@@ -2817,6 +2817,11 @@ only the bar, never the build; run it again to pick up where the build is.</p>
 <p>The total of the first run in a tree is an estimate from the selected packages, so the bar holds
 at 99% until the build reports its end. Every finished run saves its real count in
 <code>&lt;tree&gt;/.cw-progress-total</code>, and later runs use that.</p>
+<p>On GitHub Actions the <em>Build</em> step runs the same watcher beside the build. A CI log cannot redraw
+a line, so there it prints a new one, <code>&gt;&gt; progress: compile [########............] 40% ...</code>, at
+each phase, every 5% and at least every 10 minutes, between the build's own output. Its total is
+kept in the cached <code>dl/</code> directory, so after the first run with this watcher it is the previous
+run's real count. Pass <code>--plain</code> to get the same lines locally, for example in a log file.</p>
 <h2 id="what-the-build-script-guarantees">What the build script guarantees<a class="headerlink" href="#what-the-build-script-guarantees" title="Permanent link">&para;</a></h2>
 <p><code>tools/cw-release-build.sh</code> applies the overlay, the pinned feeds and the patches (to the feeds
 and to the tree), then runs the mandatory post-defconfig fixups, and it <strong>fails</strong> rather than ship
