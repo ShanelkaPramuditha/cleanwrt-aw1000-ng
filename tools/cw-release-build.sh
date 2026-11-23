@@ -86,8 +86,21 @@ fi
     echo "       Restore it: git -C $TREE checkout HEAD -- target" >&2
     exit 1
 }
+# Every path a patches/tree patch touches: the edited ones (+++ b/) and the ones it deletes,
+# which only a --- a/ line names (their +++ side is /dev/null). A file a tree patch deletes is
+# gone from the tree between builds - the patch stays applied until the next run reverses it -
+# so it is an expected deletion, not damage.
+tree_patch_paths() {
+    sed -n -e 's,^+++ b/\([^[:space:]]*\).*,\1,p' -e 's,^--- a/\([^[:space:]]*\).*,\1,p' \
+        "$REPO"/patches/tree/*.patch 2>/dev/null | sort -u
+}
 if git -C "$TREE" rev-parse --git-dir >/dev/null 2>&1; then
     deleted=$(git -C "$TREE" ls-files --deleted -- target include scripts toolchain tools package config rules.mk Makefile Config.in)
+    tp_all=$(tree_patch_paths)
+    deleted=$(printf '%s\n' "$deleted" | while IFS= read -r f; do
+        [ -n "$f" ] || continue
+        printf '%s\n' "$tp_all" | grep -qxF "$f" || printf '%s\n' "$f"
+    done)
     if [ -n "$deleted" ]; then
         echo "ERROR: $(printf '%s\n' "$deleted" | wc -l) tracked file(s) of the OpenWrt tree are deleted from $TREE, e.g.:" >&2
         printf '%s\n' "$deleted" | head -5 | sed 's/^/         /' >&2
@@ -822,7 +835,7 @@ if [ "$rc" = 0 ]; then
             # templates this script rewrites for the version label (no %C), restored later,
             # and every file a patches/tree patch edits (they stay applied until the next
             # `--reset` run). Anything else is listed.
-            tp_paths=$(sed -n 's,^+++ [ab]/\([^[:space:]]*\).*,\1,p' "$REPO"/patches/tree/*.patch 2>/dev/null | paste -sd'|' -)
+            tp_paths=$(tree_patch_paths | paste -sd'|' -)
             ow_dirty=$(git -C "$TREE" status --porcelain --untracked-files=no 2>/dev/null | awk '{print $2}' | grep -v -E "^(feeds\.conf\.default|package/base-files/files/etc/openwrt_release|package/base-files/files/usr/lib/os-release)${tp_paths:+|$tp_paths}\$" | tr '\n' ' ')
             if [ -z "$ow_dirty" ]; then
                 echo "openwrt: $ow_tag (tracked files identical to the tag except the expected build edits: feeds.conf.default = the repo's pinned feed list, the two base-files version-label templates, and the files patches/tree edits)"
