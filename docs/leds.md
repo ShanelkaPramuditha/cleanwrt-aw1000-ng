@@ -1,6 +1,6 @@
 ---
 title: "AW1000 front-panel LEDs explained"
-description: "What each LED on the Arcadyan AW1000 shows with CleanWRT: 5G SA or NSA, signal quality from RSRP, the internet probe, night mode and every setting."
+description: "What each LED on the Arcadyan AW1000 shows with CleanWRT: 4G, 4G+, 5G NSA or SA, signal quality from RSRP, the internet probe, night mode and every setting."
 updated: 2026-11-06
 ---
 
@@ -44,7 +44,7 @@ service owns but never writes it (night mode asks the phone service to hold it d
 |---|---|
 | **Power** | always on |
 | **Wi-Fi** | on while any radio is up. In *Single interface* mode it blinks with traffic on the interface you choose |
-| **5G** | the 5G type only: **solid blue** = 5G standalone (SA), **solid green** = 5G non-standalone (NSA), **off** for anything else — 4G, 3G, no service, unknown. There is no red on this lamp. While the very first modem read is still running it flashes red at 1 Hz |
+| **5G** | the network type, by default: **solid blue** = 5G standalone (SA), **solid green** = 5G non-standalone (NSA), **yellow** (red and green together) = 4G+ (LTE with carrier aggregation), **solid red** = 4G; **off** for 3G, no service or unknown. The colours are set under [5G LED](#settings). While the very first modem read is still running it flashes red at 1 Hz |
 | **Signal** | **green** good, **blue** average, **red** poor; **flashing red** while the modem is searching or the SIM has a fault; **off** when the service is unavailable |
 | **Internet** | on while the connectivity check says the uplink really reaches the internet |
 | **Phone** | not this app's lamp. While [AWvoice](awvoice.md) is running it is solid while the line is ready, blinks fast while a call rings and blinks slowly while the handset is off hook |
@@ -67,8 +67,11 @@ pair where the poor threshold is not below the excellent one.
 ### How the 5G type is read
 
 One AT command answers the question: `AT+QENG="servingcell"`. A `NR5G-SA` line is standalone, a
-`NR5G-NSA` line is non-standalone, `LTE` or a 3G line is not 5G, and a reply that names no cell at
-all leaves the lamp off. `AT+CSQ` is asked only when the serving-cell reply carried no usable RSRP,
+`NR5G-NSA` line is non-standalone, an `LTE` line is 4G, a 3G line leaves the lamp off, and so does a
+reply that names no cell at all. On 4G one more command, `AT+QCAINFO`, tells 4G from 4G+: a secondary
+carrier on an LTE band (an `"SCC"` line) is carrier aggregation, the same rule
+*Modem → 3gInfo-lite* uses for "CA active". It is not asked when 4G and 4G+ have the same colour, and
+a reply cut short by another program on the port keeps the last answer. `AT+CSQ` is asked only when the serving-cell reply carried no usable RSRP,
 and `AT+CEREG?` and `AT+CPIN?` only while the modem is not registered — fewer queries on a port
 other programs also use.
 
@@ -134,6 +137,7 @@ Everything is on the page and stored in `/etc/config/cw-led`.
 | Night | `enabled`, `start`, `end`, `exempt` | Night mode | `0`, `22:30`, `06:00`, all six lamps (`power`, `wifi`, `fiveg`, `signal`, `internet`, `phone`) | see [night mode](#night-mode) |
 | Wi-Fi | `mode` | Mode | `auto` | `auto` is daemon-driven from the radios, because the Wi-Fi driver here ignores the kernel's per-radio triggers. `netdev` puts the kernel's traffic trigger on one interface |
 | Wi-Fi | `device` | Wi-Fi interface | unset = first found | only shown in `netdev` mode |
+| 5G LED (`fiveg`) | `color_lte`, `color_lte_ca`, `color_nsa`, `color_sa` | 4G, 4G+, 5G NSA, 5G SA | `red`, `yellow`, `green`, `blue` | the lamp's colour per network type: `off`, `red`, `green`, `blue`, or a mix of its LEDs, `yellow` (red + green), `cyan` (green + blue), `purple` (red + blue), `white` (all three). How a mix looks depends on the lamp's light pipe |
 | Signal | `rsrp_excellent`, `rsrp_poor` | RSRP thresholds | `-95`, `-110` | the green and red limits |
 | Signal | `csq_excellent`, `csq_poor` | CSQ thresholds | `20`, `9` | the same, when RSRP is missing |
 | Internet | `mode` | Check mode | `http204` | `http204`, `interface` or `ping` |

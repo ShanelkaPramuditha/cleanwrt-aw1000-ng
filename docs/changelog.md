@@ -11,6 +11,9 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   icon rail, a Ctrl+K command palette, light and dark modes. Footstrap stays in the image under
   *System → System → Language and Style*, and a router upgraded with its settings kept stays on the
   theme it had. See [Themes](theme.md).
+- **The 5G LED shows 4G and 4G+ too.** Red for 4G, yellow for 4G+ (carrier aggregation),
+  green for 5G NSA and blue for 5G SA, by default. Each colour can be changed under
+  *System → LED Management → 5G LED*. See [Front-panel LEDs](leds.md).
 - **Dark mode on more pages.** *Modem → 3gInfo-lite*, QModem's signal bars, the AWvoice phone page
   and the LED page's lamps now follow the theme's dark mode instead of showing white tiles and
   dark text on dark cards.

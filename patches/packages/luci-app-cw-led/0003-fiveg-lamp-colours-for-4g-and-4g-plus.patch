@@ -1,0 +1,410 @@
+5G lamp: colours for 4G and 4G+, chosen on the page
+
+The 5G lamp showed the 5G type only - blue for SA, green for NSA - and stayed dark on
+4G. It now shows every network type, in colours set on the LED page:
+
+  4G  (LTE)                              red     (default)
+  4G+ (LTE with carrier aggregation)     yellow  (red + green)
+  5G NSA                                 green
+  5G SA                                  blue
+  3G, no service                         off, as before
+
+- Each type can take off, red, green, blue, or a mix of two or three of the lamp's LEDs:
+  yellow (red + green), cyan (green + blue), purple (red + blue), white (all three).
+  set_tricolor lights the members of a mix together, cw_led_tricolor_color reads a mix
+  back for the live card, and the card's lamp and channel dots draw it.
+- 4G+ comes from AT+QCAINFO: one or more "SCC" lines on an LTE band. That is the rule
+  3gInfo-lite's radio page uses, so the lamp agrees with that page. It is asked only on
+  LTE, once per modem poll, and not at all when 4G and 4G+ share a colour. A QCAINFO read
+  that fails or comes back cut short keeps the previous answer, so a contended AT port does
+  not flip the lamp between 4G and 4G+.
+- The colours live in `config led 'fiveg'` (color_lte, color_lte_ca, color_nsa,
+  color_sa). An unknown value falls back to the default. 90-cw-led adds the section once
+  to a config written before this, with the defaults above.
+- The contention grace now holds any network-type colour, not only blue and green.
+- A solid red on the 5G lamp now means 4G; the 1 Hz red flash still means the first modem
+  read is running.
+
+Applies to: https://github.com/Pr0Luci/luci-app-cw-led.git @ a65586cf, after 0001 and 0002.
+Upstream status: local to CleanWRT.
+
+diff --git a/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js b/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js
+index 766fede..d9fc55f 100644
+--- a/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js
++++ b/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js
+@@ -57,6 +57,11 @@ var CW_CSS = [
+ 	':root[data-theme="light"] .cw-led-page,:root[data-darkmode="false"] .cw-led-page{--cl-g:#2e8b57;--cl-b:#2563c9;--cl-r2:#b91c1c;--cl-am:#b7791f;--cl-w:#fff;--cl-off:#f3f4f6}',
+ 	'@media (max-width:700px){.cw-led-page{--cl-h:44px}}',
+ 	'.cw-c-green{--c:var(--cl-g)}.cw-c-blue{--c:var(--cl-b)}.cw-c-red{--c:var(--cl-r2)}.cw-c-amber{--c:var(--cl-am)}.cw-c-white{--c:var(--cl-w)}',
++	/* the 5G lamp's mixes: two of its LEDs lit together */
++	'.cw-led-page{--cl-cy:#22d3ee;--cl-pu:#c084fc}',
++	'@media (prefers-color-scheme:light){:root:not([data-theme="dark"]):not([data-darkmode="true"]) .cw-led-page{--cl-cy:#0e7490;--cl-pu:#7e22ce}}',
++	':root[data-theme="light"] .cw-led-page,:root[data-darkmode="false"] .cw-led-page{--cl-cy:#0e7490;--cl-pu:#7e22ce}',
++	'.cw-c-yellow{--c:var(--cl-am)}.cw-c-cyan{--c:var(--cl-cy)}.cw-c-purple{--c:var(--cl-pu)}',
+ 
+ 	/* ---- live status card ---- */
+ 	'.cw-live{margin:0;padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px}',
+@@ -110,16 +115,45 @@ function lamp(name, colour, state, active, flash) {
+ 	return E('div', { 'class': 'cw-led' + (colour ? ' cw-c-' + colour : ' off') }, kids);
+ }
+ 
+-/* Tri-colour channel dots (blue, green, red): 'white' lights all three,
++/* Which of the three LEDs a lamp colour lights. */
++var LED_MIX = {
++	yellow: [ 'red', 'green' ], cyan: [ 'green', 'blue' ], purple: [ 'red', 'blue' ],
++	white: [ 'blue', 'green', 'red' ]
++};
++
++/* Tri-colour channel dots (blue, green, red): a mix lights its members,
+  * '<c>-flash' lights its base colour, else the single matching member. */
+ function dots(active) {
+-	var all = (active === 'white');
+ 	var base = (active || '').replace(/-flash$/, '');
++	var lit = LED_MIX[base] || [ base ];
+ 	return LED_KEYS.map(function(p) {
+-		return E('i', { 'class': 'cw-c-' + p + ((all || base === p) ? ' on' : '') });
++		return E('i', { 'class': 'cw-c-' + p + ((lit.indexOf(p) >= 0) ? ' on' : '') });
+ 	});
+ }
+ 
++/* The 5G lamp's colour choices, and its defaults per network type. */
++var FIVEG_COLOURS = [
++	[ 'off', _('Off') ], [ 'red', _('Red') ], [ 'green', _('Green') ], [ 'blue', _('Blue') ],
++	[ 'yellow', _('Yellow (red + green)') ], [ 'cyan', _('Cyan (green + blue)') ],
++	[ 'purple', _('Purple (red + blue)') ], [ 'white', _('White (all three)') ]
++];
++var FIVEG_TYPES = [
++	[ 'color_lte', _('4G'), 'red' ], [ 'color_lte_ca', _('4G+'), 'yellow' ],
++	[ 'color_nsa', _('5G NSA'), 'green' ], [ 'color_sa', _('5G SA'), 'blue' ]
++];
++
++/* Live-card words for the 5G lamp: each colour names the network types set to it. */
++function fivegWords() {
++	var w = { 'red-flash': _('reading modem'), off: _('off') };
++	FIVEG_TYPES.forEach(function(t) {
++		var c = uci.get('cw-led', 'fiveg', t[0]) || t[2];
++		if (c === 'off')
++			return;
++		w[c] = w[c] ? w[c] + ' / ' + t[1] : t[1];
++	});
++	return w;
++}
++
+ function monoLamp(leds, node, name) {
+ 	var on = !!(leds && leds[node] && leds[node].brightness > 0);
+ 	return lamp(name, on ? 'green' : null, on ? _('on') : _('off'));
+@@ -167,8 +201,7 @@ function renderStatus(st) {
+ 		box.appendChild(E('div', { 'class': 'cw-leds' }, [
+ 			monoLamp(leds, 'green:power', _('Power')),
+ 			wifiLamp(leds),
+-			triLamp((st && st.color_5g) || 'off', _('5G'),
+-				{ blue: _('5G SA'), green: _('5G NSA'), off: _('no 5G') }),
++			triLamp((st && st.color_5g) || 'off', _('5G'), fivegWords()),
+ 			triLamp((st && st.color_signal) || 'off', _('Signal'),
+ 				{ green: _('good'), blue: _('average'), red: _('poor'),
+ 				  'red-flash': _('connecting'), off: _('unavailable') }),
+@@ -383,6 +416,14 @@ return view.extend({
+ 		addChoices(o, opts.wifi_ifaces);
+ 		addChoices(o, opts.bridges);
+ 
++		s = m.section(form.NamedSection, 'fiveg', 'led', _('5G LED'),
++			_('The colour for each network type. 4G+ is LTE with carrier aggregation (a secondary LTE carrier, from AT+QCAINFO). Yellow, cyan, purple and white light two or three of the lamp\'s LEDs together. 3G and no service leave the lamp off.'));
++		FIVEG_TYPES.forEach(function(t) {
++			o = s.option(form.ListValue, t[0], t[1]);
++			FIVEG_COLOURS.forEach(function(c) { o.value(c[0], c[1]); });
++			o.default = t[2];
++		});
++
+ 		s = m.section(form.NamedSection, 'signal', 'led', _('Signal LED'),
+ 			_('Green: good. Blue: average. Red: poor or no service. Based on RSRP, with CSQ as fallback.'));
+ 
+diff --git a/luci-app-cw-led/root/etc/config/cw-led b/luci-app-cw-led/root/etc/config/cw-led
+index fa0fd24..dba8441 100644
+--- a/luci-app-cw-led/root/etc/config/cw-led
++++ b/luci-app-cw-led/root/etc/config/cw-led
+@@ -41,6 +41,15 @@ config led 'wifi'
+ 	                            # netdev = kernel netdev trigger on one iface (traffic blink)
+ 	option device ''            # netdev mode: wifi iface (e.g. phy0-ap0); empty = first found
+ 
++# The 5G lamp's colour for each network type: off, red, green, blue, or a mix of
++# two or three of its LEDs - yellow (red+green), cyan (green+blue), purple
++# (red+blue), white (all three). 3G and no service always leave it off.
++config led 'fiveg'
++	option color_lte 'red'        # 4G (LTE)
++	option color_lte_ca 'yellow'  # 4G+ (LTE with carrier aggregation)
++	option color_nsa 'green'      # 5G NSA
++	option color_sa 'blue'        # 5G SA
++
+ config led 'signal'
+ 	option rsrp_excellent '-95'
+ 	option rsrp_poor '-110'
+diff --git a/luci-app-cw-led/root/etc/uci-defaults/90-cw-led b/luci-app-cw-led/root/etc/uci-defaults/90-cw-led
+index ed1b850..cebf0c1 100755
+--- a/luci-app-cw-led/root/etc/uci-defaults/90-cw-led
++++ b/luci-app-cw-led/root/etc/uci-defaults/90-cw-led
+@@ -53,6 +53,20 @@ if uci -q get cw-led.night >/dev/null && [ -z "$(uci -q get cw-led.night.phone_k
+ 	uci -q commit cw-led
+ fi
+ 
++# The 5G lamp learned 4G and 4G+ colours. A config written before that has no
++# 'fiveg' section; the daemon falls back to the same defaults, and the section is
++# added once so the page has something to show and save.
++if uci -q get cw-led.global >/dev/null && ! uci -q get cw-led.fiveg >/dev/null; then
++	uci -q batch <<-EOF
++		set cw-led.fiveg=led
++		set cw-led.fiveg.color_lte=red
++		set cw-led.fiveg.color_lte_ca=yellow
++		set cw-led.fiveg.color_nsa=green
++		set cw-led.fiveg.color_sa=blue
++		commit cw-led
++	EOF
++fi
++
+ /etc/init.d/cw-led enable 2>/dev/null
+ /etc/init.d/rpcd reload 2>/dev/null
+ 
+diff --git a/luci-app-cw-led/root/usr/lib/cw-led/functions.sh b/luci-app-cw-led/root/usr/lib/cw-led/functions.sh
+index 897bc43..db18ef3 100644
+--- a/luci-app-cw-led/root/usr/lib/cw-led/functions.sh
++++ b/luci-app-cw-led/root/usr/lib/cw-led/functions.sh
+@@ -57,12 +57,14 @@ cw_wifi_first_iface() {
+ # cw_led_tricolor_color 5g|signal
+ #   Prints what the three-LED group shows right now:
+ #     blue|green|red   that member is lit
++#     yellow|cyan|purple|white  two or three members lit together
++#                      (red+green, green+blue, red+blue, all three)
+ #     <c>-flash        that member runs the kernel 'timer' trigger. This is
+ #                      checked before brightness so a sample taken mid-blink
+ #                      does not report the flashing lamp as off.
+-#     off              nothing lit (or more than one lit)
++#     off              nothing lit
+ cw_led_tricolor_color() {
+-	local c b trig lit="" n=0
++	local c b trig lit=""
+ 	for c in blue green red; do
+ 		trig=$(sed -n 's/.*\[\([^]]*\)\].*/\1/p' "/sys/class/leds/$c:$1/trigger" 2>/dev/null)
+ 		if [ "$trig" = "timer" ]; then
+@@ -70,16 +72,25 @@ cw_led_tricolor_color() {
+ 			return 0
+ 		fi
+ 		b=$(cat "/sys/class/leds/$c:$1/brightness" 2>/dev/null)
+-		if [ "$b" = "1" ]; then
+-			lit="$c"
+-			n=$((n + 1))
+-		fi
++		[ "$b" = "1" ] && lit="$lit$c"
+ 	done
+-	if [ "$n" -eq 1 ]; then
+-		printf '%s\n' "$lit"
+-	else
+-		printf 'off\n'
+-	fi
++	case "$lit" in
++	blue | green | red) printf '%s\n' "$lit" ;;
++	greenred) printf 'yellow\n' ;;
++	bluegreen) printf 'cyan\n' ;;
++	bluered) printf 'purple\n' ;;
++	bluegreenred) printf 'white\n' ;;
++	*) printf 'off\n' ;;
++	esac
++}
++
++# cw_led_fiveg_colour VALUE DEFAULT
++#   Prints VALUE when it is a colour the 5G lamp can show, else DEFAULT.
++cw_led_fiveg_colour() {
++	case "$1" in
++	off | red | green | blue | yellow | cyan | purple | white) printf '%s\n' "$1" ;;
++	*) printf '%s\n' "$2" ;;
++	esac
+ }
+ 
+ # cw_valid_host HOST
+diff --git a/luci-app-cw-led/root/usr/lib/cw-led/modem.sh b/luci-app-cw-led/root/usr/lib/cw-led/modem.sh
+index 69bf0d7..a10c6c0 100644
+--- a/luci-app-cw-led/root/usr/lib/cw-led/modem.sh
++++ b/luci-app-cw-led/root/usr/lib/cw-led/modem.sh
+@@ -7,10 +7,12 @@
+ # Entry points:
+ #   cw_at_query CMD            one AT command, response lines on stdout
+ #   cw_modem_poll              sets M_RAT (sa|nsa|lte|3g|none), M_RSRP, M_CSQ,
+-#                              M_REG, M_REGSTAT (raw CEREG stat), M_SIM (ok|fail)
++#                              M_REG, M_REGSTAT (raw CEREG stat), M_SIM (ok|fail),
++#                              and on LTE M_CA (secondary LTE carriers, 0 = none)
+ #   cw_modem_probe_port        find a responsive AT port, updates CW_AT_PORT
+ #   cw_modem_parse_qeng TEXT   parsers, usable without hardware
+ #   cw_modem_parse_csq TEXT
++#   cw_modem_parse_qca TEXT
+ #   cw_modem_parse_cpin TEXT
+ 
+ CW_AT_PORT="${CW_AT_PORT:-/dev/ttyUSB3}"
+@@ -146,6 +148,20 @@ cw_modem_parse_csq() {
+ 	return 0
+ }
+ 
++# Parse the AT+QCAINFO reply. Sets M_CA to the number of secondary LTE carriers
++# ("SCC" lines on an LTE band): 0 is plain LTE, 1 or more is LTE-A (4G+). The rule
++# is the one 3gInfo-lite's radio page uses, so the lamp and that page agree. A reply
++# that is neither a carrier list nor OK (an error, or a line cut short by another
++# reader on the port) returns 1 and leaves M_CA as it was.
++cw_modem_parse_qca() {
++	case "$1" in
++	*"+QCAINFO:"* | *OK*) ;;
++	*) return 1 ;;
++	esac
++	M_CA=$(printf '%s\n' "$1" | grep -c '+QCAINFO: *"SCC", *[^,]*, *[^,]*, *"LTE BAND')
++	return 0
++}
++
+ # Parse the AT+CPIN? reply. Sets M_SIM (ok|fail, empty = can't tell).
+ # "+CPIN: READY" is ok. Any other +CPIN state (SIM PIN, PUK, ...) or a SIM
+ # error (10 not inserted, 13 failure, 15 wrong card) is a SIM fault. A plain
+@@ -160,7 +176,11 @@ cw_modem_parse_cpin() {
+ 	return 0
+ }
+ 
+-# One poll. Sets M_RAT M_RSRP M_CSQ M_REG M_REGSTAT M_SIM.
++# One poll. Sets M_RAT M_RSRP M_CSQ M_REG M_REGSTAT M_SIM, and M_CA on LTE.
++# AT+QCAINFO is asked only on LTE, and only while CW_WANT_CA is not 0 (the daemon
++# sets it to 0 when 4G and 4G+ share one colour, so the answer would change nothing).
++# M_CA is not cleared at the start of a poll: a QCAINFO read that fails keeps the
++# last answer, so a contended port does not flip the lamp between 4G and 4G+.
+ # Returns 0 if at least one AT query was answered, 1 if none was (port
+ # missing, busy or silent); the caller decides when that turns the LEDs off.
+ cw_modem_poll() {
+@@ -175,6 +195,13 @@ cw_modem_poll() {
+ 		ok=1
+ 		cw_modem_parse_qeng "$resp"
+ 	fi
++	if [ "$M_RAT" = lte ]; then
++		if [ "${CW_WANT_CA:-1}" != 0 ] && resp=$(cw_at_query 'AT+QCAINFO'); then
++			cw_modem_parse_qca "$resp" || :
++		fi
++	else
++		M_CA=""
++	fi
+ 	if [ -z "$M_RSRP" ]; then
+ 		if resp=$(cw_at_query 'AT+CSQ'); then
+ 			ok=1
+diff --git a/luci-app-cw-led/root/usr/sbin/cw-led-daemon b/luci-app-cw-led/root/usr/sbin/cw-led-daemon
+index aee4bcf..1d9f175 100755
+--- a/luci-app-cw-led/root/usr/sbin/cw-led-daemon
++++ b/luci-app-cw-led/root/usr/sbin/cw-led-daemon
+@@ -67,6 +67,10 @@ load_config() {
+ 	config_get night_exempt night exempt ""
+ 	config_get wifi_mode wifi mode auto
+ 	config_get wifi_device wifi device ""
++	config_get fiveg_lte fiveg color_lte red
++	config_get fiveg_lte_ca fiveg color_lte_ca yellow
++	config_get fiveg_nsa fiveg color_nsa green
++	config_get fiveg_sa fiveg color_sa blue
+ 	config_get signal_rsrp_excellent signal rsrp_excellent -95
+ 	config_get signal_rsrp_poor signal rsrp_poor -110
+ 	config_get signal_csq_excellent signal csq_excellent 20
+@@ -118,6 +122,14 @@ load_config() {
+ 		signal_csq_poor=9
+ 	fi
+ 
++	fiveg_lte=$(cw_led_fiveg_colour "$fiveg_lte" red)
++	fiveg_lte_ca=$(cw_led_fiveg_colour "$fiveg_lte_ca" yellow)
++	fiveg_nsa=$(cw_led_fiveg_colour "$fiveg_nsa" green)
++	fiveg_sa=$(cw_led_fiveg_colour "$fiveg_sa" blue)
++	# 4G and 4G+ in one colour: AT+QCAINFO would change nothing, so it is not asked
++	CW_WANT_CA=1
++	[ "$fiveg_lte" = "$fiveg_lte_ca" ] && CW_WANT_CA=0
++
+ 	CW_AT_PORT=$modem_port
+ 	CW_AT_TIMEOUT=$modem_timeout
+ }
+@@ -180,6 +192,10 @@ clear_cache() {
+ 
+ # Set a three-LED group ($1 = 5g|signal) to a state ($2):
+ #   off | blue | green | red    one member solid (or none), kernel trigger off
++#   yellow | cyan | purple | white
++#                               two or three members solid together: red+green,
++#                               green+blue, red+blue, all three (the 5G lamp's
++#                               colours for a network type can be any of these)
+ #   green_flash | red_flash     one member blinks via the kernel 'timer' trigger
+ # Solid and off members get 'trigger none' first, which clears a leftover timer.
+ # The blinking member keeps delay_on/off and its brightness is left to the kernel.
+@@ -187,6 +203,10 @@ set_tricolor() { # group(5g|signal) state
+ 	local c fc="" solid=""
+ 	case "$2" in
+ 	blue | green | red) solid="$2" ;;
++	yellow) solid="red green" ;;
++	cyan) solid="green blue" ;;
++	purple) solid="red blue" ;;
++	white) solid="red green blue" ;;
+ 	green_flash) fc="green" ;;
+ 	red_flash) fc="red" ;;
+ 	esac
+@@ -197,11 +217,10 @@ set_tricolor() { # group(5g|signal) state
+ 			led_set "$c:$1" delay_off "$CW_FLASH_OFF"
+ 		else
+ 			led_set "$c:$1" trigger none
+-			if [ "$c" = "$solid" ]; then
+-				led_set "$c:$1" brightness 1
+-			else
+-				led_set "$c:$1" brightness 0
+-			fi
++			case " $solid " in
++			*" $c "*) led_set "$c:$1" brightness 1 ;;
++			*) led_set "$c:$1" brightness 0 ;;
++			esac
+ 		fi
+ 	done
+ }
+@@ -367,11 +386,20 @@ night_update() {
+ # --- modem-driven tri-colors -------------------------------------------------------
+ 
+ compute_colors() {
+-	# 5G LED: shows 5G only and has no red. SA = blue, NSA = green, anything
+-	# else (4G, 3G, no service, unknown) = off.
++	# 5G LED: the network type, in the colours set under `config led 'fiveg'`.
++	# Defaults: SA = blue, NSA = green, 4G+ (LTE with a secondary LTE carrier,
++	# from AT+QCAINFO) = yellow, 4G = red. 3G, no service and unknown = off.
++	# A red flash only ever means the first modem read is still running.
+ 	case "$M_RAT" in
+-	sa) COLOR_5G=blue ;;
+-	nsa) COLOR_5G=green ;;
++	sa) COLOR_5G=${fiveg_sa:-blue} ;;
++	nsa) COLOR_5G=${fiveg_nsa:-green} ;;
++	lte)
++		if [ "${M_CA:-0}" -gt 0 ] 2>/dev/null; then
++			COLOR_5G=${fiveg_lte_ca:-yellow}
++		else
++			COLOR_5G=${fiveg_lte:-red}
++		fi
++		;;
+ 	*) COLOR_5G=off ;;
+ 	esac
+ 	# Signal LED. Registered: green = good, blue = average, red = poor (by RSRP,
+@@ -471,15 +499,16 @@ modem_refresh() {
+ 		# denied and SIM-fail states don't pass that check and keep their own
+ 		# colour. After the limit the LEDs go blank. A readable RAT resets the
+ 		# grace and repaints at once.
+-		# Only a real 5G colour is worth holding. If the last 5G colour was off
+-		# (or a flash), the previous poll saw no service or was searching, so
++		# Only a real network-type colour is worth holding. If the last 5G colour
++		# was off (or a flash), the previous poll saw no service or was searching, so
+ 		# compute fresh. That also stops a stale red flash being held across a
+ 		# searching -> registered change, and a hold/blank flip-flop after the
+-		# limit is reached. A real 5G colour means the modem was registered, so
++		# limit is reached. A real colour means the modem was registered, so
+ 		# the matching signal colour was a registered one too, never a flash.
+ 		contended=0
+ 		case "$COLOR_5G" in
+-		blue | green)
++		off | *_flash | '') ;;
++		*)
+ 			if { [ "$M_RAT" = none ] || [ -z "$M_RAT" ]; } && [ -z "$M_RSRP" ] && cw_modem_serving; then
+ 				contended=1
+ 			fi
+@@ -548,7 +577,7 @@ modem_refresh() {
+ 			return 0 # transient, keep the previous colours
+ 		fi
+ 		# Modem unreachable means unknown, not "no service": go off, never red.
+-		# The 5G LED has no red, and a solid red on the signal LED means "poor".
++		# Solid red on the 5G LED means 4G, and on the signal LED it means "poor".
+ 		COLOR_5G=off
+ 		COLOR_SIGNAL=off
+ 		if [ "$MODEM_WARNED" != 1 ]; then

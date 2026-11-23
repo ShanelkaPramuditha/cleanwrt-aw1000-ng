@@ -203,6 +203,7 @@ than shipping a half-applied change.
 |---|---|
 | `packages/awvoice-phoned/0001-indicator-dark-for-night-mode` | one ubus method, `awvoice indicator_dark {dark}`: a memory-only hold that keeps the phone LED dark while the line works underneath. Nothing is written to the phone's settings, and a restart clears it |
 | `packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch` | the LED lamps on the settings page take their light or dark colours from the theme's own switch (`data-darkmode`, which Vantage, Footstrap and Bootstrap all set) instead of only the browser's preference |
+| `packages/luci-app-cw-led/0003-fiveg-lamp-colours-for-4g-and-4g-plus` | the 5G lamp shows 4G (red) and 4G+ (yellow, from `AT+QCAINFO`) as well as NSA and SA, and the four colours are chosen on the LED page (`cw-led.fiveg`), including two- and three-LED mixes |
 | `packages/luci-app-cw-led/0001-night-mode-phone-led` | Phone joins *Keep on during night*: outside the keep-on list, night mode asks the phone service for that hold, re-sends it about once a minute and releases it at the end of the window or when the daemon stops. Phone is exempt by default, and added once to an older config, so nothing goes dark unasked |
 
 ## Changing a patch or moving a pin
