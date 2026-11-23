@@ -85,14 +85,25 @@ spin='|/-\\'
 tick=0
 [ "$cols" -lt 60 ] && cols=60
 barw=$((cols - 62)); [ "$barw" -lt 10 ] && barw=10; [ "$barw" -gt 40 ] && barw=40
+# the step text gets at least 28 columns, the bar gives way first (down to 10)
+curw=$((cols - barw - 52))
+if [ "$curw" -lt 28 ]; then barw=$((barw - (28 - curw))); [ "$barw" -lt 10 ] && barw=10; curw=$((cols - barw - 52)); fi
+[ "$curw" -lt 8 ] && curw=8
+[ "$curw" -gt 48 ] && curw=48
 
 fmt() { s=$1; [ "$s" -lt 0 ] && s=0; printf '%d:%02d:%02d' $((s / 3600)) $((s % 3600 / 60)) $((s % 60)); }
 
 while :; do
 	[ "$total" -gt 0 ] || find_total
 	# one pass over the log: phase, distinct compiled dirs, the newest one, and the end state
-	set -- $(sed 's/\x1b\[[0-9;]*m//g' "$LOG" 2>/dev/null | awk '
-		/=== CW RELEASE BUILD START/ { ph = "download" }
+	out=$(sed 's/\x1b\[[0-9;]*m//g' "$LOG" 2>/dev/null | awk '
+		/=== CW RELEASE BUILD START/ { ph = "download"; st = "fetching sources" }
+		# before compiling, the step the build is on: its own "== ... ==" notes, the feed updates,
+		# and the source each download step fetches
+		/^== .* ==$/ { t = $0; gsub(/^== | ==$/, "", t); st = t }
+		/^Updating feed / { t = $0; sub(/^Updating feed /, "updating feed ", t); sub(/\.\.\.$/, "", t); st = t }
+		/^Installing (all packages|package)/ { st = "installing feed packages" }
+		/^ make\[[0-9]+\] -C [^ ]+ download$/ { d = $3; n = split(d, p, "/"); st = "fetching " p[n] }
 		/^ make\[[0-9]+\] world/ || /^ make\[[0-9]+\] -C [^ ]+ (compile|host-compile)$/ { if (ph == "download" || ph == "setup") ph = "compile" }
 		/^ make\[[0-9]+\] -C [^ ]+ (compile|host-compile)$/ {
 			d = $3; n = split(d, p, "/"); k = p[n]
@@ -108,9 +119,13 @@ while :; do
 		END {
 			if (ph == "") ph = "setup"
 			if (cur == "") cur = "-"
-			printf "%s %d %s %d %d\n", ph, done + 0, cur, end + 0, ok + 0
+			if (ph == "setup" || ph == "download") { if (st == "") st = "starting"; cur = st }
+			gsub(/[\t\n]/, " ", cur)
+			printf "%s %d %d %d %s\n", ph, done + 0, end + 0, ok + 0, cur
 		}')
-	phase=$1 done=$2 cur=$3 ended=$4 ok=$5
+	set -f; set -- $out; set +f
+	phase=$1 done=$2 ended=$3 ok=$4
+	cur=${out#* * * * }
 	# a build that died without its end line (killed, or the machine ran out of memory):
 	# CW_PIDFILE names the build's process (tools/cw-build.sh sets it)
 	if [ "$ended" = 0 ] && [ -n "${CW_PIDFILE:-}" ] && [ -s "$CW_PIDFILE" ]; then
@@ -150,11 +165,10 @@ while :; do
 		sp=$(printf '%s' "$spin" | cut -c$((tick + 1)))
 		[ "$ended" = 1 ] && sp=' '
 	fi
-	curw=$((cols - barw - 52)); [ "$curw" -lt 8 ] && curw=8
 	cur=$(printf '%.*s' "$curw" "$cur")
 	if [ "$PLAIN" = 0 ]; then
 		printf '\r\033[K %s %s%-8s%s %s%s%s%s%s %s%3d%%%s  %s/%s  %s%-*s%s  %s  %sleft %s%s' \
-			"$sp" "$cB" "$phase" "$cN" "$cG" "$bar" "$cD" "$rest" "$cN" "$cB" "$pct" "$cN" \
+			"$sp" "$cB" "$phase" "$cN" "$cG" "$bar" "$cN$cD" "$rest" "$cN" "$cB" "$pct" "$cN" \
 			"$done" "$tot_s" "$cC" "$curw" "$cur" "$cN" "$(fmt "$el")" "$cD" "$left" "$cN"
 	elif [ "$phase" != "$last_phase" ] || [ $((pct / 5)) -ne "$last_step" ] ||
 	     [ $((now - last_print)) -ge 600 ] || [ "$ended" = 1 ]; then
