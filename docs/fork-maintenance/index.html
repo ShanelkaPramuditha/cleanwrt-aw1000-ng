@@ -2461,6 +2461,21 @@ merging a new upstream release, start again at <code>-SP1</code> (for example <c
 </ul>
 <p>A release tag is <code>v&lt;label&gt;</code>, e.g. <code>v25.12.5-R2.2-SP1</code>. The router's newer-version notice compares
 every number of the label, so <code>-SP2</code> is offered to a router on <code>-SP1</code>.</p>
+<p><strong>The <code>-SP&lt;n&gt;</code> number moves by itself.</strong> When the release workflow publishes <code>v&lt;label&gt;</code>, its last
+step runs <code>tools/cw-bump-version.sh --released &lt;label&gt;</code> on the default branch and pushes the result
+as <code>github-actions[bot]</code>:</p>
+<ul>
+<li><code>CW_VERSION</code> and the seed move to the next <code>-SP&lt;n&gt;</code> together;</li>
+<li>in <code>docs/changelog.md</code>, the released section loses its "(this fork, not yet released)" and an
+  empty section for the next label opens above it;</li>
+<li><code>docs/index.md</code>, the site's <code>softwareVersion</code> and the issue templates name the release as the
+  current version.</li>
+</ul>
+<p>So <code>main</code> is always one label ahead of the newest tag. Write each change into the open changelog
+section as you make it: the build's release checks refuse a draft whose section is empty, before
+the two-hour build starts. If the push is refused (branch protection) or a release was published
+some other way, run the same command by hand, commit and push. After merging a new upstream release,
+set the label to the upstream one plus <code>-SP1</code> by hand, as before.</p>
 <h2 id="signing-keys">Signing keys<a class="headerlink" href="#signing-keys" title="Permanent link">&para;</a></h2>
 <p>The fork signs with its own keys. The private halves never enter the repository: <code>keys-release/</code>
 is in <code>.gitignore</code>.</p>
