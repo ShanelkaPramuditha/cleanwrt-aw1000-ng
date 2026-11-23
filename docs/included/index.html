@@ -2444,12 +2444,6 @@ switch.</p>
 <td>mihomo transparent proxy with the Zashboard dashboard (<a href="../features/vpn-proxy/#nikki">VPN and proxies</a>)</td>
 </tr>
 <tr>
-<td>WireGuard</td>
-<td>Network → Interfaces</td>
-<td>needs a tunnel from you</td>
-<td>VPN protocol support</td>
-</tr>
-<tr>
 <td>Tailscale</td>
 <td>Services → Tailscale</td>
 <td>Off (enable it under System → Startup, then log in)</td>
@@ -2559,6 +2553,11 @@ arrives switched off.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>WireGuard</td>
+<td><code>apk add kmod-wireguard wireguard-tools luci-proto-wireguard</code></td>
+<td>VPN protocol, set up under Network → Interfaces (<a href="../features/vpn-proxy/#wireguard">VPN and proxies</a>)</td>
+</tr>
 <tr>
 <td>Cloudflare Zero Trust Tunnel</td>
 <td><code>apk add cloudflared luci-app-cloudflared</code></td>
