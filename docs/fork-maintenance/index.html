@@ -2025,6 +2025,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#when-the-draft-release-is-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When the draft release is refused
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pinned-packages-to-bump-now-and-then" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2344,6 +2355,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#when-the-draft-release-is-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When the draft release is refused
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pinned-packages-to-bump-now-and-then" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2506,6 +2528,21 @@ is in <code>.gitignore</code>.</p>
 <p>Back both up offline. A lost apk key means routers can no longer verify the fork's feed; a leaked
 one means rotating it and shipping a new public key in an image.</p>
 <p><code>tools/cw-check-release-keys.sh &lt;tree&gt;</code> proves a build tree signs with the key the image ships.</p>
+<h2 id="when-the-draft-release-is-refused">When the draft release is refused<a class="headerlink" href="#when-the-draft-release-is-refused" title="Permanent link">&para;</a></h2>
+<p><code>HTTP 403: Resource not accessible by integration</code> in the build's <em>Draft release</em> step means
+GitHub refused the workflow's own token permission to create the release. The workflow asks for
+<code>contents: write</code>, so the refusal comes from the repository:</p>
+<ol>
+<li><em>Settings → Actions → General → Workflow permissions</em>: <strong>Read and write permissions</strong>. A
+   repository created new (rather than renamed) starts read-only. Every workflow here declares its
+   own narrower permissions, so this widens nothing else.</li>
+<li><em>Settings → Rules → Rulesets</em>: a rule on <code>v*</code> tags or on releases blocks the workflow token too.</li>
+<li>If neither applies, give the step a token of its own: create a fine-grained personal access
+   token (<em>GitHub → Settings → Developer settings → Fine-grained tokens</em>) for <strong>this repository
+   only</strong>, with <strong>Contents: Read and write</strong>, and save it as the repository secret
+   <code>RELEASE_TOKEN</code>. The <em>Draft release</em> step uses it when it exists and the workflow token
+   otherwise.</li>
+</ol>
 <h2 id="pinned-packages-to-bump-now-and-then">Pinned packages to bump now and then<a class="headerlink" href="#pinned-packages-to-bump-now-and-then" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
