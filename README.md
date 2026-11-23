@@ -144,16 +144,81 @@ GitHub Actions inside a pinned Docker image, applies the overlay and the patches
 pinned to a commit, a patch that no longer applies stops the build, and the image must fit the
 flash layout.
 
+### Build it yourself
+
+You need a 64-bit Linux machine (Ubuntu 22.04/24.04 or Debian, also in WSL2) with roughly **50 GB
+free disk** and **8 GB RAM or more**. The first build compiles the toolchain and every package and
+takes a few hours; later builds reuse that work and take 10–30 minutes.
+
+**1. Get the sources** (the OpenWrt tag must match `OPENWRT_TAG` in `tools/cw-release-build.sh`):
+
 ```sh
+mkdir -p ~/cw && cd ~/cw
+git clone https://github.com/ShanelkaPramuditha/cleanwrt-aw1000-ng.git cleanwrt-aw1000
 git clone --depth 1 --branch v25.12.5 https://github.com/openwrt/openwrt.git openwrt
-docker build -t cleanwrt-builder docker/
-docker run --rm -v "$PWD/openwrt":/build -v "$PWD":/cleanwrt \
-  cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build --clean
 ```
 
-`CW_CHECK_ONLY=1` runs every check and stops before compiling. See the
-[build page](https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/building/) for signing and the optional
-package feed.
+**2. Build**, in one of two ways:
+
+*Option A: Docker* (any distribution)
+
+```sh
+cd ~/cw
+docker build -t cleanwrt-builder cleanwrt-aw1000/docker/
+docker run --rm -e CW_MAX_IMAGE_MB=130 -e CW_BUILD_OPT_ARTIFACTS=0 -e CW_CCACHE=1 \
+  -v ~/cw/openwrt:/build -v ~/cw/cleanwrt-aw1000:/cleanwrt \
+  cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build 2>&1 | tee ~/cw/build.log
+```
+
+*Option B: plain Ubuntu or Debian*
+
+```sh
+sudo apt-get update && sudo apt-get install -y build-essential clang lld flex bison g++ gawk \
+  gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev python3 python3-setuptools \
+  rsync swig unzip zlib1g-dev file wget zstd texinfo curl ca-certificates jq xz-utils \
+  meson ninja-build pkg-config
+cd ~/cw/cleanwrt-aw1000
+sudo env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \
+  tools/cw-release-build.sh ~/cw/openwrt < /dev/null 2>&1 | tee ~/cw/build.log
+```
+
+The script runs as root (it sets the overlay's file owners). In a root shell `~` is `/root`,
+so write the paths out in full there: `/home/<you>/cw/...`.
+
+The build is done when the log ends with `IMAGE_OK …sysupgrade.bin` and its sha256. The images
+are in `~/cw/openwrt/bin/targets/qualcommax/ipq807x/`; copy the one you want elsewhere, because
+the next build clears that folder.
+
+**A progress bar:** run the build in the background with its output in a log, and the bar in front:
+
+```sh
+cd ~/cw/cleanwrt-aw1000
+sudo sh -c "env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \
+  tools/cw-release-build.sh $HOME/cw/openwrt < /dev/null > $HOME/cw/build.log 2>&1 &"
+tools/cw-build-progress.sh ~/cw/build.log ~/cw/openwrt
+```
+
+Ctrl+C stops only the bar; run the second command again to pick the build up.
+
+**Build again** after a `git pull` in `~/cw/cleanwrt-aw1000`: the same command. The script resets
+feeds, patches and pins to what the repository says, and rebuilds only what changed.
+
+| Option | What it does |
+|---|---|
+| no flag | incremental: only what changed (10–30 minutes) |
+| `--clean` (at the end of the command) | rebuilds every package, keeps the toolchain |
+| `--dirclean` | rebuilds everything, the toolchain included |
+| `CW_CHECK_ONLY=1` | runs the feed, patch, pin and config checks in a few minutes, compiles nothing |
+
+Clone OpenWrt again only when `OPENWRT_TAG` changes, and rebuild the Docker image only when
+`docker/Dockerfile` changes.
+
+**Release key:** your own build has no release signing key (it is a CI secret), so the log notes
+`local build - the tree's feed key is not the release key`. That image is fine to flash; only the
+optional package feed built next to it is not trusted by routers.
+
+More (CI, signing, the optional package feed): the
+[build page](https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/building/).
 
 ## The parts
 
