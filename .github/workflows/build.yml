@@ -202,10 +202,25 @@ jobs:
           CW_REQUIRE_RELEASE_KEYS: ${{ ((inputs.opt_artifacts && secrets.APK_PRIVATE_KEY != '') || steps.ver.outputs.draft == 'true') && '1' || '0' }}
         run: |
           set -o pipefail
+          # Progress lines in this log (">> progress: compile [####....] 40% ..."), read from the
+          # build log by a watcher beside the build: at each phase, every 5%, and every 10 minutes.
+          # Its total is the last finished run's count, kept in the cached dl/ directory; sudo
+          # because the build's container leaves dl/ owned by root. It only reads, and it is
+          # stopped when the build ends, whatever the build's result.
+          : > /mnt/cw/build.log
+          sudo env CW_PROGRESS_TOTAL_FILE=/mnt/cw/openwrt/dl/.cw-progress-total \
+            sh tools/cw-build-progress.sh --plain /mnt/cw/build.log /mnt/cw/openwrt &
+          progress=$!
+          rc=0
           docker run --rm \
             -e CW_CCACHE -e CW_BUILD_OPT_ARTIFACTS -e CW_REQUIRE_RELEASE_KEYS -e CW_MAX_IMAGE_MB \
             -v /mnt/cw/openwrt:/build -v "$PWD":/cleanwrt \
-            cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build 2>&1 | tee /mnt/cw/build.log
+            cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build 2>&1 | tee -a /mnt/cw/build.log || rc=$?
+          # one last pass so the final line is printed, then stop the watcher
+          sleep 20
+          sudo kill "$progress" 2>/dev/null || true
+          wait "$progress" 2>/dev/null || true
+          exit "$rc"
 
       - name: Compiler cache statistics
         if: always()

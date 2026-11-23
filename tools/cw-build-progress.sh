@@ -1,7 +1,7 @@
 #!/bin/sh
 # cw-build-progress.sh - a progress bar for a running build, read from its log.
 #
-#   usage: tools/cw-build-progress.sh <build.log> [<openwrt-tree>]
+#   usage: tools/cw-build-progress.sh [--plain] <build.log> [<openwrt-tree>]
 #
 # Run it in a second terminal while tools/cw-release-build.sh writes <build.log>, or start the
 # build in the background and run this in front of it (docs/building.md). It only reads: the
@@ -18,23 +18,34 @@
 # It shows the phase (setup, download, compile, image, checks), the bar, done/total, the
 # package compiling now, the elapsed time and a time-left estimate from the pace so far, and
 # exits when the build ends: 0 when it printed IMAGE_OK, 1 otherwise.
+#
+# --plain prints a new line instead of redrawing one: at each phase, every 5%, and at least
+# every 10 minutes. That is the form a CI log can show (GitHub Actions cannot redraw a line);
+# it is chosen by itself under GitHub Actions (GITHUB_ACTIONS=true) or when the output is not a
+# terminal. CW_PROGRESS_TOTAL_FILE moves the saved total out of the tree (CI keeps it in the
+# cached dl/ directory, as the tree itself is fresh on every run).
 set -u
 
-LOG=${1:?usage: tools/cw-build-progress.sh <build.log> [<openwrt-tree>]}
+PLAIN=0
+[ "${1:-}" = --plain ] && { PLAIN=1; shift; }
+[ "${GITHUB_ACTIONS:-}" = true ] && PLAIN=1
+[ -t 1 ] || PLAIN=1
+LOG=${1:?usage: tools/cw-build-progress.sh [--plain] <build.log> [<openwrt-tree>]}
 TREE=${2:-}
 INTERVAL=${CW_PROGRESS_INTERVAL:-2}
+[ "$PLAIN" = 1 ] && INTERVAL=${CW_PROGRESS_INTERVAL:-15}
 
 # Wait for the log: the build may not have created it yet.
 n=0
 while [ ! -f "$LOG" ]; do
-	[ "$n" -ge 30 ] && { echo "cw-build-progress: $LOG does not exist" >&2; exit 2; }
+	[ "$n" -ge 120 ] && { echo "cw-build-progress: $LOG does not exist" >&2; exit 2; }
 	n=$((n + 1)); sleep 1
 done
 
 # The tree, when not given: the build prints "== seed: ..." and works in the tree it was given.
 # Its "-C <dir>" lines are relative, so the tree is only needed for the total.
-TOTAL_FILE=
-[ -n "$TREE" ] && TOTAL_FILE="$TREE/.cw-progress-total"
+TOTAL_FILE=${CW_PROGRESS_TOTAL_FILE:-}
+[ -z "$TOTAL_FILE" ] && [ -n "$TREE" ] && TOTAL_FILE="$TREE/.cw-progress-total"
 
 estimate_total() { # distinct source directories of the selected packages, plus tools and toolchain
 	[ -n "$TREE" ] && [ -f "$TREE/tmp/.packageinfo" ] && [ -f "$TREE/.config" ] || { echo 0; return; }
@@ -46,18 +57,22 @@ estimate_total() { # distinct source directories of the selected packages, plus 
 	' "$TREE/.config" "$TREE/tmp/.packageinfo"
 }
 
+# The total: the last finished run's count, else an estimate. A fresh tree has no package list
+# until the build's defconfig has run, so the estimate is tried again on every pass until then.
 total=0
-if [ -n "$TOTAL_FILE" ] && [ -s "$TOTAL_FILE" ]; then
-	total=$(cat "$TOTAL_FILE")
-	basis="last run"
-else
+find_total() {
+	if [ -n "$TOTAL_FILE" ] && [ -s "$TOTAL_FILE" ]; then
+		total=$(cat "$TOTAL_FILE")
+		case "$total" in ''|*[!0-9]*) total=0 ;; esac
+		[ "$total" -gt 0 ] && return
+	fi
 	pk=$(estimate_total)
 	if [ "$pk" -gt 0 ]; then
 		tools=$(ls "$TREE"/tools/*/Makefile 2>/dev/null | wc -l)
 		total=$((pk + tools * 4 / 5 + 12))   # most host tools build; toolchain and kernel ~12 steps
-		basis="estimate"
 	fi
-fi
+}
+last_phase= last_step=-1 last_print=0
 
 start=$(date +%s)
 cols=$(tput cols 2>/dev/null || echo 100)
@@ -67,6 +82,7 @@ barw=$((cols - 62)); [ "$barw" -lt 10 ] && barw=10; [ "$barw" -gt 40 ] && barw=4
 fmt() { s=$1; [ "$s" -lt 0 ] && s=0; printf '%d:%02d:%02d' $((s / 3600)) $((s % 3600 / 60)) $((s % 60)); }
 
 while :; do
+	[ "$total" -gt 0 ] || find_total
 	# one pass over the log: phase, distinct compiled dirs, the newest one, and the end state
 	set -- $(sed 's/\x1b\[[0-9;]*m//g' "$LOG" 2>/dev/null | awk '
 		/=== CW RELEASE BUILD START/ { ph = "download" }
@@ -108,11 +124,19 @@ while :; do
 	bar=$(printf '%*s' "$fill" '' | tr ' ' '#')$(printf '%*s' $((barw - fill)) '' | tr ' ' '.')
 	curw=$((cols - barw - 52)); [ "$curw" -lt 8 ] && curw=8
 	cur=$(printf '%.*s' "$curw" "$cur")
-	printf '\r\033[K%-8s [%s] %3d%%  %s/%s  %-*s  %s  left %s' \
-		"$phase" "$bar" "$pct" "$done" "$tot_s" "$curw" "$cur" "$(fmt "$el")" "$left"
+	if [ "$PLAIN" = 0 ]; then
+		printf '\r\033[K%-8s [%s] %3d%%  %s/%s  %-*s  %s  left %s' \
+			"$phase" "$bar" "$pct" "$done" "$tot_s" "$curw" "$cur" "$(fmt "$el")" "$left"
+	elif [ "$phase" != "$last_phase" ] || [ $((pct / 5)) -ne "$last_step" ] ||
+	     [ $((now - last_print)) -ge 600 ] || [ "$ended" = 1 ]; then
+		bar=$(printf '%*s' $((pct / 5)) '' | tr ' ' '#')$(printf '%*s' $((20 - pct / 5)) '' | tr ' ' '.')
+		printf '>> progress: %-8s [%s] %3d%%  %s/%s steps  now: %s  elapsed %s  left %s\n' \
+			"$phase" "$bar" "$pct" "$done" "$tot_s" "$cur" "$(fmt "$el")" "$left"
+		last_phase=$phase last_step=$((pct / 5)) last_print=$now
+	fi
 
 	if [ "$ended" = 1 ]; then
-		echo
+		[ "$PLAIN" = 0 ] && echo
 		if [ "$ok" = 1 ]; then
 			# the next run's total: what this one compiled (a clean build lists every step,
 			# an incremental one the same set again)

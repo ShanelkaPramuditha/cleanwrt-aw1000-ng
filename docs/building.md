@@ -127,6 +127,12 @@ The total of the first run in a tree is an estimate from the selected packages, 
 at 99% until the build reports its end. Every finished run saves its real count in
 `<tree>/.cw-progress-total`, and later runs use that.
 
+On GitHub Actions the *Build* step runs the same watcher beside the build. A CI log cannot redraw
+a line, so there it prints a new one, `>> progress: compile [########............] 40% ...`, at
+each phase, every 5% and at least every 10 minutes, between the build's own output. Its total is
+kept in the cached `dl/` directory, so after the first run with this watcher it is the previous
+run's real count. Pass `--plain` to get the same lines locally, for example in a log file.
+
 ## What the build script guarantees
 
 `tools/cw-release-build.sh` applies the overlay, the pinned feeds and the patches (to the feeds

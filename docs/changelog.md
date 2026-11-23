@@ -35,8 +35,8 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   error: the key file is locked down to mode 600 by the build, and a key that is not the release
   key is a note there. Release builds stay strict. See [Building](building.md).
 - **A progress bar for local builds.** `tools/cw-build-progress.sh` follows the build log and shows
-  the phase, the steps done, the package compiling now and the time left. See
-  [Building](building.md#a-progress-bar).
+  the phase, the steps done, the package compiling now and the time left. The GitHub Actions
+  build prints the same progress as lines in its log. See [Building](building.md#a-progress-bar).
 
 ## 25.12.5-R2.2-SP1
 

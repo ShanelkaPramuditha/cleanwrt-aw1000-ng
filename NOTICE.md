@@ -61,7 +61,7 @@ upstream's, unchanged.
 | 2026-11-23 | `configs/arcadyan_aw1000.seed`, `docs/` | modified: OpenVPN removed from the image |
 | 2026-11-23 | `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/54-cw-tailscale-off`, `tools/tests/cw-tailscale-off-test.sh`, `docs/` | added: Tailscale in the image, off until enabled |
 | 2026-11-23 | `tools/cw-release-build.sh`, `tools/cw-check-image.sh`, `docs/building.md` | modified: the build sets the feed key to mode 600; a local build notes a non-release key instead of failing |
-| 2026-11-23 | `tools/cw-build-progress.sh`, `docs/building.md` | added: a progress bar that follows a build's log |
+| 2026-11-23 | `tools/cw-build-progress.sh`, `.github/workflows/build.yml`, `docs/building.md` | added: a progress bar that follows a build's log, and progress lines in the CI build log |
 | 2026-11-14 | `.github/workflows/build.yml` | modified: Go build cache (`tmp/go-build`) kept between CI runs |
 | 2026-11-14 | `.devcontainer/cw-dev.sh`, `.devcontainer/devcontainer.json` | modified: local builds skip the optional cw-opt feed set unless `CW_BUILD_OPT_ARTIFACTS=1` |
 | 2026-11-14 | `README.md`, `NOTICE.md` | modified: fork notice, change list, credits |
