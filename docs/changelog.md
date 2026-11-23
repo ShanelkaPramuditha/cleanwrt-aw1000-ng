@@ -20,9 +20,11 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 - **Even spacing on *Modem → 3gInfo-lite*.** The Neighbour cells card no longer touches the card
   above it, "Auto refresh" and "Auto scan" stay on one line, and the page's buttons, cards and
   gaps match the rest of the theme.
-- **Buttons no longer touch on QModem's pages.** The Modem Log's *Download* and *Clear* on
-  *Dial Overview*, and the buttons on the modem debug page, have space between them and below the
-  log boxes.
+- **QModem's pages are laid out properly under Vantage.** On *Advance Modem Settings* the
+  function tabs look and work like tabs, the card titles sit inside their cards, the *Submit*,
+  *Select All* and *Scan* buttons no longer lie on top of the band list, and radio and checkbox
+  labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
+  status card no longer touches the Save bar.
 - **OpenVPN is no longer in the image**, and with it the *VPN* menu, where it was the only page.
   WireGuard stays under *Network → Interfaces*. OpenVPN is one install away:
   `apk add openvpn-openssl luci-app-openvpn`, and a router upgraded with its settings kept gets its

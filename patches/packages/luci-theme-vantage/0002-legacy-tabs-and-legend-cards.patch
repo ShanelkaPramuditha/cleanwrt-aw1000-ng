@@ -1,0 +1,62 @@
+Legacy QModem pages: tabs without links, and legend-headed cards
+
+Pages that build their own markup in script, rather than through LuCI's forms, use two
+patterns this theme did not cover. QModem's Advance Modem Settings is where both show:
+
+- Its function tabs (Dial Mode, Rat Prefer, Set IMEI, ...) are bare <li> items with the text
+  in them and no <a>. The tab rules style "li > a", so these got no padding, no rounding and
+  no selected state: a run of cramped words with no sign of the open tab.
+- Its cards are <fieldset class="cbi-section"> headed by a <legend>. A legend is drawn on the
+  fieldset's border, so the card's header bar sat half outside the top of the card, cut
+  through by the border line. QModem Information and SMS build theirs the same way.
+
+The bare items now get the tab segment on the item itself, with the selected state. The
+legend is floated, which makes it an ordinary box inside the card; it then takes the same
+header bar as an h3, and what follows starts below it. Only top-level cards: a nested
+section has no card padding for the bar to bleed into.
+
+Both selectors match only these patterns: LuCI's own tabs keep their <a>, and its forms head
+cards with h3, so no stock page changes.
+
+Applies to: https://github.com/anothaDev/luci-theme-vantage.git @ v1.2.0 (a7ff63b7), after 0001.
+Upstream status: local to CleanWRT.
+
+--- a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
++++ b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
+@@ -969,6 +969,15 @@
+ 	font-size: var(--fs-md); font-weight: 600; letter-spacing: -.005em;
+ }
+ .cbi-section > .cbi-title > h3 { display: flex; align-items: center; gap: var(--sp-2); flex: 1 1 auto; margin: 0; font-size: var(--fs-md); font-weight: 600; }
++/* A <legend> heading a fieldset card (pages that build their cards in script, such as
++   QModem's) is drawn by the browser on the fieldset's border, so the header bar above sat
++   half outside the card. Floated, it is an ordinary box inside the card and takes the bar's
++   bleed like an h3; what follows starts below it. Top-level cards only: a nested section
++   has no card padding to bleed into. (CleanWRT: patches/packages/luci-theme-vantage/) */
++fieldset.cbi-section:not(.cbi-section *) > legend:first-child {
++	float: left; box-sizing: border-box; width: calc(100% + 2 * var(--card-px));
++}
++fieldset.cbi-section:not(.cbi-section *) > legend:first-child + * { clear: both; }
+ /* headings further down a card: sub-section title with a hairline above */
+ .cbi-section > h3:not(:first-child), .cbi-section > div > h3, .cbi-value > h4, .cbi-section-node > h4 {
+ 	display: flex; align-items: center; gap: var(--sp-2);
+@@ -1948,6 +1957,20 @@
+ /* the selected segment carries the signal (text and ring): white on the
+    grey track alone was hard to pick out; hover keeps it */
+ .cbi-tabmenu > li.cbi-tab > a, .cbi-tabmenu > li.cbi-tab > a:hover, .vt-pagetabs > .vt-tab[aria-current] { background-color: var(--seg-on); color: var(--accent-text); font-weight: 600; box-shadow: var(--seg-on-ring); }
++/* tabs built as bare list items with no link inside (QModem's Advance Modem Settings):
++   the same segment, on the item itself (CleanWRT: patches/packages/luci-theme-vantage/) */
++.cbi-tabmenu > li:not(:has(> a)) {
++	align-items: center;
++	min-height: var(--ctl-h); padding: 0 10px;
++	border: 3px solid transparent; background-clip: padding-box;
++	border-radius: calc(var(--r) + 3px);
++	color: var(--text-2);
++	font-weight: 500;
++	white-space: nowrap;
++	cursor: pointer;
++}
++.cbi-tabmenu > li:not(:has(> a)):hover { color: var(--text); }
++.cbi-tabmenu > li.cbi-tab:not(:has(> a)) { background-color: var(--seg-on); color: var(--accent-text); font-weight: 600; box-shadow: var(--seg-on-ring); }
+ .cbi-tabmenu > li[data-errors] > a::after {
+ 	content: attr(data-errors);
+ 	display: inline-flex; align-items: center; justify-content: center;

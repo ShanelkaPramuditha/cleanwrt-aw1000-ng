@@ -206,7 +206,7 @@ than shipping a half-applied change.
 | `0008-sip-default-config-for-the-phone-bridge` | the defaults this router needs: the media socket pointed at the phone daemon, the inbound direction on, the account named `awvoice`, the password shared with the Wi-Fi key, and the vendor engine's own path switched off |
 | `0009-sip-voip-default-migration` | a first-boot script that migrates a configuration that still pointed at the vendor engine — and only when the media socket is the phone daemon's, so a hand-configured router is left alone |
 | `0010-qmi-wwan-nss-path-behind-its-own-guard` | restores the vendor-deleted `CONFIG_RMNET_DATA` guard. Without it `modpost` fails on a symbol this tree does not carry and the driver cannot be packaged at all |
-| `0011-luci-button-spacing` | the Dial Overview and modem debug pages put space between buttons that sit side by side and under the log boxes; the pages built them with nothing in between, so they touched |
+| `0011-luci-button-spacing` | QModem's hand-built pages get their spacing: buttons side by side and under the log boxes no longer touch, Dial Overview's status card keeps clear of the Save bar, and Advance Modem Settings puts its Submit / Select All / Scan buttons in real table rows (they were appended straight into the table and lay over the band rows) and spaces its radio and checkbox labels |
 
 ### The LuCI feed
 
@@ -233,6 +233,7 @@ than shipping a half-applied change.
 | patch | what it changes |
 |---|---|
 | `packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages` | Vantage publishes LuCI Bootstrap's colour tokens (`--background-color-high`, `--text-color-highest`, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text |
+| `packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards` | pages that build their own markup: tabs made of bare list items (no link) get the tab look and the selected state, and a card headed by a `<legend>` gets the header bar inside the card instead of on its border. QModem's Advance Modem Settings, Information and SMS pages use both |
 | `packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo` | one line: the login page shows the CleanWRT logo where the theme prints the router's hostname. The image file lives outside the theme's own directory, so a theme update can neither overwrite it nor collide with the patch |
 | `packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport` | the login card sits in the middle of the screen instead of 7vh from the top; on a screen shorter than the card the page scrolls from the top as before |
 

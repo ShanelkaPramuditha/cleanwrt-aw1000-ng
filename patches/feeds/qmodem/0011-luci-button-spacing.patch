@@ -10,12 +10,24 @@ Each page's own stylesheet now gives a button that follows another button 8px, a
 row under a textarea 12px. Rows the theme already lays out with a gap (.right) are left
 alone, so they do not get the space twice.
 
+Dial Overview also appends its Modem Status and Modem Log cards after the page's form, right
+behind the Reset / Save / Save & Apply bar. Vantage floats that bar with space above it only,
+so the Modem Status card touched it; the card now keeps 16px from it.
+
+Advance Modem Settings appended its Submit, Select All and Scan buttons straight into a
+<tbody> or <table>. That is not table content: the browser hoists each button into an
+anonymous cell, and under Vantage they sat on top of the band rows (Lock Band) or against the
+card edge (Dial Mode, Neighbor Cell). They now sit in a real row (createBtnRow), with 8px
+between them. Its radios and checkboxes had their labels glued to them and to the next
+choice ("qmigobinet", "3G4G5G"); each label now keeps 6px from its box and 16px from the
+next choice, and the band list keeps 8px between bands.
+
 Applies to: https://github.com/FUjr/QModem.git @ 0988085b, after 0010.
 Upstream status: local to CleanWRT.
 
 --- a/luci/luci-app-qmodem/luasrc/view/qmodem/dial_overview.htm
 +++ b/luci/luci-app-qmodem/luasrc/view/qmodem/dial_overview.htm
-@@ -353,4 +353,16 @@
+@@ -353,4 +353,23 @@
  		position: unset !important;
  		transform: none !important;
  	}
@@ -31,10 +43,69 @@ Upstream status: local to CleanWRT.
 +	textarea + .cbi-button {
 +		margin-top: 12px;
 +	}
++
++	/* The Modem Status and Modem Log cards are added after the page's form, so they follow
++	   its Save bar directly. A theme that floats that bar (Vantage) gives it space above
++	   only, and the first card touched it. */
++	#maincontent > .cbi-section-modem-state {
++		margin-top: 16px;
++	}
  </style>
 --- a/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
 +++ b/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
-@@ -1386,6 +1386,18 @@
+@@ -88,6 +88,22 @@
+ 			return btn;
+ 		}
+ 
++		// CleanWRT: a row of buttons as a table row. Buttons appended straight into a
++		// <tbody> or <table> are not table content: the browser hoists them into an
++		// anonymous cell that a theme can lay over the rows next to it.
++		createBtnRow(){
++			var tr = document.createElement('tr');
++			tr.className = "tr cbi-section-table-row";
++			var td = document.createElement('td');
++			td.className = "td cbi-section-table-cell qm-btn-row";
++			td.colSpan = 99;
++			for (var btn of arguments) {
++				td.appendChild(btn);
++			}
++			tr.appendChild(td);
++			return tr;
++		}
++
+ 		createRadio(name,value){
+ 			var radio = document.createElement('input');
+ 			radio.type = "radio";
+@@ -499,8 +515,7 @@
+ 					}
+ 				this.tbody.appendChild(tr_header);
+ 				this.tbody.appendChild(tr);
+-				this.tbody.appendChild(select_all_btn);
+-				this.tbody.appendChild(submit_btn);
++				this.tbody.appendChild(this.createBtnRow(select_all_btn, submit_btn));
+ 
+ 			}
+ 
+@@ -710,7 +725,7 @@
+ 			this.mode_btn = this.createBTN("<%:Submit%>",() => {
+ 				this.set_config(this.selected_mode);
+ 			});
+-			this.tbody.appendChild(this.mode_btn);
++			this.tbody.appendChild(this.createBtnRow(this.mode_btn));
+ 		}
+ 
+ 		create_mode_radio(){
+@@ -880,8 +895,7 @@
+ 			this.setting_table.appendChild(arfcn_tr);
+ 			this.setting_table.appendChild(band_tr);
+ 			this.setting_table.appendChild(scs_tr);
+-			this.setting_table.appendChild(scan_btn);
+-			this.setting_table.appendChild(submit_btn);
++			this.setting_table.appendChild(this.createBtnRow(scan_btn, submit_btn));
+ 		}
+ 
+ 		render_neighborcell(){
+@@ -1386,6 +1400,44 @@
  		flex-wrap: wrap;
  		justify-content: space-around;
  	}
@@ -49,6 +120,32 @@ Upstream status: local to CleanWRT.
 +	textarea + div,
 +	textarea + .cbi-button {
 +		margin-top: 12px;
++	}
++
++	/* the button rows built by createBtnRow, the radios and checkboxes with their labels,
++	   and the band list: space between each item and the next */
++	td.qm-btn-row {
++		display: flex;
++		flex-wrap: wrap;
++		gap: 8px;
++		padding-top: 12px;
++	}
++
++	td.qm-btn-row > .cbi-button + .cbi-button {
++		margin-left: 0;
++	}
++
++	input[type="radio"] + span,
++	input[type="checkbox"] + span {
++		margin: 0 16px 0 6px;
++	}
++
++	.band-container {
++		margin-right: 8px;
++	}
++
++	.band-container > input[type="checkbox"] + span {
++		margin-right: 0;
 +	}
  </style>
  <div class="cbi-map">
