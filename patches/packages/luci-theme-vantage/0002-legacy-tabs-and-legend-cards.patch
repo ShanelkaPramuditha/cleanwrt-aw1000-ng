@@ -15,6 +15,11 @@ legend is floated, which makes it an ordinary box inside the card; it then takes
 header bar as an h3, and what follows starts below it. Only top-level cards: a nested
 section has no card padding for the bar to bleed into.
 
+One more, seen on the same kind of page: Save & Apply is a split button (.cbi-dropdown), laid
+out as a flex row, and the busy spinner the theme draws as its ::before became a flex item with a
+fixed height - it sat at the top-left of the button, over the label, while a save ran. It is
+centred now, with space before the label.
+
 Both selectors match only these patterns: LuCI's own tabs keep their <a>, and its forms head
 cards with h3, so no stock page changes.
 
@@ -60,3 +65,14 @@ Upstream status: local to CleanWRT.
  .cbi-tabmenu > li[data-errors] > a::after {
  	content: attr(data-errors);
  	display: inline-flex; align-items: center; justify-content: center;
+@@ -2247,6 +2270,10 @@
+ #view > .spinning::before, .vt-main > .spinning::before { width: 20px; height: 20px; margin: 0; }
+ .btn.spinning, .cbi-button.spinning { pointer-events: none; opacity: .85; }
+ .btn.spinning::before, .cbi-button.spinning::before { margin-right: 2px; border-color: color-mix(in srgb, currentColor 25%, transparent); border-top-color: currentColor; }
++/* Save & Apply is a split button (.cbi-dropdown), a flex row: there the spinner is a flex item
++   with a fixed height, so it sat at the top of the row, over the label's corner. Centred, and
++   kept clear of the label (CleanWRT: patches/packages/luci-theme-vantage/) */
++.cbi-dropdown.spinning::before { flex: none; align-self: center; margin: 0 -4px 0 10px; }
+ .cbi-dropdown.spinning > .open { visibility: hidden; }
+ @keyframes vt-spin { to { transform: rotate(360deg); } }
+ 
