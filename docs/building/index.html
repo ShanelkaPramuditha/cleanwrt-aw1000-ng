@@ -2937,7 +2937,7 @@ than shipping a half-applied change.</p>
 </tr>
 <tr>
 <td><code>0011-luci-button-spacing</code></td>
-<td>the Dial Overview and modem debug pages put space between buttons that sit side by side and under the log boxes; the pages built them with nothing in between, so they touched</td>
+<td>QModem's hand-built pages get their spacing: buttons side by side and under the log boxes no longer touch, Dial Overview's status card keeps clear of the Save bar, and Advance Modem Settings puts its Submit / Select All / Scan buttons in real table rows (they were appended straight into the table and lay over the band rows) and spaces its radio and checkbox labels</td>
 </tr>
 </tbody>
 </table>
@@ -3015,6 +3015,10 @@ than shipping a half-applied change.</p>
 <tr>
 <td><code>packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages</code></td>
 <td>Vantage publishes LuCI Bootstrap's colour tokens (<code>--background-color-high</code>, <code>--text-color-highest</code>, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text</td>
+</tr>
+<tr>
+<td><code>packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards</code></td>
+<td>pages that build their own markup: tabs made of bare list items (no link) get the tab look and the selected state, and a card headed by a <code>&lt;legend&gt;</code> gets the header bar inside the card instead of on its border. QModem's Advance Modem Settings, Information and SMS pages use both</td>
 </tr>
 <tr>
 <td><code>packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo</code></td>
