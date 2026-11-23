@@ -2699,12 +2699,12 @@ upstream feeds at build time, every one pinned to a commit.</p>
 <tr>
 <td><code>check</code></td>
 <td>every push and pull request</td>
-<td>shell syntax, the version label, that the pins resolve, and a <strong>config check</strong>: feeds, patches, pins, defconfig and the seed checks, without compiling</td>
+<td>shell syntax, the version label, that the pins resolve, a <strong>config check</strong> (feeds, patches, pins, defconfig and the seed checks, without compiling), and that every LuCI script and JSON file a patch touches still parses, read as the patched file</td>
 </tr>
 <tr>
 <td><code>build</code></td>
 <td>by hand (<em>Actions → build → Run workflow</em>)</td>
-<td>builds the image in the Docker environment, with a download cache and a compiler cache, and puts it in the private draft release</td>
+<td>builds the image in the Docker environment, with a download cache and a compiler cache, and puts it in the private draft release. Its notes carry the image size, the change since the last release and the flash blocks used</td>
 </tr>
 <tr>
 <td><code>release</code></td>
@@ -2995,6 +2995,10 @@ than shipping a half-applied change.</p>
 <td><code>0009-filemanager-default-width</code></td>
 <td>the file manager's default width, 400 to 800</td>
 </tr>
+<tr>
+<td><code>0010-tailscale-service-switch</code></td>
+<td>the Tailscale page gets a Service row with one button, <em>Enable and start</em> or <em>Stop and disable</em>, so turning Tailscale on no longer needs <em>System → Startup</em> first; the ACL gains <code>luci</code> <code>getInitList</code> / <code>setInitAction</code>, the calls that page makes</td>
+</tr>
 </tbody>
 </table>
 <h3 id="other-feeds-and-the-openwrt-tree-itself">Other feeds, and the OpenWrt tree itself<a class="headerlink" href="#other-feeds-and-the-openwrt-tree-itself" title="Permanent link">&para;</a></h3>
@@ -3034,6 +3038,10 @@ than shipping a half-applied change.</p>
 <td><code>tree/0001-apk-package-timestamps-zero</code></td>
 <td><code>apk mkpkg</code> runs with a fixed epoch, so two builds of one commit produce identical images</td>
 </tr>
+<tr>
+<td><code>tree/0002-dropbear-no-blank-root-password</code></td>
+<td>OpenWrt's dropbear lets root log in over SSH with no password while none is set; that patch is removed, so SSH refuses root until a password exists. Failsafe's own dropbear gains <code>-B</code> and keeps its blank-password recovery shell</td>
+</tr>
 </tbody>
 </table>
 <h3 id="themes">Themes<a class="headerlink" href="#themes" title="Permanent link">&para;</a></h3>
@@ -3052,14 +3060,6 @@ than shipping a half-applied change.</p>
 <tr>
 <td><code>packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards</code></td>
 <td>pages that build their own markup: tabs made of bare list items (no link) get the tab look and the selected state, and a card headed by a <code>&lt;legend&gt;</code> gets the header bar inside the card instead of on its border. QModem's Advance Modem Settings, Information and SMS pages use both</td>
-</tr>
-<tr>
-<td><code>packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo</code></td>
-<td>one line: the login page shows the CleanWRT logo where the theme prints the router's hostname. The image file lives outside the theme's own directory, so a theme update can neither overwrite it nor collide with the patch</td>
-</tr>
-<tr>
-<td><code>packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport</code></td>
-<td>the login card sits in the middle of the screen instead of 7vh from the top; on a screen shorter than the card the page scrolls from the top as before</td>
 </tr>
 </tbody>
 </table>

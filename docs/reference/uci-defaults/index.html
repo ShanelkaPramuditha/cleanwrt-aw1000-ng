@@ -2371,7 +2371,7 @@ rows.</p>
 <tr>
 <td><code>29-cw-keep-chosen-theme</code></td>
 <td><code>luci.themes.Vantage=/luci-static/vantage</code>, written <strong>before</strong> Vantage's own <code>30_luci-theme-vantage</code>, which selects Vantage whenever its entry is new</td>
-<td>only after an upgrade that kept the settings, when the base names an installed theme other than stock bootstrap (Footstrap, say): Vantage is added to the design list and the base stays. A fresh flash, the stock base or a base whose theme is gone is left to Vantage's script</td>
+<td>only after an upgrade that kept the settings, when the base names an installed theme other than stock bootstrap (one you installed yourself, say): Vantage is added to the design list and the base stays. A fresh flash, the stock base or a base whose theme is gone is left to Vantage's script</td>
 </tr>
 <tr>
 <td><code>45-cw-strip-stock-leds</code></td>
@@ -2380,8 +2380,8 @@ rows.</p>
 </tr>
 <tr>
 <td><code>46-cw-uhttpd-https</code></td>
-<td><code>uhttpd.main.redirect_https='1'</code>, so plain HTTP becomes HTTPS</td>
-<td>exits quietly if <code>/etc/config/uhttpd</code> is missing</td>
+<td><code>uhttpd.main.redirect_https='1'</code>, so plain HTTP becomes HTTPS; and, through <code>/usr/sbin/cw-https-cert</code>, a certificate that names the LAN address, the hostname and <code>&lt;hostname&gt;.lan</code>, so trusting it once ends the browser warning</td>
+<td>exits quietly if <code>/etc/config/uhttpd</code> is missing; the certificate only when there is none yet, so an upgraded router keeps its own</td>
 </tr>
 <tr>
 <td><code>47-cw-awvoice-at-port</code></td>
@@ -2399,11 +2399,6 @@ rows.</p>
 <td>exits if <code>/etc/config/uhttpd</code> is missing. To undo: delete the section, remove the directory, restart uhttpd</td>
 </tr>
 <tr>
-<td><code>50-cw-footstrap-look</code></td>
-<td>writes the image's look into <code>/etc/config/footstrap</code> — 27 options: <code>layout='top'</code>, <code>darkmode='dark'</code>, <code>palette='footstrap'</code>, <code>wallpaper='file'</code>, <code>material='frosted'</code>, <code>blur='30'</code>, <code>rounding='12'</code>, <code>card_opacity='55'</code>, <code>bar_opacity='55'</code>, <code>photo_dim='15'</code>, <code>pattern_size='440'</code>, <code>pattern_strength='20'</code>, <code>pattern_ink='theme'</code>, <code>content_width='1280'</code>, <code>density='normal'</code>, <code>autocollapse='off'</code>, colour tints at <code>0</code>, plus <code>login_bg</code> and <code>pattern</code> set to the <strong>checksums of the two files the image installs</strong>, and <code>cw_look='rc2.1'</code></td>
-<td>three reasons to do nothing: the router already carries the look this script names; the current <code>login_bg</code> is a photo that is not one of the image's two files; or either installed file's checksum cannot be read. Your own saved look always outranks the image's. See <a href="../../theme/#the-look-a-new-router-starts-with">theme</a></td>
-</tr>
-<tr>
 <td><code>51-cw-awvoice-voipd-off</code></td>
 <td>stops the vendor VoIP engine <code>qmodem_voip</code> and takes it off the boot path, so the phone daemon can answer the front-end name itself and the <a href="../../awvoice/network-phones/">network phone</a> carries audio</td>
 <td>exits if the init script is not executable. It <strong>fails</strong> — and retries next boot — if any boot link for that engine survives other than the SIP service's own. This is the fix for a soft phone that registers and never sets up media</td>
@@ -2419,8 +2414,18 @@ rows.</p>
 <td>exits unless the option is exactly <code>8080</code>: any other port you chose stays</td>
 </tr>
 <tr>
+<td><code>54-cw-tailscale-off</code></td>
+<td>stops <code>tailscale</code> and takes it off the boot path, so it ships off; <em>Services → Tailscale → Enable and start</em> turns it on</td>
+<td>a router already logged in (a non-empty <code>/etc/tailscale/tailscaled.state</code>) is left running</td>
+</tr>
+<tr>
+<td><code>55-cw-wireguard-restore</code></td>
+<td>leaves <code>/etc/cw-wireguard-restore</code> when a WireGuard interface is configured and WireGuard is not installed; <code>/etc/hotplug.d/iface/95-cw-wireguard-restore</code> then installs it from the official repositories the first time an interface comes up, brings the tunnels up and removes the marker</td>
+<td>no WireGuard interface, or WireGuard installed: nothing</td>
+</tr>
+<tr>
 <td><code>95-cw-drop-removed-apps</code></td>
-<td>after a keep-settings upgrade from an image that carried them: deletes <code>/etc/config/{passwall,passwall2,homeproxy,adblock}</code> and the <code>passwall*</code> firewall include sections. AdGuard Home's and p910nd's settings are <strong>kept</strong> (both are <a href="../../install-apps/">optional installs</a>). While AdGuard Home is not installed, it also puts dnsmasq back on port 53 if its setup had moved it, so DNS keeps working after an upgrade</td>
+<td>after a keep-settings upgrade from an image that carried them: deletes Footstrap's <code>/etc/config/footstrap</code> and <code>/etc/footstrap/</code> when the theme is gone; deletes <code>/etc/config/{passwall,passwall2,homeproxy,adblock}</code> and the <code>passwall*</code> firewall include sections. AdGuard Home's and p910nd's settings are <strong>kept</strong> (both are <a href="../../install-apps/">optional installs</a>). While AdGuard Home is not installed, it also puts dnsmasq back on port 53 if its setup had moved it, so DNS keeps working after an upgrade</td>
 <td>each app only when its init script is absent, so reinstalling one keeps its settings. Nothing to do on a router that never had them</td>
 </tr>
 <tr>
@@ -2522,7 +2527,7 @@ in <a href="../options/">UCI options</a>.</p>
 <td><strong>comment lines only, no sections.</strong> The package default is an active "ping, reboot after 6 failures" rule; this file replaces it so the router never reboots itself unless you add a rule</td>
 </tr>
 <tr>
-<td><code>cw-led</code>, <code>awvoice</code>, <code>footstrap</code>, <code>qmodem_sip</code></td>
+<td><code>cw-led</code>, <code>awvoice</code>, <code>qmodem_sip</code></td>
 <td>shipped by their own packages, not here, so an upgrade keeps what you changed</td>
 </tr>
 </tbody>
@@ -2531,7 +2536,6 @@ in <a href="../options/">UCI options</a>.</p>
 <p>Nothing here is hidden. On a flashed router:</p>
 <div class="highlight"><pre><span></span><code>ls<span class="w"> </span>/etc/uci-defaults/<span class="w">          </span><span class="c1"># what is still waiting to run</span>
 logread<span class="w"> </span>-e<span class="w"> </span>cw-firstboot<span class="w">        </span><span class="c1"># what the image's own scripts said</span>
-uci<span class="w"> </span>show<span class="w"> </span>footstrap<span class="w">             </span><span class="c1"># the look the image applied</span>
 uci<span class="w"> </span>show<span class="w"> </span>awvoice<span class="w">               </span><span class="c1"># the line, the network side, the quiet-hours windows</span>
 </code></pre></div>
 <p>A script that already ran is gone from that directory, which is why the log and the config — not

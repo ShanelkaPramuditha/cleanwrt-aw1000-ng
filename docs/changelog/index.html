@@ -2460,11 +2460,25 @@
 <li><strong>WireGuard is no longer in the image</strong> (its kernel module, <code>wireguard-tools</code> and LuCI's WireGuard
   protocol), and with it the empty <em>Status → WireGuard</em> page. Tailscale is the VPN the image ships.
   WireGuard is one install away: <code>apk add kmod-wireguard wireguard-tools luci-proto-wireguard</code>.
-  <strong>If you run a WireGuard tunnel on the router</strong>, install those packages again right after
-  upgrading: until then that interface stays down (its settings are kept). See
+  A router that runs a WireGuard tunnel gets it installed again by itself once it is online after
+  the upgrade (below); until then that interface is down. See
   <a href="../features/vpn-proxy/#wireguard">VPN and proxies</a>.</li>
+<li><strong>SSH refuses root until a root password is set.</strong> Stock OpenWrt lets anyone who reaches
+  port 22 log in as root with no password while none is set; this image does not. Set the password
+  in LuCI (it asks on the first login) and SSH works at once. Failsafe mode still opens a shell with
+  no password, for recovery. If you only ever used SSH without a password, set one in LuCI first.</li>
+<li><strong>"Not secure" can go away for good.</strong> The router's HTTPS certificate now names its LAN address
+  and <code>cleanwrt.lan</code>, so trusting it once in your browser or computer ends the warning. A router
+  upgraded with its settings kept keeps its old certificate: run <code>cw-https-cert</code> to make the new
+  kind. See <a href="../features/security/#why-the-browser-says-not-secure">Security</a>.</li>
+<li><strong>WireGuard comes back by itself</strong> on a router that ran a WireGuard tunnel: the first time it is
+  online after the upgrade, it installs WireGuard again from the official repositories and brings
+  the tunnel up.</li>
+<li><strong>Footstrap is no longer in the image.</strong> Vantage is the one theme, so every page is made to look
+  right once. A router that was on Footstrap moves to Vantage when upgraded, and Footstrap's leftover
+  settings are removed. LuCI's Bootstrap stays as the fallback. See <a href="../theme/">Theme</a>.</li>
 <li><strong>Tailscale is in the image</strong> (about 10 MiB), with its page under <em>Services → Tailscale</em>. It
-  ships off: enable it under <em>System → Startup</em>, then log in from its page. A router that was
+  ships off: <em>Services → Tailscale → Enable and start</em>, then log in from the same page. A router that was
   logged in to Tailscale before the upgrade stays connected. See
   <a href="../features/remote-access/#tailscale">Remote access</a>.</li>
 <li><strong>Local builds finish clean.</strong> A build on your own machine no longer ends with a release-key

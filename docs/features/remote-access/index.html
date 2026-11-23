@@ -2468,8 +2468,8 @@ LAN from outside, pick <strong>one</strong> of these. All of them ship <strong>d
 <p>A mesh VPN, and the easiest option: reach the router, and the devices behind it, from your phone
 or laptop anywhere. It is in the image and ships <strong>off</strong>, so nothing runs until you start it.</p>
 <ol>
-<li><strong>Start it:</strong> <em>System → Startup</em>, find <code>tailscale</code>, click <strong>Enable</strong> and then <strong>Start</strong>.</li>
-<li><strong>Log in:</strong> <em>Services → Tailscale → Account Settings</em> → <strong>Login</strong>. A new tab opens Tailscale's sign-in
+<li><strong>Start it:</strong> <em>Services → Tailscale</em>, <strong>Enable and start</strong> in the <em>Service</em> row at the top.</li>
+<li><strong>Log in:</strong> on the same page, <em>Account Settings</em> → <strong>Login</strong>. A new tab opens Tailscale's sign-in
    page; sign in, and the router appears in your Tailscale admin console.</li>
 <li><strong>Optional, reach the whole LAN</strong>, not only the router: on <em>General Settings</em>, pick
    <code>192.168.1.0/24</code> under <strong>Advertise Routes</strong>, <strong>Save &amp; Apply</strong>, then approve the route in the
@@ -2479,7 +2479,7 @@ or laptop anywhere. It is in the image and ships <strong>off</strong>, so nothin
 <div class="highlight"><pre><span></span><code>/etc/init.d/tailscale<span class="w"> </span><span class="nb">enable</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>/etc/init.d/tailscale<span class="w"> </span>start
 tailscale<span class="w"> </span>up<span class="w">        </span><span class="c1"># prints a login URL; open it to authenticate</span>
 </code></pre></div>
-<p><strong>Turn it off again:</strong> <em>System → Startup</em> → <code>tailscale</code>: <strong>Stop</strong> and <strong>Disable</strong>. Logging out
+<p><strong>Turn it off again:</strong> <em>Services → Tailscale</em> → <strong>Stop and disable</strong>. Logging out
 first (<code>tailscale logout</code>) also removes the router from your Tailscale account.</p>
 <p>A router upgraded with <em>Keep settings</em> keeps its Tailscale login, and stays connected after the
 upgrade.</p>
@@ -2546,7 +2546,7 @@ an unconfigured tunnel, not a fault. Configure the token first.</p>
 <tbody>
 <tr>
 <td>Tailscale</td>
-<td>installed, <strong>off</strong> (System → Startup)</td>
+<td>installed, <strong>off</strong> (<em>Services → Tailscale → Enable and start</em>)</td>
 <td>your login</td>
 </tr>
 <tr>

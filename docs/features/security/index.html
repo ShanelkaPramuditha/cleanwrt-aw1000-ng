@@ -2484,7 +2484,9 @@
 <p>CleanWRT starts the way stock OpenWrt does:</p>
 <ul>
 <li><strong>No root password</strong> at first. The first login happens over <strong>Ethernet</strong>, and LuCI asks you
-  to set one.</li>
+  to set one. Until you do, <strong>SSH refuses root</strong>: stock OpenWrt lets anyone who reaches port 22 in
+  as root with no password, this image does not. SSH works as soon as a password is set, with no
+  restart. Failsafe mode still opens a shell with no password, for recovery.</li>
 <li>Wi-Fi is on, WPA2-PSK, with the default key <code>CleanWRT#40</code>. Change it on the first login.</li>
 <li>Every opt-in service is <strong>disabled</strong>. Nothing listens on your network until you enable it.</li>
 <li>LuCI is served over <strong>HTTPS</strong>; plain HTTP only redirects to it.</li>
@@ -2499,7 +2501,30 @@ password to the internet.</p>
 <p>The admin UI uses a <strong>self-signed TLS certificate</strong>, generated on your router at first boot.
 Every router gets a different one and no public authority signed it, so browsers warn exactly
 as they do on stock OpenWrt. The connection is still encrypted. Click <em>Advanced → Proceed</em>.</p>
-<p>If you own a domain, you can get a trusted certificate:</p>
+<p><strong>To stop the warning for good, trust the router's certificate once.</strong> This image makes it with
+the names you type: the LAN address (<code>192.168.1.1</code>), the hostname (<code>cleanwrt</code>) and
+<code>cleanwrt.lan</code>. Stock OpenWrt's certificate names only the hostname, so trusting it changes nothing
+at <code>https://192.168.1.1</code>.</p>
+<ol>
+<li>Copy the certificate to your computer: <code>scp root@192.168.1.1:/etc/uhttpd.crt cleanwrt.crt</code>
+   (or open the site, click the padlock / <em>Not secure</em>, and export the certificate).</li>
+<li>Trust it:<ul>
+<li><strong>Windows:</strong> double-click <code>cleanwrt.crt</code> → <em>Install Certificate</em> → <em>Local Machine</em> →
+  <em>Place all certificates in the following store</em> → <em>Trusted Root Certification Authorities</em>.
+  Chrome and Edge use this store.</li>
+<li><strong>macOS:</strong> double-click it, then in <em>Keychain Access</em> open it and set <em>Trust</em> to
+  <em>Always Trust</em>.</li>
+<li><strong>Firefox</strong> keeps its own list: <em>Settings → Privacy &amp; Security → Certificates → View
+  Certificates → Authorities → Import</em>.</li>
+</ul>
+</li>
+<li>Restart the browser and open <code>https://192.168.1.1</code> again.</li>
+</ol>
+<p>A router upgraded from an older image keeps the certificate it had, which names only the
+hostname. To make the new kind, and after you change the router's LAN address, run
+<code>cw-https-cert</code> over SSH, then trust the new file the same way. The certificate is valid for
+825 days.</p>
+<p>If you own a domain, you can get a publicly trusted certificate instead:</p>
 <div class="highlight"><pre><span></span><code>apk<span class="w"> </span>add<span class="w"> </span>acme-common<span class="w"> </span>luci-app-acme
 </code></pre></div>
 <p>Then issue a Let's Encrypt certificate with a DNS challenge (it works behind CGNAT).</p>
@@ -2576,7 +2601,7 @@ details and ask for a private channel.</p>
 <tr>
 <td>Root password</td>
 <td><strong>none</strong>, until you set one</td>
-<td><code>99-aw1000-defaults</code> leaves it unset, as stock OpenWrt does</td>
+<td><code>99-aw1000-defaults</code> leaves it unset, as stock OpenWrt does. Unlike stock, SSH refuses root until one is set (<code>patches/tree/0002-dropbear-no-blank-root-password.patch</code>)</td>
 </tr>
 <tr>
 <td>Wi-Fi</td>

@@ -2468,6 +2468,10 @@ install it from the official repositories (the kernel module matches the image's
 </code></pre></div>
 <p>Then reload LuCI. <strong>WireGuard VPN</strong> appears as a protocol under <em>Network → Interfaces</em>, and its
 tunnels are listed on <em>Status → WireGuard</em> once one exists.</p>
+<p><strong>Upgrading a router that runs a WireGuard tunnel:</strong> with <em>Keep settings</em>, the tunnel's settings
+stay, and the first time the router is online after the upgrade it installs these three packages
+again by itself and brings the tunnel up (<code>logread -e cw-wireguard</code> shows it). Until then, that
+interface is down.</p>
 <p><strong>Create a tunnel:</strong> <em>Network → Interfaces → Add new interface</em>, name it (for example <code>wg0</code>),
 protocol <strong>WireGuard VPN</strong>, <em>Create interface</em>. In the interface's <em>Configuration</em> tab set the
 private key and the peers (a peer is an endpoint plus allowed IPs).</p>
@@ -2559,7 +2563,7 @@ install brings back the version the image ships.</p>
 </tr>
 <tr>
 <td>Tailscale</td>
-<td>installed, <strong>off</strong>: enable it under <em>System → Startup</em>, then log in. See <a href="../remote-access/#tailscale">remote access</a></td>
+<td>installed, <strong>off</strong>: <em>Services → Tailscale → Enable and start</em>, then log in. See <a href="../remote-access/#tailscale">remote access</a></td>
 </tr>
 <tr>
 <td>Cloudflare Tunnel</td>

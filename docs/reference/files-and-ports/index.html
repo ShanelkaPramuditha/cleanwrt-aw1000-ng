@@ -2458,11 +2458,6 @@ creates; nothing is a guess.</p>
 <td>the daemon's settings. A package conffile, so an upgrade keeps your changes</td>
 </tr>
 <tr>
-<td><code>/etc/config/footstrap</code></td>
-<td>the theme's page, or the image's first-boot script</td>
-<td>the look. A package conffile</td>
-</tr>
-<tr>
 <td><code>/etc/config/qmodem_sip</code></td>
 <td>the SIP service's package, edited on the AWvoice page</td>
 <td>the network phone's account and media socket</td>
@@ -2564,12 +2559,12 @@ come through a flash on their own.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>/etc/footstrap/login-bg</code>, <code>/etc/footstrap/pattern.svg</code></td>
-<td>the two files that make the image's background. The theme lists this directory in its own keep file, so a <code>sysupgrade</code> keeps whatever you uploaded there</td>
+<td><code>/etc/uhttpd.crt</code>, <code>/etc/uhttpd.key</code></td>
+<td>LuCI's HTTPS certificate and key. On a fresh flash <code>cw-https-cert</code> makes them with the LAN address, the hostname and <code>&lt;hostname&gt;.lan</code> in them; run it again after changing the LAN address</td>
 </tr>
 <tr>
-<td><code>/www/luci-static/cw-branding/login-logo.png</code></td>
-<td>the branding logo the login page shows. Outside the theme's directory, so a theme update can neither overwrite it nor collide with the patch that places it</td>
+<td><code>/etc/cw-wireguard-restore</code></td>
+<td>present only while a WireGuard tunnel waits for WireGuard to be installed again after an upgrade (<code>55-cw-wireguard-restore</code>)</td>
 </tr>
 <tr>
 <td><code>/var/run/qmodem_voip/sip.conf</code></td>

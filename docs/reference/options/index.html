@@ -1568,17 +1568,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#footstrap-the-look" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        footstrap — the look
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#uhttpd-the-web-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2355,17 +2344,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#footstrap-the-look" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        footstrap — the look
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#uhttpd-the-web-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2685,28 +2663,6 @@ after its <a href="../../building/#what-this-build-changes-upstream">patch</a>:<
 </table>
 <p>Nothing in this file is <em>started</em> by the image. The service runs when the AWvoice page's switch
 starts it, and no SIP port is open until then.</p>
-<h2 id="footstrap-the-look"><code>footstrap</code> — the look<a class="headerlink" href="#footstrap-the-look" title="Permanent link">&para;</a></h2>
-<p>The image writes 27 options on first boot, listed option by option in
-<a href="../uci-defaults/">first-boot defaults</a> and explained in <a href="../../theme/">the theme</a>. The two that
-behave differently from the rest:</p>
-<table>
-<thead>
-<tr>
-<th>option</th>
-<th>what it holds</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>settings.login_bg</code></td>
-<td>the <strong>checksum</strong> of the photo file, not a path. It is how the first-boot script recognises its own default</td>
-</tr>
-<tr>
-<td><code>settings.cw_look</code></td>
-<td>the name of the look the image applied. A router that already carries it is left alone</td>
-</tr>
-</tbody>
-</table>
 <h2 id="uhttpd-the-web-server"><code>uhttpd</code> — the web server<a class="headerlink" href="#uhttpd-the-web-server" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
