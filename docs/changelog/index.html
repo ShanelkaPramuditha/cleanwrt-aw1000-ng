@@ -2459,6 +2459,9 @@
   ships off: enable it under <em>System → Startup</em>, then log in from its page. A router that was
   logged in to Tailscale before the upgrade stays connected. See
   <a href="../features/remote-access/#tailscale">Remote access</a>.</li>
+<li><strong>Local builds finish clean.</strong> A build on your own machine no longer ends with a release-key
+  error: the key file is locked down to mode 600 by the build, and a key that is not the release
+  key is a note there. Release builds stay strict. See <a href="../building/">Building</a>.</li>
 </ul>
 <h2 id="25125-r22-sp1">25.12.5-R2.2-SP1<a class="headerlink" href="#25125-r22-sp1" title="Permanent link">&para;</a></h2>
 <ul>

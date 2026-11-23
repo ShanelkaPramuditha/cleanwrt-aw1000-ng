@@ -2808,6 +2808,13 @@ something stale:</p>
 </tr>
 </tbody>
 </table>
+<p>A local build has no release key, because the private half is a CI secret. OpenWrt then makes
+a new <code>private-key.pem</code> in the tree, and the build ends with a note instead of an error:
+<code>local build - the tree's feed key is not the release key</code>. That image is fine to flash. Only
+the <code>cw-opt</code> feed index built next to it is signed with a key no router trusts, and it is never
+published. A release build (<code>CW_REQUIRE_RELEASE_KEYS=1</code>, which CI sets for every draft) still
+fails on any other key. The build also sets the key file to mode 600 itself, so it is never
+left readable by other users of the machine.</p>
 <p>A tree with no key lets OpenWrt generate one during the build, so every image carried a different
 <code>/etc/apk/keys/public-key.pem</code> and a device could no longer verify the <code>cw-opt</code> feed built from the
 same source. The patch in <code>patches/tree/</code> removes a second build-to-build change: <code>apk mkpkg</code>
