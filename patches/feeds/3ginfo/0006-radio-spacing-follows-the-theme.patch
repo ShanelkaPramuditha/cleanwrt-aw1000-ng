@@ -1,0 +1,155 @@
+Radio page spacing follows the theme
+
+The radio page set its own spacing in pixels, tuned against Footstrap. Under Vantage three
+things came out wrong:
+
+- The Neighbour cells card touched the Serving cells card above it. The cards in the
+  overview grid drop their section margin so the grid gap spaces them, and nothing spaced
+  the grid itself from the card that follows it.
+- "Auto refresh" and "Auto scan" broke onto two lines. Vantage gives every select
+  width: 100%, so the select took the whole label and squeezed its text.
+- Buttons and selects were 38px against Vantage's 36px controls (44px on touch), and the
+  gaps between cards were 12px against the 16px of every other Vantage page.
+
+The page column now spaces its blocks with one flex gap and clears each block's own margin,
+so the rhythm cannot depend on which theme margin applies where. The gap, radii and control
+height read Vantage's exported --v-* tokens first, Footstrap's --fs-* radii next, and keep
+the old literals for any other theme, so Footstrap and Bootstrap look as before apart from
+the restored space above Neighbour cells. The select keeps its own width.
+
+Applies to: the 3ginfo feed pin, after 0004 and 0005.
+Upstream status: local to CleanWRT, like 0004.
+
+--- a/luci-app-3ginfo-lite/htdocs/luci-static/resources/3ginfo/radio.css
++++ b/luci-app-3ginfo-lite/htdocs/luci-static/resources/3ginfo/radio.css
+@@ -19,17 +19,29 @@
+ 	--tg-good: var(--success-color-high, #197c36);
+ 	--tg-warn: var(--warn-color-high, #946300);
+ 	--tg-bad: var(--error-color-high, #cf222e);
+-	--tg-radius: var(--fs-radius-lg, 10px);
+-	--tg-radius-sm: var(--fs-radius, 8px);
+-	--tg-gap: 12px;
+-
++	/* Layout follows the theme too: Vantage publishes its spacing, radii and
++	   control height as --v-*, Footstrap its radii as --fs-*. The literals are
++	   the page's own values for themes that publish neither. */
++	--tg-radius: var(--v-r-lg, var(--fs-radius-lg, 10px));
++	--tg-radius-sm: var(--v-r, var(--fs-radius, 8px));
++	--tg-gap: var(--v-sp-4, 12px);
++	--tg-ctl-h: var(--v-ctl-h, 38px);
++
++	/* The column's gap is the only space between its blocks: each block's own
++	   margin is cleared below, so a theme's section margin cannot add to it
++	   or, as under a grid, go missing. */
+ 	display: flex;
+ 	flex-direction: column;
+-	gap: 0;
++	gap: var(--tg-gap);
+ 	color: var(--tg-text);
+ 	min-width: 0;
+ }
+ 
++.tg-page.cbi-map > * {
++	margin-top: 0;
++	margin-bottom: 0;
++}
++
+ .tg-page *,
+ .tg-page *::before,
+ .tg-page *::after {
+@@ -40,7 +52,6 @@
+ 	display: flex;
+ 	flex-direction: column;
+ 	gap: 12px;
+-	margin-bottom: 14px;
+ }
+ 
+ .tg-page-title {
+@@ -67,13 +78,19 @@
+ .tg-refresh-label {
+ 	display: inline-flex;
+ 	align-items: center;
+-	gap: 7px;
++	gap: 8px;
+ 	color: var(--tg-dim);
+ 	font-size: .75rem;
++	white-space: nowrap;
+ }
+ 
+-.tg-select {
+-	min-height: 38px;
++/* A theme that gives every select width: 100% (Vantage does) would let it
++   squeeze its label onto two lines; the select keeps its own width here. */
++.tg-page .tg-select {
++	flex: none;
++	width: auto;
++	min-width: 8rem;
++	min-height: var(--tg-ctl-h);
+ 	max-width: 10rem;
+ }
+ 
+@@ -82,7 +99,7 @@
+ 	align-items: center;
+ 	justify-content: center;
+ 	gap: 4px;
+-	min-height: 38px;
++	min-height: var(--tg-ctl-h);
+ 	white-space: nowrap;
+ }
+ 
+@@ -104,7 +121,6 @@
+ }
+ 
+ .tg-banner {
+-	margin-bottom: 12px;
+ 	padding: 10px 12px;
+ 	border: 1px solid var(--tg-border);
+ 	border-radius: var(--tg-radius-sm);
+@@ -134,7 +150,6 @@
+ 
+ .tg-summary {
+ 	position: relative;
+-	margin-bottom: 12px;
+ 	overflow: hidden;
+ }
+ 
+@@ -246,10 +261,6 @@
+ 	margin-bottom: 0;
+ }
+ 
+-.tg-page > .tg-card {
+-	margin-bottom: var(--tg-gap);
+-}
+-
+ .tg-neighbour-actions {
+ 	display: flex;
+ 	flex-wrap: wrap;
+@@ -511,8 +522,8 @@
+ }
+ 
+ .tg-filter {
+-	min-height: 36px;
+-	padding: 0 9px;
++	min-height: var(--v-ctl-h, 36px);
++	padding: 0 12px;
+ 	border: 1px solid var(--tg-border);
+ 	border-radius: 999px;
+ 	background: var(--tg-bg-soft);
+@@ -531,7 +542,7 @@
+ .tg-search {
+ 	width: 100%;
+ 	min-width: 0;
+-	min-height: 36px;
++	min-height: var(--v-ctl-h, 36px);
+ 	font-size: .75rem;
+ }
+ 
+@@ -797,7 +808,7 @@
+ @media (max-width: 380px) {
+ 	.tg-card,
+ 	.tg-summary {
+-		padding: 12px;
++		padding: var(--v-card-py, 12px) var(--v-card-px, 12px);
+ 	}
+ 
+ 	.tg-page-title {

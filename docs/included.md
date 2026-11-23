@@ -23,7 +23,7 @@ switch.
 | SIP service for the phone port | no page of its own — the switch is on AWvoice → SIP | Off until the AWvoice SIP switch turns it on | a soft phone on your own network rings and dials through the SIM's line; off means no port is open ([AWvoice](awvoice.md)) |
 | Nikki | Services → Nikki | Off (add a Clash profile) | mihomo transparent proxy with the Zashboard dashboard ([VPN and proxies](features/vpn-proxy.md#nikki)) |
 | WireGuard | Network → Interfaces | needs a tunnel from you | VPN protocol support |
-| OpenVPN | VPN → OpenVPN | Off (needs your .ovpn file) | VPN client and server |
+| Tailscale | Services → Tailscale | Off (enable it under System → Startup, then log in) | mesh VPN: reach the router and the LAN from anywhere ([remote access](features/remote-access.md#tailscale)) |
 | Watchcat | Tools → Watchcat | **no rule at all**, deliberately | reboot or restart an interface when the connection is lost. The package default would reboot a router on its own; this image ships it empty |
 | Disk Manager | Services → Disk Manager | On | partition and format USB drives |
 | HDD Idle | Tools → HDD Idle | Off | spin down a USB hard disk |
@@ -47,7 +47,6 @@ arrives switched off.
 
 | App | Install | What it does |
 |---|---|---|
-| Tailscale | `apk add tailscale luci-app-tailscale-community` | mesh VPN ([remote access](features/remote-access.md)) |
 | Cloudflare Zero Trust Tunnel | `apk add cloudflared luci-app-cloudflared` | publish a service without a public IP ([remote access](features/remote-access.md)) |
 | Syncthing | `apk add syncthing luci-app-syncthing` | folder sync with your phone and PC ([web apps](features/web-apps.md)) |
 | qBittorrent | `apk add qbittorrent luci-app-qbittorrent` | download client with its own web interface ([web apps](features/web-apps.md)) |

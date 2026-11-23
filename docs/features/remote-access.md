@@ -1,7 +1,7 @@
 ---
 title: "Remote access to a 5G CGNAT router"
-description: "Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to install and set up each one."
-updated: 2026-11-06
+description: "Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to set up each one."
+updated: 2026-11-23
 ---
 
 # Remote access
@@ -12,18 +12,30 @@ LAN from outside, pick **one** of these. All of them ship **disabled**; enable o
 !!! warning "Set a root password first"
     See [Security](security.md). A tunnel to a router with no password is an open door.
 
-## Tailscale
+## Tailscale { #tailscale }
 
-A mesh VPN, and the easiest option. It is not in the image (it is a large program); install it
-from the official OpenWrt repositories first ([step by step](../install-apps.md#tailscale)):
+A mesh VPN, and the easiest option: reach the router, and the devices behind it, from your phone
+or laptop anywhere. It is in the image and ships **off**, so nothing runs until you start it.
+
+1. **Start it:** *System → Startup*, find `tailscale`, click **Enable** and then **Start**.
+2. **Log in:** *Services → Tailscale → Account Settings* → **Login**. A new tab opens Tailscale's sign-in
+   page; sign in, and the router appears in your Tailscale admin console.
+3. **Optional, reach the whole LAN**, not only the router: on *General Settings*, pick
+   `192.168.1.0/24` under **Advertise Routes**, **Save & Apply**, then approve the route in the
+   Tailscale admin console (*Machines → the router → Edit route settings*).
+
+From the command line instead:
 
 ```sh
-apk update && apk add tailscale luci-app-tailscale-community
 /etc/init.d/tailscale enable && /etc/init.d/tailscale start
 tailscale up        # prints a login URL; open it to authenticate
 ```
 
-The LuCI page is *Services → Tailscale*.
+**Turn it off again:** *System → Startup* → `tailscale`: **Stop** and **Disable**. Logging out
+first (`tailscale logout`) also removes the router from your Tailscale account.
+
+A router upgraded with *Keep settings* keeps its Tailscale login, and stays connected after the
+upgrade.
 
 ## Cloudflare Tunnel
 
@@ -53,7 +65,7 @@ You can also run your own WireGuard server on the router. See [VPN and proxies](
 ## Common questions
 
 ??? question "How can I reach my router behind 5G CGNAT?"
-    5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard is in the image; Tailscale and Cloudflare Tunnel are one `apk add` away.
+    5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard and Tailscale are in the image; Cloudflare Tunnel is one `apk add` away.
 
 ??? question "Should I use Tailscale or Cloudflare Tunnel on the AW1000?"
     Tailscale is the easiest way to reach the whole LAN from your own devices. A Cloudflare Tunnel is better for publishing one web service under your own domain.
@@ -65,10 +77,10 @@ You can also run your own WireGuard server on the router. See [VPN and proxies](
 
 | | state | what it needs |
 |---|---|---|
-| Tailscale | **not in the image**: `apk add tailscale luci-app-tailscale-community` | your login |
+| Tailscale | installed, **off** (System → Startup) | your login |
 | Cloudflare Tunnel | **not in the image**: `apk add cloudflared luci-app-cloudflared` | your tunnel token |
 | WireGuard | kernel module and tools, no tunnel | a peer config from wherever you keep one |
-| OpenVPN | installed, **off** | your `.ovpn` file |
+| OpenVPN | **not in the image**: `apk add openvpn-openssl luci-app-openvpn` | your `.ovpn` file |
 | SSH (`dropbear`) | on, with password authentication and root password authentication enabled, and **no root password set** | set a password before you use it from anywhere |
 | LuCI | HTTPS on the LAN, HTTP redirected to it | see [security](security.md) |
 

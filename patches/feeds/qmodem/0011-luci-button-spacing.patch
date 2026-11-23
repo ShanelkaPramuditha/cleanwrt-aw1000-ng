@@ -1,0 +1,55 @@
+QModem pages: space between buttons, and between a log and its buttons
+
+The Dial Overview and modem debug pages build their buttons in script and append them one
+after another, with no whitespace between them, and put some of them straight under a
+textarea. Nothing in the markup separates them, so under any theme the buttons touched each
+other and the log box above them: the Modem Log's Download and Clear, the AT console's
+Clear, the debug page's paired Submit buttons.
+
+Each page's own stylesheet now gives a button that follows another button 8px, and a button
+row under a textarea 12px. Rows the theme already lays out with a gap (.right) are left
+alone, so they do not get the space twice.
+
+Applies to: https://github.com/FUjr/QModem.git @ 0988085b, after 0010.
+Upstream status: local to CleanWRT.
+
+--- a/luci/luci-app-qmodem/luasrc/view/qmodem/dial_overview.htm
++++ b/luci/luci-app-qmodem/luasrc/view/qmodem/dial_overview.htm
+@@ -353,4 +353,16 @@
+ 		position: unset !important;
+ 		transform: none !important;
+ 	}
++
++	/* CleanWRT: these pages build their buttons side by side, and under a
++	   textarea, with no space in between - nothing in the markup separates
++	   them, so under any theme they touched each other and the box above. */
++	:not(.right) > .cbi-button + .cbi-button {
++		margin-left: 8px;
++	}
++
++	textarea + div,
++	textarea + .cbi-button {
++		margin-top: 12px;
++	}
+ </style>
+--- a/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
++++ b/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
+@@ -1386,6 +1386,18 @@
+ 		flex-wrap: wrap;
+ 		justify-content: space-around;
+ 	}
++
++	/* CleanWRT: these pages build their buttons side by side, and under a
++	   textarea, with no space in between - nothing in the markup separates
++	   them, so under any theme they touched each other and the box above. */
++	:not(.right) > .cbi-button + .cbi-button {
++		margin-left: 8px;
++	}
++
++	textarea + div,
++	textarea + .cbi-button {
++		margin-top: 12px;
++	}
+ </style>
+ <div class="cbi-map">
+ 	<fieldset class="cbi-section">

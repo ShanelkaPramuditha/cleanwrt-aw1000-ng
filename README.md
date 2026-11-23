@@ -47,7 +47,7 @@ checksums and a provenance bundle.
 | **5G that just works** | QModem, auto-dial and auto-recovery, dual-stack IPv4/IPv6, SMS, TTL control, per-interface data usage, and a registration fix for data-only SIMs. |
 | **A modern interface** | Vantage: a console-style theme with an icon rail, breadcrumbs, page tabs, a Ctrl+K command palette, light and dark modes, and a live Dashboard as the first page. Footstrap stays one click away. |
 | **LEDs that mean something** | The 5G LED shows 4G, 4G+, NSA or SA in colours you choose, the signal LED shows quality, the internet LED runs a real connectivity check, and night mode switches them off at bedtime. |
-| **Tools, but off by default** | Nikki (mihomo with your Clash profiles and a dashboard), WireGuard, OpenVPN, DLNA and file sharing in the image; Tailscale, Cloudflare Tunnel, Syncthing and qBittorrent one `apk add` away. Nothing listens until you tick **Enable**. |
+| **Tools, but off by default** | Nikki (mihomo with your Clash profiles and a dashboard), WireGuard, Tailscale, DLNA and file sharing in the image; Cloudflare Tunnel, Syncthing and qBittorrent one `apk add` away. Nothing listens until you tick **Enable**. |
 | **Careful defaults** | HTTPS for the admin UI, no hidden remote access, BBR congestion control, pinned LuCI so an `apk upgrade` cannot undo the build. |
 | **Verifiable builds** | Built on GitHub Actions in a pinned Docker environment from commits you can read, with checksums and a provenance bundle for each release. |
 
@@ -194,6 +194,9 @@ package feed.
 | Vantage is the default theme, with its Dashboard; Footstrap stays selectable, and a router upgraded with its settings kept stays on the theme it had | `configs/local-packages.pin`, `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/29-cw-keep-chosen-theme`, `files/etc/uci-defaults/96-cw-default-theme`, `tools/tests/`, `docs/` |
 | Pages written for the stock themes follow Vantage's dark mode (3gInfo-lite, QModem, AWvoice), and the LED page's lamps follow the theme's switch | `patches/packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages.patch`, `patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch` |
 | The 5G LED shows 4G (red) and 4G+ (yellow) as well as 5G NSA and SA, with the colours chosen on the LED page | `patches/packages/luci-app-cw-led/0003-fiveg-lamp-colours-for-4g-and-4g-plus.patch`, `docs/leds.md` |
+| The 3gInfo-lite radio page takes its spacing from the theme, and QModem's buttons no longer touch | `patches/feeds/3ginfo/0006-radio-spacing-follows-the-theme.patch`, `patches/feeds/qmodem/0011-luci-button-spacing.patch` |
+| OpenVPN removed, and with it the VPN menu (one `apk add` away) | `configs/arcadyan_aw1000.seed`, `docs/` |
+| Tailscale in the image, shipped off; a router logged in already stays connected across an upgrade | `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/54-cw-tailscale-off`, `tools/tests/cw-tailscale-off-test.sh`, `docs/` |
 | The login card is centred on the screen | `patches/packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport.patch` |
 | OpenClash no longer built for the optional feed (Nikki runs the same Clash profiles) | `feeds.conf.default`, `tools/`, `files/etc/`, `.devcontainer/cw-dev.sh`, `docs/` |
 | A missing or partly deleted OpenWrt tree stops the build in seconds instead of failing hours later | `tools/cw-release-build.sh` |

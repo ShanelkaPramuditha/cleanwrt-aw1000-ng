@@ -1,0 +1,28 @@
+#!/bin/sh
+# Tailscale is in the image but ships off, like the image's other VPN and proxy tools.
+#
+# Its init script arrives enabled for boot, so tailscaled would start on every router,
+# logged out, holding memory and UDP port 41641 for an account nobody has connected. This
+# takes it off the boot path. Turning it on is System -> Startup -> tailscale: Enable,
+# Start; Services -> Tailscale then logs it in (docs/features/remote-access.md).
+#
+# A router already logged in to Tailscale is left alone: tailscaled.state is the login it
+# keeps across a keep-settings upgrade, and an upgrade must not cut the tunnel someone uses
+# to reach the router. A fresh flash has no state file, so it is switched off.
+#
+# CW_ROOT points it at another root (tools/tests/cw-tailscale-off-test.sh uses that).
+R=${CW_ROOT:-}
+UNIT="$R/etc/init.d/tailscale"
+[ -x "$UNIT" ] || exit 0
+
+state=$(uci -q get tailscale.settings.state_file)
+[ -n "$state" ] || state=/etc/tailscale/tailscaled.state
+if [ -s "$R$state" ]; then
+	logger -t cw-firstboot "tailscale: logged in already ($state), left as it is"
+	exit 0
+fi
+
+"$UNIT" stop >/dev/null 2>&1
+"$UNIT" disable >/dev/null 2>&1
+logger -t cw-firstboot "tailscale: off until it is enabled under System -> Startup"
+exit 0

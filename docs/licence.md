@@ -27,6 +27,7 @@ licence and copyright; nothing here relicenses them.
 | 3ginfo-lite | GPL-3.0 |
 | Nikki, luci-app-nikki, mihomo | GPL-3.0 |
 | Zashboard (the Nikki dashboard) | MIT |
+| Tailscale | BSD-3-Clause (its LuCI page, luci-app-tailscale-community, is part of LuCI: Apache-2.0) |
 | QModem | MPL-2.0 **plus an added non-commercial clause** |
 | Vendor QMI kernel modules (from QModem) | GPL |
 | ath11k firmware | Qualcomm Atheros firmware licence |

@@ -17,6 +17,20 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 - **Dark mode on more pages.** *Modem → 3gInfo-lite*, QModem's signal bars, the AWvoice phone page
   and the LED page's lamps now follow the theme's dark mode instead of showing white tiles and
   dark text on dark cards.
+- **Even spacing on *Modem → 3gInfo-lite*.** The Neighbour cells card no longer touches the card
+  above it, "Auto refresh" and "Auto scan" stay on one line, and the page's buttons, cards and
+  gaps match the rest of the theme.
+- **Buttons no longer touch on QModem's pages.** The Modem Log's *Download* and *Clear* on
+  *Dial Overview*, and the buttons on the modem debug page, have space between them and below the
+  log boxes.
+- **OpenVPN is no longer in the image**, and with it the *VPN* menu, where it was the only page.
+  WireGuard stays under *Network → Interfaces*. OpenVPN is one install away:
+  `apk add openvpn-openssl luci-app-openvpn`, and a router upgraded with its settings kept gets its
+  OpenVPN settings back when it is installed again. See [VPN and proxies](features/vpn-proxy.md#openvpn).
+- **Tailscale is in the image** (about 10 MiB), with its page under *Services → Tailscale*. It
+  ships off: enable it under *System → Startup*, then log in from its page. A router that was
+  logged in to Tailscale before the upgrade stays connected. See
+  [Remote access](features/remote-access.md#tailscale).
 
 ## 25.12.5-R2.2-SP1
 

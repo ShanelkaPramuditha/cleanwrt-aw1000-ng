@@ -1,7 +1,7 @@
 ---
-title: "WireGuard, OpenVPN and Nikki on OpenWrt"
+title: "WireGuard and Nikki on OpenWrt"
 description: "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles)."
-updated: 2026-11-14
+updated: 2026-11-23
 ---
 
 # VPN and proxies
@@ -25,10 +25,17 @@ wg genkey | tee privatekey | wg pubkey > publickey
 
 then configure with `wg set`.
 
-## OpenVPN
+## OpenVPN { #openvpn }
 
-*VPN → OpenVPN*. The service needs your `.ovpn` configuration, so it ships disabled. Enable it
-per configuration.
+OpenVPN is not in the image; WireGuard is the VPN it ships. If a provider or office gives you only
+an `.ovpn` file, install it:
+
+```sh
+apk update && apk add openvpn-openssl luci-app-openvpn
+```
+
+Its page then appears under *VPN → OpenVPN*. A router upgraded from an image that still had
+OpenVPN keeps `/etc/config/openvpn`, so installing it again brings your settings back.
 
 ## Proxies
 
@@ -61,7 +68,7 @@ install brings back the version the image ships.
 ## Common questions
 
 ??? question "Does CleanWRT include WireGuard and OpenVPN?"
-    Yes. WireGuard is fully installed with no interfaces configured, and OpenVPN needs your own `.ovpn` configuration. Both ship disabled.
+    WireGuard, yes: fully installed with no interfaces configured. OpenVPN is one install away: `apk add openvpn-openssl luci-app-openvpn`.
 
 ??? question "Can I use my Clash config?"
     Yes, with Nikki. Upload the YAML file or add its subscription URL on *Services → Nikki → Profile*. mihomo reads Clash and Clash Meta profiles.
@@ -74,10 +81,11 @@ install brings back the version the image ships.
 | | state |
 |---|---|
 | WireGuard | kernel module and `wireguard-tools`, **no tunnel configured** |
-| OpenVPN | installed, off, needs your `.ovpn` |
+| OpenVPN | **not in the image**, one `apk add` away (see [above](#openvpn)) |
 | Nikki | installed, **off**. Its core is `mihomo-meta` (stable); the Zashboard dashboard is preinstalled. First boot moves its HTTP proxy port from 8080 (taken) to **7893** and sets a random dashboard secret and proxy password |
 | HomeProxy, Passwall, Passwall 2, OpenClash | **not in the image**. OpenClash is no longer built either: Nikki runs the same Clash profiles |
-| Tailscale, Cloudflare Tunnel | **not in the image**, one `apk add` away. See [remote access](remote-access.md) |
+| Tailscale | installed, **off**: enable it under *System → Startup*, then log in. See [remote access](remote-access.md#tailscale) |
+| Cloudflare Tunnel | **not in the image**, one `apk add` away. See [remote access](remote-access.md) |
 
 ## What is listening
 
@@ -98,9 +106,9 @@ the router and the LAN, and none of them is forwarded from the cellular side by 
 
 ## Questions people ask
 
-??? question "Does CleanWRT include WireGuard and OpenVPN?"
-    Yes. WireGuard is a kernel module plus tools and a LuCI page; OpenVPN is installed with its own
-    page and needs your configuration file. Neither is configured out of the box.
+??? question "Why is there no VPN menu?"
+    OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. WireGuard lives
+    under *Network → Interfaces*. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back.
 
 ??? question "Can I install Passwall myself?"
     It is not built for this image, and its cores (xray-core and others) are not in the image either.

@@ -1,6 +1,6 @@
 ---
 title: "Install optional apps"
-description: "Step by step: install and set up Tailscale, Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line."
+description: "Step by step: install and set up Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line."
 updated: 2026-11-15
 ---
 
@@ -12,7 +12,6 @@ nothing listens on your network until you enable it.
 
 | App | What it does | Install |
 |---|---|---|
-| [Tailscale](#tailscale) | reach your router and LAN from anywhere (mesh VPN) | `apk add tailscale luci-app-tailscale-community` |
 | [Cloudflare Tunnel](#cloudflare-tunnel) | publish a web service under your own domain, no public IP needed | `apk add cloudflared luci-app-cloudflared` |
 | [Syncthing](#syncthing) | keep folders in step between your phone, your PC and a USB drive | `apk add syncthing luci-app-syncthing` |
 | [qBittorrent](#qbittorrent) | download client that saves to a USB drive | `apk add qbittorrent luci-app-qbittorrent` |
@@ -54,7 +53,7 @@ The examples assume the router is at `192.168.1.1`.
     Use the install line from the table above for the app you want. Reload LuCI in your browser
     afterwards so its menu shows the new page.
 
-Where the packages come from: Tailscale, Cloudflare Tunnel, `syncthing`, AdGuard Home, the printer
+Where the packages come from: Cloudflare Tunnel, `syncthing`, AdGuard Home, the printer
 server and its driver come from the **official OpenWrt repositories**. qBittorrent and the Syncthing switch
 (`luci-app-syncthing`) come from this project's own signed feed, **`cw-opt`**. Every router already
 lists both, and `apk` checks each package's signature before it installs anything. See
@@ -65,37 +64,10 @@ lists both, and `apk` checks each package's signature before it installs anythin
     yourself are gone afterwards. **Their settings are kept** (with *Keep settings* ticked, as
     usual), so run the same install line again and the app comes back exactly as you left it.
 
-## Tailscale
+## Tailscale { #tailscale }
 
-A private network between your devices: reach the router, and the devices behind it, from your
-phone or laptop anywhere, even behind the carrier's NAT.
-
-1. Install:
-
-    ```sh
-    apk update && apk add tailscale luci-app-tailscale-community
-    ```
-
-2. Start it and log in:
-
-    ```sh
-    /etc/init.d/tailscale enable
-    /etc/init.d/tailscale start
-    tailscale up
-    ```
-
-    `tailscale up` prints a login link. Open it in a browser and sign in to your Tailscale
-    account; the router then appears in your Tailscale admin console.
-
-3. The LuCI page is **Services → Tailscale**: status, and the settings of the running service.
-
-4. **Optional — reach the whole LAN**, not only the router: run
-   `tailscale up --advertise-routes=192.168.1.0/24`, then approve the route for this router in the
-   Tailscale admin console (*Machines → the router → Edit route settings*).
-
-More, and how it compares with the other options: [Remote access](features/remote-access.md).
-
-**Remove it:** `apk del luci-app-tailscale-community tailscale`
+Tailscale is in the image now: see [Remote access](features/remote-access.md#tailscale) to switch
+it on and log in.
 
 ## Cloudflare Tunnel
 
@@ -289,7 +261,7 @@ Shares a USB printer so the computers on your network can print to it.
 ## Questions people ask
 
 ??? question "Why are these apps not in the image?"
-    They are large: Tailscale and Cloudflare Tunnel are about 10 MB each, qBittorrent with the
+    They are large: Cloudflare Tunnel is about 10 MB, qBittorrent with the
     libraries it needs and AdGuard Home about 25–30 MB each. Leaving them out keeps the image small, and anyone who wants
     one installs it in a minute.
 

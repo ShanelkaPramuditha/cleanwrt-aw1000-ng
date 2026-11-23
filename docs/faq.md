@@ -16,7 +16,7 @@ updated: 2026-11-06
 - **AWvoice is not for emergency calls.** See the safety notes on the [AWvoice](awvoice.md) page.
 - **Release images are signed** with the project's key. The router checks the signature only when
   the `ucert` package is installed, which the image does not do by default.
-- **Some apps are one install away, not in the image:** Tailscale, Cloudflare Tunnel, Syncthing,
+- **Some apps are one install away, not in the image:** Cloudflare Tunnel, Syncthing,
   qBittorrent and AdGuard Home. See [Install optional apps](install-apps.md).
 - The modem's own firmware is separate and is not provided by this project.
 - **The phone line is on as installed**, because a phone that does not ring is the failure people

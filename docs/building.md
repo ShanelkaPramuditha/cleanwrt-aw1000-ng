@@ -169,6 +169,7 @@ than shipping a half-applied change.
 | `0008-sip-default-config-for-the-phone-bridge` | the defaults this router needs: the media socket pointed at the phone daemon, the inbound direction on, the account named `awvoice`, the password shared with the Wi-Fi key, and the vendor engine's own path switched off |
 | `0009-sip-voip-default-migration` | a first-boot script that migrates a configuration that still pointed at the vendor engine — and only when the media socket is the phone daemon's, so a hand-configured router is left alone |
 | `0010-qmi-wwan-nss-path-behind-its-own-guard` | restores the vendor-deleted `CONFIG_RMNET_DATA` guard. Without it `modpost` fails on a symbol this tree does not carry and the driver cannot be packaged at all |
+| `0011-luci-button-spacing` | the Dial Overview and modem debug pages put space between buttons that sit side by side and under the log boxes; the pages built them with nothing in between, so they touched |
 
 ### The LuCI feed
 
@@ -186,6 +187,7 @@ than shipping a half-applied change.
 | `3ginfo/0003-3ginfo-menu-title` | the menu title becomes `3gInfo-lite` |
 | `3ginfo/0004-radio-telemetry-and-redesign` | the radio page and the collector behind it: one locked snapshot per request, serving cells per carrier, a neighbour table that scans itself, and five-second defaults |
 | `3ginfo/0005-radio-telemetry-executable` | `radiodata.sh` gains its executable bit, for the same reason `0002` exists: the page runs it through `fs.exec`, and `patch` alone does not carry the mode |
+| `3ginfo/0006-radio-spacing-follows-the-theme` | the radio page takes its card gaps, radii and control height from the theme (Vantage's `--v-*` tokens), so its cards are evenly spaced and its refresh controls stay on one line |
 | `diskman/0001-disk-manager-menu-rename-services-move` | Disk Manager moves from the System menu to Services, with its title and every internal link |
 | `tree/0001-apk-package-timestamps-zero` | `apk mkpkg` runs with a fixed epoch, so two builds of one commit produce identical images |
 
