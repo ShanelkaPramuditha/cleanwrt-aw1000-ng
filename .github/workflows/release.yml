@@ -143,3 +143,32 @@ jobs:
           set -eu
           gh workflow run docs.yml --ref "$MAIN" -f version="$VERSION"
           echo "site update started (Actions → docs) for $VERSION" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # The default branch moves to the next -SP<n> as soon as this label is public, so the
+      # next draft build can never name a published release ("v... is published already").
+      # tools/cw-bump-version.sh closes the released changelog section, opens an empty one for
+      # the next label (the build's release checks refuse a draft until it has an entry), and
+      # moves CW_VERSION and the seed together. A push made with the workflow token starts no
+      # other workflow. It runs last: the release above stands even if this push is refused.
+      - name: Next version on the default branch
+        env:
+          VERSION: ${{ steps.draft.outputs.version }}
+          MAIN: ${{ github.event.repository.default_branch }}
+        run: |
+          set -eu
+          git fetch -q origin "$MAIN"
+          git checkout -q -B "$MAIN" "origin/$MAIN"
+          sh tools/cw-bump-version.sh --released "$VERSION"
+          if git diff --quiet; then
+            echo "nothing to bump: $MAIN has moved past $VERSION already" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          next=$(sed -n 's/^CW_VERSION="\(.*\)"$/\1/p' tools/cw-release-build.sh)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -am "release: $VERSION published, $MAIN is now $next"
+          git push -q origin "HEAD:$MAIN" || {
+            echo "::error::could not push the bump to $MAIN (branch protection?). Run: tools/cw-bump-version.sh --released $VERSION, then commit and push"
+            exit 1
+          }
+          echo "$MAIN is now $next (changelog section opened)" | tee -a "$GITHUB_STEP_SUMMARY"

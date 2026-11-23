@@ -74,16 +74,24 @@ jobs:
           bad=0
           [ "$HAVE_USIGN" = true ] || { echo "::error::a release needs the USIGN_KEY_BUILD and USIGN_KEY_BUILD_PUB secrets (image signing)"; bad=1; }
           [ "$HAVE_APK" = true ] || { echo "::error::a release needs the APK_PRIVATE_KEY secret (the package key routers trust)"; bad=1; }
-          awk -v v="$VERSION" 'index($0, "## " v) == 1 && (length($0) == length(v) + 3 || substr($0, length(v) + 4, 1) == " ") { f = 1 } END { exit !f }' docs/changelog.md ||
-            { echo "::error::docs/changelog.md has no '## $VERSION' section for the release notes"; bad=1; }
+          # the section must exist and hold at least one entry: the release workflow opens an
+          # empty one for the next label, and the draft's notes are made from it
+          entries=$(awk -v v="$VERSION" '
+            /^## / { if (on) exit; if (index($0, "## " v) == 1 && (length($0) == length(v) + 3 || substr($0, length(v) + 4, 1) == " ")) { on = 1; f = 1; next } }
+            on && /^[-*] / { n++ }
+            END { print (f ? n + 0 : -1) }' docs/changelog.md)
+          case "$entries" in
+            -1) echo "::error::docs/changelog.md has no '## $VERSION' section for the release notes"; bad=1 ;;
+            0)  echo "::error::the '## $VERSION' section of docs/changelog.md is empty - add what changed"; bad=1 ;;
+          esac
           tag="v$VERSION"
           if gh release view "$tag" --json isDraft -q .isDraft 2>/dev/null | grep -qx false; then
-            echo "::error::$tag is published already - bump CW_VERSION in tools/cw-release-build.sh and the seed"; bad=1
+            echo "::error::$tag is published already. The release workflow moves main to the next label by itself; for a release published without it, run tools/cw-bump-version.sh --released $VERSION and push"; bad=1
           fi
           # a tag that exists already decides the commit the release publishes; it must be this one
           at=$(git ls-remote --tags origin "refs/tags/$tag" "refs/tags/$tag^{}" | awk '{c=$1} END{print c}')
           if [ -n "$at" ] && [ "$at" != "$GITHUB_SHA" ]; then
-            echo "::error::tag $tag exists at $at, not at this commit $GITHUB_SHA - bump CW_VERSION or delete the tag"; bad=1
+            echo "::error::tag $tag exists at $at, not at this commit $GITHUB_SHA - run tools/cw-bump-version.sh --released $VERSION and push, or delete the tag"; bad=1
           fi
           list=files/etc/apk/repositories.d/cw-opt.list
           if [ -f "$list" ]; then

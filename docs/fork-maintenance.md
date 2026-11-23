@@ -63,6 +63,22 @@ The label lives in two places that must agree, and the build fails if they do no
 A release tag is `v<label>`, e.g. `v25.12.5-R2.2-SP1`. The router's newer-version notice compares
 every number of the label, so `-SP2` is offered to a router on `-SP1`.
 
+**The `-SP<n>` number moves by itself.** When the release workflow publishes `v<label>`, its last
+step runs `tools/cw-bump-version.sh --released <label>` on the default branch and pushes the result
+as `github-actions[bot]`:
+
+- `CW_VERSION` and the seed move to the next `-SP<n>` together;
+- in `docs/changelog.md`, the released section loses its "(this fork, not yet released)" and an
+  empty section for the next label opens above it;
+- `docs/index.md`, the site's `softwareVersion` and the issue templates name the release as the
+  current version.
+
+So `main` is always one label ahead of the newest tag. Write each change into the open changelog
+section as you make it: the build's release checks refuse a draft whose section is empty, before
+the two-hour build starts. If the push is refused (branch protection) or a release was published
+some other way, run the same command by hand, commit and push. After merging a new upstream release,
+set the label to the upstream one plus `-SP1` by hand, as before.
+
 ## Signing keys
 
 The fork signs with its own keys. The private halves never enter the repository: `keys-release/`

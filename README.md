@@ -185,6 +185,7 @@ package feed.
 | HomeProxy removed (its pin, sing-box and ucode-mod-digest): Nikki is the one proxy app | `configs/arcadyan_aw1000.seed`, `configs/local-packages.pin`, `tools/cw-release-build.sh`, `docs/` |
 | Leftover iptables-era packages removed (`kmod-ipt-tproxy`, `ipset`, `ip6tables-nft`, `kmod-ip6tables`) and the duplicate `wget` line (the build already uses `uclient-fetch`) | `configs/arcadyan_aw1000.seed` |
 | The fork's own links: os-release home and bug URLs, the newer-version notice and its version feed, the docs site, releases, issues, badges and the optional cw-opt feed point at this fork; site commits use the GitHub Actions bot identity | `configs/`, `tools/`, `files/`, `patches/feeds/luci/0007-upgrade-check-cdn-no-asu.patch`, `mkdocs.yml`, `.github/ISSUE_TEMPLATE/`, `docs/`, `feeds*` |
+| The `-SP<n>` label moves to the next number by itself when a release is published, and a draft needs changelog entries | `tools/cw-bump-version.sh`, `tools/tests/cw-bump-version-test.sh`, `.github/workflows/release.yml`, `.github/workflows/build.yml`, `docs/fork-maintenance.md` |
 | Version label `-SP<n>` (first: `25.12.5-R2.2-SP1`), and the upgrade notice compares the whole label | `tools/cw-release-build.sh`, `configs/arcadyan_aw1000.seed`, `patches/feeds/luci/0007-upgrade-check-cdn-no-asu.patch` |
 | The fork's own apk feed signing key (the image trusts it instead of upstream's) | `files/etc/apk/keys/public-key.pem` |
 | Leftover configs of the removed apps cleaned up on a keep-settings upgrade | `files/etc/uci-defaults/95-cw-drop-removed-apps` |

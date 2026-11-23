@@ -37,7 +37,7 @@ CONFIG_VERSION_DIST="CleanWRT"
 # This fork appends -SP<n> to the upstream release it is based on (25.12.5-R2.2-SP1 is
 # the first fork build on upstream R2.2), so a fork image never carries an upstream
 # label. The upgrade notice (patch luci/0007) compares every number, -SP<n> included.
-CONFIG_VERSION_NUMBER="25.12.5-R2.2-SP1"
+CONFIG_VERSION_NUMBER="25.12.5-R2.2-SP2"
 CONFIG_VERSION_CODE=""
 CONFIG_VERSION_PRODUCT="CleanWRT AW1000 5G Router"
 CONFIG_VERSION_HWREV="v1"

@@ -5,7 +5,7 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 
 # Changelog
 
-## 25.12.5-R2.2-SP1 (this fork, not yet released)
+## 25.12.5-R2.2-SP2 (this fork, not yet released)
 
 - **Vantage is the new default theme**, with its Dashboard as the first page after login: an
   icon rail, a Ctrl+K command palette, light and dark modes. Footstrap stays in the image under
@@ -17,6 +17,9 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 - **Dark mode on more pages.** *Modem → 3gInfo-lite*, QModem's signal bars, the AWvoice phone page
   and the LED page's lamps now follow the theme's dark mode instead of showing white tiles and
   dark text on dark cards.
+
+## 25.12.5-R2.2-SP1
+
 - **Upgrading from upstream with keep-settings.** The first boot deletes the leftover
   configuration of Passwall, Passwall 2, HomeProxy, AdGuard Home and Adblock, and Passwall's
   firewall includes, when those apps are not installed.
