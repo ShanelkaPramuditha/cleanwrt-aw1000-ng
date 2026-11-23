@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Step by step: install and set up Tailscale, Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.">
+        <meta name="description" content="Step by step: install and set up Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.">
       
       
       
@@ -56,7 +56,7 @@
   <meta property="og:type" content="article">
 <meta property="og:site_name" content="CleanWRT">
 <meta property="og:title" content="Install optional apps - CleanWRT">
-<meta property="og:description" content="Step by step: install and set up Tailscale, Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.">
+<meta property="og:description" content="Step by step: install and set up Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.">
 <meta property="og:url" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/install-apps/">
 <meta property="og:image" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png">
 <meta property="og:image:width" content="1200">
@@ -64,13 +64,13 @@
 <meta property="og:image:alt" content="CleanWRT, OpenWrt for the Arcadyan AW1000">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Install optional apps - CleanWRT">
-<meta name="twitter:description" content="Step by step: install and set up Tailscale, Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.">
+<meta name="twitter:description" content="Step by step: install and set up Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.">
 <meta name="twitter:image" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Packages"}, {"@type": "ListItem", "position": 3, "name": "Install optional apps", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/install-apps/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Install optional apps", "description": "Step by step: install and set up Tailscale, Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/install-apps/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-15"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why are these apps not in the image?", "acceptedAnswer": {"@type": "Answer", "text": "They are large: Tailscale and Cloudflare Tunnel are about 10 MB each, qBittorrent with the libraries it needs and AdGuard Home about 25–30 MB each. Leaving them out keeps the image small, and anyone who wants one installs it in a minute."}}, {"@type": "Question", "name": "Are the packages safe to install?", "acceptedAnswer": {"@type": "Answer", "text": "apk installs only packages signed by a key the router trusts: the official OpenWrt key for the official repositories, and this project's key for the cw-opt feed. A package with any other signature is refused."}}, {"@type": "Question", "name": "Do I have to reinstall apps after every firmware upgrade?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A firmware upgrade replaces what is not part of the image. With Keep settings ticked, each app's settings survive, so the same install line brings it back as it was."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Install optional apps", "description": "Step by step: install and set up Cloudflare Tunnel, Syncthing, qBittorrent and the USB printer server on CleanWRT for the Arcadyan AW1000, from LuCI or the command line.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/install-apps/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-15"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why are these apps not in the image?", "acceptedAnswer": {"@type": "Answer", "text": "They are large: Cloudflare Tunnel is about 10 MB, qBittorrent with the libraries it needs and AdGuard Home about 25–30 MB each. Leaving them out keeps the image small, and anyone who wants one installs it in a minute."}}, {"@type": "Question", "name": "Are the packages safe to install?", "acceptedAnswer": {"@type": "Answer", "text": "apk installs only packages signed by a key the router trusts: the official OpenWrt key for the official repositories, and this project's key for the cw-opt feed. A package with any other signature is refused."}}, {"@type": "Question", "name": "Do I have to reinstall apps after every firmware upgrade?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A firmware upgrade replaces what is not part of the image. With Keep settings ticked, each app's settings survive, so the same install line brings it back as it was."}}]}</script>
 </head>
   
   
@@ -2493,11 +2493,6 @@ nothing listens on your network until you enable it.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="#tailscale">Tailscale</a></td>
-<td>reach your router and LAN from anywhere (mesh VPN)</td>
-<td><code>apk add tailscale luci-app-tailscale-community</code></td>
-</tr>
-<tr>
 <td><a href="#cloudflare-tunnel">Cloudflare Tunnel</a></td>
 <td>publish a web service under your own domain, no public IP needed</td>
 <td><code>apk add cloudflared luci-app-cloudflared</code></td>
@@ -2558,7 +2553,7 @@ afterwards so its menu shows the new page.</p>
 </div>
 </div>
 </div>
-<p>Where the packages come from: Tailscale, Cloudflare Tunnel, <code>syncthing</code>, AdGuard Home, the printer
+<p>Where the packages come from: Cloudflare Tunnel, <code>syncthing</code>, AdGuard Home, the printer
 server and its driver come from the <strong>official OpenWrt repositories</strong>. qBittorrent and the Syncthing switch
 (<code>luci-app-syncthing</code>) come from this project's own signed feed, <strong><code>cw-opt</code></strong>. Every router already
 lists both, and <code>apk</code> checks each package's signature before it installs anything. See
@@ -2570,34 +2565,8 @@ yourself are gone afterwards. <strong>Their settings are kept</strong> (with <em
 usual), so run the same install line again and the app comes back exactly as you left it.</p>
 </div>
 <h2 id="tailscale">Tailscale<a class="headerlink" href="#tailscale" title="Permanent link">&para;</a></h2>
-<p>A private network between your devices: reach the router, and the devices behind it, from your
-phone or laptop anywhere, even behind the carrier's NAT.</p>
-<ol>
-<li>
-<p>Install:</p>
-<div class="highlight"><pre><span></span><code>apk<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>tailscale<span class="w"> </span>luci-app-tailscale-community
-</code></pre></div>
-</li>
-<li>
-<p>Start it and log in:</p>
-<div class="highlight"><pre><span></span><code>/etc/init.d/tailscale<span class="w"> </span><span class="nb">enable</span>
-/etc/init.d/tailscale<span class="w"> </span>start
-tailscale<span class="w"> </span>up
-</code></pre></div>
-<p><code>tailscale up</code> prints a login link. Open it in a browser and sign in to your Tailscale
-account; the router then appears in your Tailscale admin console.</p>
-</li>
-<li>
-<p>The LuCI page is <strong>Services → Tailscale</strong>: status, and the settings of the running service.</p>
-</li>
-<li>
-<p><strong>Optional — reach the whole LAN</strong>, not only the router: run
-   <code>tailscale up --advertise-routes=192.168.1.0/24</code>, then approve the route for this router in the
-   Tailscale admin console (<em>Machines → the router → Edit route settings</em>).</p>
-</li>
-</ol>
-<p>More, and how it compares with the other options: <a href="../features/remote-access/">Remote access</a>.</p>
-<p><strong>Remove it:</strong> <code>apk del luci-app-tailscale-community tailscale</code></p>
+<p>Tailscale is in the image now: see <a href="../features/remote-access/#tailscale">Remote access</a> to switch
+it on and log in.</p>
 <h2 id="cloudflare-tunnel">Cloudflare Tunnel<a class="headerlink" href="#cloudflare-tunnel" title="Permanent link">&para;</a></h2>
 <p>Publishes one service, for example a web page on your LAN, under your own domain through your
 Cloudflare account. It only connects outwards, so no port is opened on the router.</p>
@@ -2829,7 +2798,7 @@ uci<span class="w"> </span>commit<span class="w"> </span>dhcp
 <h2 id="questions-people-ask">Questions people ask<a class="headerlink" href="#questions-people-ask" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>Why are these apps not in the image?</summary>
-<p>They are large: Tailscale and Cloudflare Tunnel are about 10 MB each, qBittorrent with the
+<p>They are large: Cloudflare Tunnel is about 10 MB, qBittorrent with the
 libraries it needs and AdGuard Home about 25–30 MB each. Leaving them out keeps the image small, and anyone who wants
 one installs it in a minute.</p>
 </details>

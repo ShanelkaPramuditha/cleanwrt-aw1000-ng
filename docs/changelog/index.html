@@ -2445,6 +2445,20 @@
 <li><strong>Dark mode on more pages.</strong> <em>Modem → 3gInfo-lite</em>, QModem's signal bars, the AWvoice phone page
   and the LED page's lamps now follow the theme's dark mode instead of showing white tiles and
   dark text on dark cards.</li>
+<li><strong>Even spacing on <em>Modem → 3gInfo-lite</em>.</strong> The Neighbour cells card no longer touches the card
+  above it, "Auto refresh" and "Auto scan" stay on one line, and the page's buttons, cards and
+  gaps match the rest of the theme.</li>
+<li><strong>Buttons no longer touch on QModem's pages.</strong> The Modem Log's <em>Download</em> and <em>Clear</em> on
+  <em>Dial Overview</em>, and the buttons on the modem debug page, have space between them and below the
+  log boxes.</li>
+<li><strong>OpenVPN is no longer in the image</strong>, and with it the <em>VPN</em> menu, where it was the only page.
+  WireGuard stays under <em>Network → Interfaces</em>. OpenVPN is one install away:
+  <code>apk add openvpn-openssl luci-app-openvpn</code>, and a router upgraded with its settings kept gets its
+  OpenVPN settings back when it is installed again. See <a href="../features/vpn-proxy/#openvpn">VPN and proxies</a>.</li>
+<li><strong>Tailscale is in the image</strong> (about 10 MiB), with its page under <em>Services → Tailscale</em>. It
+  ships off: enable it under <em>System → Startup</em>, then log in from its page. A router that was
+  logged in to Tailscale before the upgrade stays connected. See
+  <a href="../features/remote-access/#tailscale">Remote access</a>.</li>
 </ul>
 <h2 id="25125-r22-sp1">25.12.5-R2.2-SP1<a class="headerlink" href="#25125-r22-sp1" title="Permanent link">&para;</a></h2>
 <ul>

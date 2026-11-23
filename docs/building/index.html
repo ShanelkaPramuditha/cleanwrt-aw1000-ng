@@ -2873,6 +2873,10 @@ than shipping a half-applied change.</p>
 <td><code>0010-qmi-wwan-nss-path-behind-its-own-guard</code></td>
 <td>restores the vendor-deleted <code>CONFIG_RMNET_DATA</code> guard. Without it <code>modpost</code> fails on a symbol this tree does not carry and the driver cannot be packaged at all</td>
 </tr>
+<tr>
+<td><code>0011-luci-button-spacing</code></td>
+<td>the Dial Overview and modem debug pages put space between buttons that sit side by side and under the log boxes; the pages built them with nothing in between, so they touched</td>
+</tr>
 </tbody>
 </table>
 <h3 id="the-luci-feed">The LuCI feed<a class="headerlink" href="#the-luci-feed" title="Permanent link">&para;</a></h3>
@@ -2922,6 +2926,10 @@ than shipping a half-applied change.</p>
 <tr>
 <td><code>3ginfo/0005-radio-telemetry-executable</code></td>
 <td><code>radiodata.sh</code> gains its executable bit, for the same reason <code>0002</code> exists: the page runs it through <code>fs.exec</code>, and <code>patch</code> alone does not carry the mode</td>
+</tr>
+<tr>
+<td><code>3ginfo/0006-radio-spacing-follows-the-theme</code></td>
+<td>the radio page takes its card gaps, radii and control height from the theme (Vantage's <code>--v-*</code> tokens), so its cards are evenly spaced and its refresh controls stay on one line</td>
 </tr>
 <tr>
 <td><code>diskman/0001-disk-manager-menu-rename-services-move</code></td>

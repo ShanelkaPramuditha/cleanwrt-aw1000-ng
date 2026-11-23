@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to install and set up each one.">
+        <meta name="description" content="Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to set up each one.">
       
       
       
@@ -56,7 +56,7 @@
   <meta property="og:type" content="article">
 <meta property="og:site_name" content="CleanWRT">
 <meta property="og:title" content="Remote access - CleanWRT">
-<meta property="og:description" content="Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to install and set up each one.">
+<meta property="og:description" content="Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to set up each one.">
 <meta property="og:url" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/remote-access/">
 <meta property="og:image" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png">
 <meta property="og:image:width" content="1200">
@@ -64,13 +64,13 @@
 <meta property="og:image:alt" content="CleanWRT, OpenWrt for the Arcadyan AW1000">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Remote access - CleanWRT">
-<meta name="twitter:description" content="Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to install and set up each one.">
+<meta name="twitter:description" content="Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to set up each one.">
 <meta name="twitter:image" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Using CleanWRT"}, {"@type": "ListItem", "position": 3, "name": "Remote access", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/remote-access/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Remote access", "description": "Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to install and set up each one.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/remote-access/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-06"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How can I reach my router behind 5G CGNAT?", "acceptedAnswer": {"@type": "Answer", "text": "5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard is in the image; Tailscale and Cloudflare Tunnel are one apk add away."}}, {"@type": "Question", "name": "Should I use Tailscale or Cloudflare Tunnel on the AW1000?", "acceptedAnswer": {"@type": "Answer", "text": "Tailscale is the easiest way to reach the whole LAN from your own devices. A Cloudflare Tunnel is better for publishing one web service under your own domain."}}, {"@type": "Question", "name": "Why does cloudflared show a red error?", "acceptedAnswer": {"@type": "Answer", "text": "That is expected until you configure the tunnel token on the Configuration tab. It is not a fault."}}, {"@type": "Question", "name": "How can I reach my router behind 5G CGNAT?", "acceptedAnswer": {"@type": "Answer", "text": "Outbound-first: Tailscale or a Cloudflare Tunnel. Both connect out, neither needs a public address or a forwarded port. WireGuard is the third option when you already have a server somewhere with an address."}}, {"@type": "Question", "name": "Should I use Tailscale or Cloudflare Tunnel on the AW1000?", "acceptedAnswer": {"@type": "Answer", "text": "Tailscale for reaching the router and the network behind it as yourself; Cloudflare Tunnel for publishing one service to other people. They solve different problems and both are installed."}}, {"@type": "Question", "name": "Is it safe to enable SSH on this router?", "acceptedAnswer": {"@type": "Answer", "text": "Only after you set a root password. The image ships password authentication on and no password set, which is OpenWrt's first-login model and is meant for the LAN with a cable in."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Remote access", "description": "Reach your AW1000 and your LAN behind 5G CGNAT with Tailscale, Cloudflare Tunnel or WireGuard: how to set up each one.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/remote-access/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-23"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How can I reach my router behind 5G CGNAT?", "acceptedAnswer": {"@type": "Answer", "text": "5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard and Tailscale are in the image; Cloudflare Tunnel is one apk add away."}}, {"@type": "Question", "name": "Should I use Tailscale or Cloudflare Tunnel on the AW1000?", "acceptedAnswer": {"@type": "Answer", "text": "Tailscale is the easiest way to reach the whole LAN from your own devices. A Cloudflare Tunnel is better for publishing one web service under your own domain."}}, {"@type": "Question", "name": "Why does cloudflared show a red error?", "acceptedAnswer": {"@type": "Answer", "text": "That is expected until you configure the tunnel token on the Configuration tab. It is not a fault."}}, {"@type": "Question", "name": "How can I reach my router behind 5G CGNAT?", "acceptedAnswer": {"@type": "Answer", "text": "Outbound-first: Tailscale or a Cloudflare Tunnel. Both connect out, neither needs a public address or a forwarded port. WireGuard is the third option when you already have a server somewhere with an address."}}, {"@type": "Question", "name": "Should I use Tailscale or Cloudflare Tunnel on the AW1000?", "acceptedAnswer": {"@type": "Answer", "text": "Tailscale for reaching the router and the network behind it as yourself; Cloudflare Tunnel for publishing one service to other people. They solve different problems and both are installed."}}, {"@type": "Question", "name": "Is it safe to enable SSH on this router?", "acceptedAnswer": {"@type": "Answer", "text": "Only after you set a root password. The image ships password authentication on and no password set, which is OpenWrt's first-login model and is meant for the LAN with a cable in."}}]}</script>
 </head>
   
   
@@ -2465,13 +2465,24 @@ LAN from outside, pick <strong>one</strong> of these. All of them ship <strong>d
 <p>See <a href="../security/">Security</a>. A tunnel to a router with no password is an open door.</p>
 </div>
 <h2 id="tailscale">Tailscale<a class="headerlink" href="#tailscale" title="Permanent link">&para;</a></h2>
-<p>A mesh VPN, and the easiest option. It is not in the image (it is a large program); install it
-from the official OpenWrt repositories first (<a href="../../install-apps/#tailscale">step by step</a>):</p>
-<div class="highlight"><pre><span></span><code>apk<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>tailscale<span class="w"> </span>luci-app-tailscale-community
-/etc/init.d/tailscale<span class="w"> </span><span class="nb">enable</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>/etc/init.d/tailscale<span class="w"> </span>start
+<p>A mesh VPN, and the easiest option: reach the router, and the devices behind it, from your phone
+or laptop anywhere. It is in the image and ships <strong>off</strong>, so nothing runs until you start it.</p>
+<ol>
+<li><strong>Start it:</strong> <em>System → Startup</em>, find <code>tailscale</code>, click <strong>Enable</strong> and then <strong>Start</strong>.</li>
+<li><strong>Log in:</strong> <em>Services → Tailscale → Account Settings</em> → <strong>Login</strong>. A new tab opens Tailscale's sign-in
+   page; sign in, and the router appears in your Tailscale admin console.</li>
+<li><strong>Optional, reach the whole LAN</strong>, not only the router: on <em>General Settings</em>, pick
+   <code>192.168.1.0/24</code> under <strong>Advertise Routes</strong>, <strong>Save &amp; Apply</strong>, then approve the route in the
+   Tailscale admin console (<em>Machines → the router → Edit route settings</em>).</li>
+</ol>
+<p>From the command line instead:</p>
+<div class="highlight"><pre><span></span><code>/etc/init.d/tailscale<span class="w"> </span><span class="nb">enable</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>/etc/init.d/tailscale<span class="w"> </span>start
 tailscale<span class="w"> </span>up<span class="w">        </span><span class="c1"># prints a login URL; open it to authenticate</span>
 </code></pre></div>
-<p>The LuCI page is <em>Services → Tailscale</em>.</p>
+<p><strong>Turn it off again:</strong> <em>System → Startup</em> → <code>tailscale</code>: <strong>Stop</strong> and <strong>Disable</strong>. Logging out
+first (<code>tailscale logout</code>) also removes the router from your Tailscale account.</p>
+<p>A router upgraded with <em>Keep settings</em> keeps its Tailscale login, and stays connected after the
+upgrade.</p>
 <h2 id="cloudflare-tunnel">Cloudflare Tunnel<a class="headerlink" href="#cloudflare-tunnel" title="Permanent link">&para;</a></h2>
 <p>Exposes a service through your Cloudflare account, with no public IP needed. Install it first,
 from the official OpenWrt repositories: <code>apk update &amp;&amp; apk add cloudflared luci-app-cloudflared</code>
@@ -2511,7 +2522,7 @@ an unconfigured tunnel, not a fault. Configure the token first.</p>
 <h2 id="common-questions">Common questions<a class="headerlink" href="#common-questions" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>How can I reach my router behind 5G CGNAT?</summary>
-<p>5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard is in the image; Tailscale and Cloudflare Tunnel are one <code>apk add</code> away.</p>
+<p>5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard and Tailscale are in the image; Cloudflare Tunnel is one <code>apk add</code> away.</p>
 </details>
 <details class="question">
 <summary>Should I use Tailscale or Cloudflare Tunnel on the AW1000?</summary>
@@ -2533,7 +2544,7 @@ an unconfigured tunnel, not a fault. Configure the token first.</p>
 <tbody>
 <tr>
 <td>Tailscale</td>
-<td><strong>not in the image</strong>: <code>apk add tailscale luci-app-tailscale-community</code></td>
+<td>installed, <strong>off</strong> (System → Startup)</td>
 <td>your login</td>
 </tr>
 <tr>
@@ -2548,7 +2559,7 @@ an unconfigured tunnel, not a fault. Configure the token first.</p>
 </tr>
 <tr>
 <td>OpenVPN</td>
-<td>installed, <strong>off</strong></td>
+<td><strong>not in the image</strong>: <code>apk add openvpn-openssl luci-app-openvpn</code></td>
 <td>your <code>.ovpn</code> file</td>
 </tr>
 <tr>

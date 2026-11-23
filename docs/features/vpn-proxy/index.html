@@ -27,7 +27,7 @@
     
     
       
-        <title>WireGuard, OpenVPN and Nikki on OpenWrt - CleanWRT</title>
+        <title>WireGuard and Nikki on OpenWrt - CleanWRT</title>
       
     
     
@@ -69,8 +69,8 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Using CleanWRT"}, {"@type": "ListItem", "position": 3, "name": "VPN and proxies", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/vpn-proxy/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "VPN and proxies", "description": "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles).", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/vpn-proxy/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-14"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does CleanWRT include WireGuard and OpenVPN?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. WireGuard is fully installed with no interfaces configured, and OpenVPN needs your own .ovpn configuration. Both ship disabled."}}, {"@type": "Question", "name": "Can I use my Clash config?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, with Nikki. Upload the YAML file or add its subscription URL on Services → Nikki → Profile. mihomo reads Clash and Clash Meta profiles."}}, {"@type": "Question", "name": "Where did Passwall go?", "acceptedAnswer": {"@type": "Answer", "text": "Passwall and Passwall 2 are not in this build. Nikki (mihomo) covers the same use, with Clash profiles."}}, {"@type": "Question", "name": "Does CleanWRT include WireGuard and OpenVPN?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. WireGuard is a kernel module plus tools and a LuCI page; OpenVPN is installed with its own page and needs your configuration file. Neither is configured out of the box."}}, {"@type": "Question", "name": "Can I install Passwall myself?", "acceptedAnswer": {"@type": "Answer", "text": "It is not built for this image, and its cores (xray-core and others) are not in the image either. Nikki is the supported proxy app."}}, {"@type": "Question", "name": "Which dashboard is it, and why that one?", "acceptedAnswer": {"@type": "Answer", "text": "Zashboard, the dashboard Nikki itself defaults to. The image carries its build without bundled fonts (it uses the system's), about 1.5 MiB on flash, so it opens without downloading anything."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "VPN and proxies", "description": "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles).", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/vpn-proxy/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-23"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does CleanWRT include WireGuard and OpenVPN?", "acceptedAnswer": {"@type": "Answer", "text": "WireGuard, yes: fully installed with no interfaces configured. OpenVPN is one install away: apk add openvpn-openssl luci-app-openvpn."}}, {"@type": "Question", "name": "Can I use my Clash config?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, with Nikki. Upload the YAML file or add its subscription URL on Services → Nikki → Profile. mihomo reads Clash and Clash Meta profiles."}}, {"@type": "Question", "name": "Where did Passwall go?", "acceptedAnswer": {"@type": "Answer", "text": "Passwall and Passwall 2 are not in this build. Nikki (mihomo) covers the same use, with Clash profiles."}}, {"@type": "Question", "name": "Why is there no VPN menu?", "acceptedAnswer": {"@type": "Answer", "text": "OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. WireGuard lives under Network → Interfaces. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back."}}, {"@type": "Question", "name": "Can I install Passwall myself?", "acceptedAnswer": {"@type": "Answer", "text": "It is not built for this image, and its cores (xray-core and others) are not in the image either. Nikki is the supported proxy app."}}, {"@type": "Question", "name": "Which dashboard is it, and why that one?", "acceptedAnswer": {"@type": "Answer", "text": "Zashboard, the dashboard Nikki itself defaults to. The image carries its build without bundled fonts (it uses the system's), about 1.5 MiB on flash, so it opens without downloading anything."}}]}</script>
 </head>
   
   
@@ -125,7 +125,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              WireGuard, OpenVPN and Nikki on OpenWrt
+              WireGuard and Nikki on OpenWrt
             
           </span>
         </div>
@@ -2470,8 +2470,12 @@ private key and the peers (a peer is an endpoint plus allowed IPs).</p>
 </code></pre></div>
 <p>then configure with <code>wg set</code>.</p>
 <h2 id="openvpn">OpenVPN<a class="headerlink" href="#openvpn" title="Permanent link">&para;</a></h2>
-<p><em>VPN → OpenVPN</em>. The service needs your <code>.ovpn</code> configuration, so it ships disabled. Enable it
-per configuration.</p>
+<p>OpenVPN is not in the image; WireGuard is the VPN it ships. If a provider or office gives you only
+an <code>.ovpn</code> file, install it:</p>
+<div class="highlight"><pre><span></span><code>apk<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>openvpn-openssl<span class="w"> </span>luci-app-openvpn
+</code></pre></div>
+<p>Its page then appears under <em>VPN → OpenVPN</em>. A router upgraded from an image that still had
+OpenVPN keeps <code>/etc/config/openvpn</code>, so installing it again brings your settings back.</p>
 <h2 id="proxies">Proxies<a class="headerlink" href="#proxies" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2512,7 +2516,7 @@ install brings back the version the image ships.</p>
 <h2 id="common-questions">Common questions<a class="headerlink" href="#common-questions" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>Does CleanWRT include WireGuard and OpenVPN?</summary>
-<p>Yes. WireGuard is fully installed with no interfaces configured, and OpenVPN needs your own <code>.ovpn</code> configuration. Both ship disabled.</p>
+<p>WireGuard, yes: fully installed with no interfaces configured. OpenVPN is one install away: <code>apk add openvpn-openssl luci-app-openvpn</code>.</p>
 </details>
 <details class="question">
 <summary>Can I use my Clash config?</summary>
@@ -2537,7 +2541,7 @@ install brings back the version the image ships.</p>
 </tr>
 <tr>
 <td>OpenVPN</td>
-<td>installed, off, needs your <code>.ovpn</code></td>
+<td><strong>not in the image</strong>, one <code>apk add</code> away (see <a href="#openvpn">above</a>)</td>
 </tr>
 <tr>
 <td>Nikki</td>
@@ -2548,7 +2552,11 @@ install brings back the version the image ships.</p>
 <td><strong>not in the image</strong>. OpenClash is no longer built either: Nikki runs the same Clash profiles</td>
 </tr>
 <tr>
-<td>Tailscale, Cloudflare Tunnel</td>
+<td>Tailscale</td>
+<td>installed, <strong>off</strong>: enable it under <em>System → Startup</em>, then log in. See <a href="../remote-access/#tailscale">remote access</a></td>
+</tr>
+<tr>
+<td>Cloudflare Tunnel</td>
 <td><strong>not in the image</strong>, one <code>apk add</code> away. See <a href="../remote-access/">remote access</a></td>
 </tr>
 </tbody>
@@ -2591,9 +2599,9 @@ the router and the LAN, and none of them is forwarded from the cellular side by 
 </table>
 <h2 id="questions-people-ask">Questions people ask<a class="headerlink" href="#questions-people-ask" title="Permanent link">&para;</a></h2>
 <details class="question">
-<summary>Does CleanWRT include WireGuard and OpenVPN?</summary>
-<p>Yes. WireGuard is a kernel module plus tools and a LuCI page; OpenVPN is installed with its own
-page and needs your configuration file. Neither is configured out of the box.</p>
+<summary>Why is there no VPN menu?</summary>
+<p>OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. WireGuard lives
+under <em>Network → Interfaces</em>. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back.</p>
 </details>
 <details class="question">
 <summary>Can I install Passwall myself?</summary>
