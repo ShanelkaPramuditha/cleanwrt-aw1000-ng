@@ -26,9 +26,15 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
   status card no longer touches the Save bar.
 - **OpenVPN is no longer in the image**, and with it the *VPN* menu, where it was the only page.
-  WireGuard stays under *Network → Interfaces*. OpenVPN is one install away:
+  OpenVPN is one install away:
   `apk add openvpn-openssl luci-app-openvpn`, and a router upgraded with its settings kept gets its
   OpenVPN settings back when it is installed again. See [VPN and proxies](features/vpn-proxy.md#openvpn).
+- **WireGuard is no longer in the image** (its kernel module, `wireguard-tools` and LuCI's WireGuard
+  protocol), and with it the empty *Status → WireGuard* page. Tailscale is the VPN the image ships.
+  WireGuard is one install away: `apk add kmod-wireguard wireguard-tools luci-proto-wireguard`.
+  **If you run a WireGuard tunnel on the router**, install those packages again right after
+  upgrading: until then that interface stays down (its settings are kept). See
+  [VPN and proxies](features/vpn-proxy.md#wireguard).
 - **Tailscale is in the image** (about 10 MiB), with its page under *Services → Tailscale*. It
   ships off: enable it under *System → Startup*, then log in from its page. A router that was
   logged in to Tailscale before the upgrade stays connected. See

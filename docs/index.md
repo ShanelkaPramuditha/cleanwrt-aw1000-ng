@@ -98,8 +98,8 @@ router supported?" to a flashed, working router, and tell you how to get out if 
   palette, dark and light mode and a live Dashboard; [Footstrap](theme.md#footstrap) is one click away.
 - **Real front-panel LEDs:** a small daemon that shows 5G type, signal quality and internet
   reachability, with a night mode. See [Front-panel LEDs](leds.md).
-- **Proxy and VPN tools:** Nikki (mihomo, Clash profiles, Zashboard dashboard), WireGuard and
-  Tailscale, installed and off until you configure them; Cloudflare Tunnel one `apk add` away.
+- **Proxy and VPN tools:** Nikki (mihomo, Clash profiles, Zashboard dashboard) and
+  Tailscale, installed and off until you configure them; WireGuard and Cloudflare Tunnel one `apk add` away.
 - **Opt-in apps:** file sharing and DLNA in the image, Syncthing and qBittorrent one install away.
   Nothing listens on your network until you tick **Enable**.
 - **Safe defaults:** LuCI over HTTPS, BBR congestion control, no open services, no hidden

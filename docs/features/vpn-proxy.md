@@ -1,17 +1,26 @@
 ---
-title: "WireGuard and Nikki on OpenWrt"
+title: "Nikki, WireGuard and OpenVPN on OpenWrt"
 description: "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles)."
 updated: 2026-11-23
 ---
 
 # VPN and proxies
 
-All of these ship installed and **disabled**. They need your servers, keys or configuration.
+Nikki and Tailscale ship installed and **disabled**; WireGuard and OpenVPN are one install away.
+All of them need your servers, keys or configuration. For reaching the router from outside, see
+[remote access](remote-access.md): Tailscale is in the image for that.
 
 ## WireGuard { #wireguard }
 
-WireGuard is fully installed (kernel module, `wg` tools and LuCI protocol support) but has **no
-interfaces configured**. An empty *Status* page is normal until you create one.
+WireGuard is not in the image; Tailscale is the VPN it ships. To run your own WireGuard tunnel,
+install it from the official repositories (the kernel module matches the image's kernel):
+
+```sh
+apk update && apk add kmod-wireguard wireguard-tools luci-proto-wireguard
+```
+
+Then reload LuCI. **WireGuard VPN** appears as a protocol under *Network → Interfaces*, and its
+tunnels are listed on *Status → WireGuard* once one exists.
 
 **Create a tunnel:** *Network → Interfaces → Add new interface*, name it (for example `wg0`),
 protocol **WireGuard VPN**, *Create interface*. In the interface's *Configuration* tab set the
@@ -27,7 +36,7 @@ then configure with `wg set`.
 
 ## OpenVPN { #openvpn }
 
-OpenVPN is not in the image; WireGuard is the VPN it ships. If a provider or office gives you only
+OpenVPN is not in the image either. If a provider or office gives you only
 an `.ovpn` file, install it:
 
 ```sh
@@ -68,7 +77,7 @@ install brings back the version the image ships.
 ## Common questions
 
 ??? question "Does CleanWRT include WireGuard and OpenVPN?"
-    WireGuard, yes: fully installed with no interfaces configured. OpenVPN is one install away: `apk add openvpn-openssl luci-app-openvpn`.
+    Neither is in the image; both are one install away (see [WireGuard](#wireguard) and [OpenVPN](#openvpn)). Tailscale is the VPN in the image.
 
 ??? question "Can I use my Clash config?"
     Yes, with Nikki. Upload the YAML file or add its subscription URL on *Services → Nikki → Profile*. mihomo reads Clash and Clash Meta profiles.
@@ -80,7 +89,7 @@ install brings back the version the image ships.
 
 | | state |
 |---|---|
-| WireGuard | kernel module and `wireguard-tools`, **no tunnel configured** |
+| WireGuard | **not in the image**, one `apk add` away (see [above](#wireguard)) |
 | OpenVPN | **not in the image**, one `apk add` away (see [above](#openvpn)) |
 | Nikki | installed, **off**. Its core is `mihomo-meta` (stable); the Zashboard dashboard is preinstalled. First boot moves its HTTP proxy port from 8080 (taken) to **7893** and sets a random dashboard secret and proxy password |
 | HomeProxy, Passwall, Passwall 2, OpenClash | **not in the image**. OpenClash is no longer built either: Nikki runs the same Clash profiles |
@@ -107,8 +116,7 @@ the router and the LAN, and none of them is forwarded from the cellular side by 
 ## Questions people ask
 
 ??? question "Why is there no VPN menu?"
-    OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. WireGuard lives
-    under *Network → Interfaces*. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back.
+    OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back.
 
 ??? question "Can I install Passwall myself?"
     It is not built for this image, and its cores (xray-core and others) are not in the image either.

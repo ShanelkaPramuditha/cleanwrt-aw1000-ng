@@ -52,7 +52,9 @@ from the official OpenWrt repositories: `apk update && apk add cloudflared luci-
 
 ## WireGuard
 
-You can also run your own WireGuard server on the router. See [VPN and proxies](vpn-proxy.md#wireguard).
+You can also run your own WireGuard tunnel. It is not in the image: install it first
+(`apk update && apk add kmod-wireguard wireguard-tools luci-proto-wireguard`), then see
+[VPN and proxies](vpn-proxy.md#wireguard).
 
 ## Which one?
 
@@ -65,7 +67,7 @@ You can also run your own WireGuard server on the router. See [VPN and proxies](
 ## Common questions
 
 ??? question "How can I reach my router behind 5G CGNAT?"
-    5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. WireGuard and Tailscale are in the image; Cloudflare Tunnel is one `apk add` away.
+    5G gives you a carrier-grade NAT address, so port forwarding does not work. Use Tailscale, a Cloudflare Tunnel or a WireGuard server you run yourself. Tailscale is in the image; Cloudflare Tunnel and WireGuard are one `apk add` away.
 
 ??? question "Should I use Tailscale or Cloudflare Tunnel on the AW1000?"
     Tailscale is the easiest way to reach the whole LAN from your own devices. A Cloudflare Tunnel is better for publishing one web service under your own domain.
@@ -79,7 +81,7 @@ You can also run your own WireGuard server on the router. See [VPN and proxies](
 |---|---|---|
 | Tailscale | installed, **off** (System → Startup) | your login |
 | Cloudflare Tunnel | **not in the image**: `apk add cloudflared luci-app-cloudflared` | your tunnel token |
-| WireGuard | kernel module and tools, no tunnel | a peer config from wherever you keep one |
+| WireGuard | **not in the image**: `apk add kmod-wireguard wireguard-tools luci-proto-wireguard` | a peer config from wherever you keep one |
 | OpenVPN | **not in the image**: `apk add openvpn-openssl luci-app-openvpn` | your `.ovpn` file |
 | SSH (`dropbear`) | on, with password authentication and root password authentication enabled, and **no root password set** | set a password before you use it from anywhere |
 | LuCI | HTTPS on the LAN, HTTP redirected to it | see [security](security.md) |

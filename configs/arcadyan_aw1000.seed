@@ -150,8 +150,6 @@ CONFIG_PACKAGE_kmod-nft-offload=y
 CONFIG_PACKAGE_firewall4=y
 CONFIG_PACKAGE_nftables=y
 CONFIG_PACKAGE_kmod-tun=y
-CONFIG_PACKAGE_kmod-wireguard=y
-CONFIG_PACKAGE_wireguard-tools=y
 CONFIG_PACKAGE_ip-full=y
 CONFIG_PACKAGE_kmod-nf-tproxy=y
 CONFIG_PACKAGE_kmod-ipt-ipset=y
@@ -207,10 +205,10 @@ CONFIG_PACKAGE_luci-app-attendedsysupgrade=y
 CONFIG_PACKAGE_luci-app-sqm=y
 CONFIG_PACKAGE_sqm-scripts=y
 CONFIG_PACKAGE_luci-app-nlbwmon=y
-# OpenVPN is not in the image (WireGuard is the VPN): its LuCI app was the only page
-# under the VPN menu. It stays one install away: apk add openvpn-openssl luci-app-openvpn.
-# WireGuard in LuCI is the protocol handler (luci-app-wireguard does not exist):
-CONFIG_PACKAGE_luci-proto-wireguard=y
+# No OpenVPN and no WireGuard in the image: Tailscale (below) is the VPN it ships. Both stay one
+# install away, from the official repositories (the kernel module matches the image's kernel):
+#   apk add openvpn-openssl luci-app-openvpn
+#   apk add kmod-wireguard wireguard-tools luci-proto-wireguard
 
 # ── Community packages ───────────────────────────────────────────────────────
 # 1. Nikki (nikkinikki-org/OpenWrt-nikki, GPL-3.0): transparent proxy on the mihomo
