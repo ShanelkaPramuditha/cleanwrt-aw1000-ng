@@ -312,7 +312,11 @@ jobs:
       - name: Draft release
         if: success() && steps.ver.outputs.draft == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          # The workflow token, unless the repository has a RELEASE_TOKEN secret: a fine-grained
+          # personal token with "Contents: Read and write" on this repository only. That is the way
+          # round a repository whose settings or rules refuse the workflow token releases
+          # ("HTTP 403: Resource not accessible by integration"). docs/fork-maintenance.md.
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
           set -eu

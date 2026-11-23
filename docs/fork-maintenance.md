@@ -94,6 +94,22 @@ one means rotating it and shipping a new public key in an image.
 
 `tools/cw-check-release-keys.sh <tree>` proves a build tree signs with the key the image ships.
 
+## When the draft release is refused
+
+`HTTP 403: Resource not accessible by integration` in the build's *Draft release* step means
+GitHub refused the workflow's own token permission to create the release. The workflow asks for
+`contents: write`, so the refusal comes from the repository:
+
+1. *Settings → Actions → General → Workflow permissions*: **Read and write permissions**. A
+   repository created new (rather than renamed) starts read-only. Every workflow here declares its
+   own narrower permissions, so this widens nothing else.
+2. *Settings → Rules → Rulesets*: a rule on `v*` tags or on releases blocks the workflow token too.
+3. If neither applies, give the step a token of its own: create a fine-grained personal access
+   token (*GitHub → Settings → Developer settings → Fine-grained tokens*) for **this repository
+   only**, with **Contents: Read and write**, and save it as the repository secret
+   `RELEASE_TOKEN`. The *Draft release* step uses it when it exists and the workflow token
+   otherwise.
+
 ## Pinned packages to bump now and then
 
 | What | Where | How |
