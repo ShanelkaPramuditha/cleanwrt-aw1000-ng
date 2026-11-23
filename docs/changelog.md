@@ -31,6 +31,9 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   ships off: enable it under *System → Startup*, then log in from its page. A router that was
   logged in to Tailscale before the upgrade stays connected. See
   [Remote access](features/remote-access.md#tailscale).
+- **Local builds finish clean.** A build on your own machine no longer ends with a release-key
+  error: the key file is locked down to mode 600 by the build, and a key that is not the release
+  key is a note there. Release builds stay strict. See [Building](building.md).
 
 ## 25.12.5-R2.2-SP1
 

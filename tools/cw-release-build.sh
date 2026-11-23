@@ -605,6 +605,13 @@ done
 rc=0
 make -j"$(nproc)" || rc=$?
 echo "-- world rc=$rc --"
+# OpenWrt creates private-key.pem when the tree has none (package/Makefile), with the umask of
+# whoever runs the build: under sudo that is 644, readable by every user of the machine. A
+# private key is the user's only; tightening it is always safe, and the key check later
+# insists on it.
+for key in private-key.pem key-build; do
+    [ -f "$key" ] && chmod 600 "$key"
+done
 if [ "$rc" -ne 0 ]; then
     # The parallel run hides the real error ("re-run with -j1 V=s"). OpenWrt writes one log per
     # package under output/logs/, so the newest ones are printed here: the cause reaches the build

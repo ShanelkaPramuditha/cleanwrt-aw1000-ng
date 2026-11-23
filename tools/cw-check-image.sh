@@ -17,7 +17,10 @@
 #      package names gain variant suffixes in the manifest, so an exact per-name comparison
 #      would fail a healthy build; a real drop shows up as a missing fraction);
 #   6. the feed key of the tree is the key devices trust (tools/cw-check-release-keys.sh),
-#      when the tree holds one.
+#      when the tree holds one. A release build (CW_REQUIRE_RELEASE_KEYS=1, as CI sets it for
+#      every draft) fails on any other key. A local build cannot hold that key - it is a CI
+#      secret - so there a different key is a note: the image is sound, only the cw-opt feed
+#      index built next to it is signed with a key no router trusts, and it is never published.
 #
 # Usage:   tools/cw-check-image.sh <openwrt-tree-dir> [<repo-dir>]
 # Exit:    0 = release verified; 1 = a check failed (the reason is on stderr)
@@ -96,8 +99,16 @@ ok "manifest lists $listed of $selected selected packages"
 
 # 6. the feed key, when the tree holds one
 if [ -f "$TREE/private-key.pem" ]; then
-    sh "$REPO/tools/cw-check-release-keys.sh" "$TREE" >/dev/null
-    ok "the tree signs with the key devices trust"
+    if [ "${CW_REQUIRE_RELEASE_KEYS:-0}" = "1" ]; then
+        sh "$REPO/tools/cw-check-release-keys.sh" "$TREE" >/dev/null || exit 1
+        ok "the tree signs with the key devices trust"
+    elif sh "$REPO/tools/cw-check-release-keys.sh" "$TREE" >/dev/null 2>"$TREE/.cw-key-check.err"; then
+        ok "the tree signs with the key devices trust"
+    else
+        echo "  note: local build - the tree's feed key is not the release key ($(sed 's/^ERROR: cw-check-release-keys: //' "$TREE/.cw-key-check.err" | head -1 | cut -c1-120)...)."
+        echo "        The image is fine to flash; do not publish this build's cw-opt feed or call it a release."
+    fi
+    rm -f "$TREE/.cw-key-check.err"
 else
     echo "  note: no feed key in the tree (unsigned build, cw-opt feed stays disabled)"
 fi

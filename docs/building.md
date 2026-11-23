@@ -131,6 +131,14 @@ something stale:
 | image signing (usign) | signs every image | `tools/cw-sign-keys.sh --generate <tree>` creates `keys-release/`. **Never commit it.** The build uses it when present. |
 | apk key | the key every image trusts and the one that signs the optional `cw-opt` feed | one fixed pair: the public half is committed at `files/etc/apk/keys/public-key.pem` and ships in the overlay; the private half is the repository secret `APK_PRIVATE_KEY` (and `keys-release/private-key.pem` for a local release build), never committed. The build writes it to `<tree>/private-key.pem`, and `tools/cw-check-release-keys.sh` proves the two halves match. |
 
+A local build has no release key, because the private half is a CI secret. OpenWrt then makes
+a new `private-key.pem` in the tree, and the build ends with a note instead of an error:
+`local build - the tree's feed key is not the release key`. That image is fine to flash. Only
+the `cw-opt` feed index built next to it is signed with a key no router trusts, and it is never
+published. A release build (`CW_REQUIRE_RELEASE_KEYS=1`, which CI sets for every draft) still
+fails on any other key. The build also sets the key file to mode 600 itself, so it is never
+left readable by other users of the machine.
+
 A tree with no key lets OpenWrt generate one during the build, so every image carried a different
 `/etc/apk/keys/public-key.pem` and a device could no longer verify the `cw-opt` feed built from the
 same source. The patch in `patches/tree/` removes a second build-to-build change: `apk mkpkg`
