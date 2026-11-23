@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/img/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -1157,7 +1157,7 @@
   <span class="md-ellipsis">
     
   
-    The Footstrap theme
+    Themes
   
 
     
@@ -2369,6 +2369,11 @@ rows.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>29-cw-keep-chosen-theme</code></td>
+<td><code>luci.themes.Vantage=/luci-static/vantage</code>, written <strong>before</strong> Vantage's own <code>30_luci-theme-vantage</code>, which selects Vantage whenever its entry is new</td>
+<td>only after an upgrade that kept the settings, when the base names an installed theme other than stock bootstrap (Footstrap, say): Vantage is added to the design list and the base stays. A fresh flash, the stock base or a base whose theme is gone is left to Vantage's script</td>
+</tr>
+<tr>
 <td><code>45-cw-strip-stock-leds</code></td>
 <td>removes the LuCI menu node <code>admin/system/leds</code> from <code>luci-mod-system.json</code> and deletes the stock <code>view/system/leds.js</code>, then clears the LuCI caches. The <a href="../../leds/">LED Management</a> daemon owns those lamps</td>
 <td>it writes the menu file back only if the System menu is still intact and the LEDs node really went; the <code>led</code> sections in <code>/etc/config/system</code> are <strong>not</strong> removed, nor the WAN port lamp</td>
@@ -2425,8 +2430,8 @@ rows.</p>
 </tr>
 <tr>
 <td><code>96-cw-default-theme</code></td>
-<td><code>luci.themes.Footstrap=/luci-static/footstrap</code> and <code>luci.main.mediaurlbase=/luci-static/footstrap</code>; removes every <code>luci.themes</code> entry whose directory the image does not carry; deletes a dead marker section an older image left</td>
-<td>the base is set only if <code>/www/luci-static/footstrap</code> exists <strong>and</strong> the current base is empty, still the stock bootstrap, or names a directory that no longer exists. A theme you chose that is still installed stays, and so does its entry in the design selector</td>
+<td><code>luci.themes.Vantage=/luci-static/vantage</code> and <code>luci.main.mediaurlbase=/luci-static/vantage</code>; removes every <code>luci.themes</code> entry whose directory the image does not carry; deletes a dead marker section an older image left</td>
+<td>the base is set only if <code>/www/luci-static/vantage</code> exists <strong>and</strong> the current base is empty, still the stock bootstrap, or names a directory that no longer exists. A theme you chose that is still installed stays, and so does its entry in the design selector</td>
 </tr>
 <tr>
 <td><code>97-cw-net-tuning</code></td>

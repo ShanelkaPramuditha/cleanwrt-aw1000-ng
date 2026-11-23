@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="The default web interface of CleanWRT: dark and light modes, top bar or sidebar, five palettes, an accent colour, frosted surfaces and a wallpaper.">
+        <meta name="description" content="The web interface of CleanWRT: Vantage, the default theme with its Dashboard, and Footstrap beside it, both with dark and light modes.">
       
       
       
@@ -23,11 +23,11 @@
       
       
       <link rel="icon" href="../assets/img/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
-        <title>Footstrap: the CleanWRT LuCI theme - CleanWRT</title>
+        <title>Themes: Vantage and Footstrap - CleanWRT</title>
       
     
     
@@ -55,22 +55,22 @@
     
   <meta property="og:type" content="article">
 <meta property="og:site_name" content="CleanWRT">
-<meta property="og:title" content="The Footstrap theme - CleanWRT">
-<meta property="og:description" content="The default web interface of CleanWRT: dark and light modes, top bar or sidebar, five palettes, an accent colour, frosted surfaces and a wallpaper.">
+<meta property="og:title" content="Themes - CleanWRT">
+<meta property="og:description" content="The web interface of CleanWRT: Vantage, the default theme with its Dashboard, and Footstrap beside it, both with dark and light modes.">
 <meta property="og:url" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/theme/">
 <meta property="og:image" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="CleanWRT, OpenWrt for the Arcadyan AW1000">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The Footstrap theme - CleanWRT">
-<meta name="twitter:description" content="The default web interface of CleanWRT: dark and light modes, top bar or sidebar, five palettes, an accent colour, frosted surfaces and a wallpaper.">
+<meta name="twitter:title" content="Themes - CleanWRT">
+<meta name="twitter:description" content="The web interface of CleanWRT: Vantage, the default theme with its Dashboard, and Footstrap beside it, both with dark and light modes.">
 <meta name="twitter:image" content="https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Using CleanWRT"}, {"@type": "ListItem", "position": 3, "name": "The Footstrap theme", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/theme/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "The Footstrap theme", "description": "The default web interface of CleanWRT: dark and light modes, top bar or sidebar, five palettes, an accent colour, frosted surfaces and a wallpaper.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/theme/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-06"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does CleanWRT have a dark mode?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, and it is the default. System → Footstrap → Colour scheme → Mode offers Auto (follows your system), Light and Dark; a browser can also keep its own choice, which Reset to router gives up."}}, {"@type": "Question", "name": "Does the theme work on a phone?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The layout collapses below 768 px, and the density and content width are adjustable on the settings page."}}, {"@type": "Question", "name": "How do I switch back to the default OpenWrt theme?", "acceptedAnswer": {"@type": "Answer", "text": "Go to System → System → Language and Style → Design and pick Bootstrap. Bootstrap stays installed in the image precisely so that this is always possible."}}, {"@type": "Question", "name": "Does CleanWRT patch the theme?", "acceptedAnswer": {"@type": "Answer", "text": "Only the login page: it shows the CleanWRT logo instead of the router's hostname, and its card is centred on the screen instead of sitting near the top. Everything else is the upstream package at its pinned commit. The logo is this repository's own file (files/www/luci-static/cw-branding/login-logo.png), outside the theme's directory, so a theme update can neither overwrite it nor collide with the patch. The look a new router starts with is added by a first-boot script and two background files, not by a patch."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Using CleanWRT"}, {"@type": "ListItem", "position": 3, "name": "Themes", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/theme/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Themes", "description": "The web interface of CleanWRT: Vantage, the default theme with its Dashboard, and Footstrap beside it, both with dark and light modes.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/theme/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-23"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does CleanWRT have a dark mode?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, in both themes. In Vantage, the light / dark / auto button in the top bar. In Footstrap, System → Footstrap → Colour scheme → Mode offers Auto (follows your system), Light and Dark; a browser can also keep its own choice, which Reset to router gives up."}}, {"@type": "Question", "name": "A page looks wrong in dark mode", "acceptedAnswer": {"@type": "Answer", "text": "Pages from LuCI apps colour themselves; most follow the theme, some carry light colours of their own. Reload with Ctrl+Shift+R first (LuCI caches scripts by its own version). If it persists, note the page and the theme and open an issue."}}, {"@type": "Question", "name": "Does the theme work on a phone?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The layout collapses below 768 px, and the density and content width are adjustable on the settings page."}}, {"@type": "Question", "name": "How do I switch back to the default OpenWrt theme?", "acceptedAnswer": {"@type": "Answer", "text": "Go to System → System → Language and Style → Design and pick Bootstrap. Bootstrap stays installed in the image precisely so that this is always possible."}}, {"@type": "Question", "name": "Does CleanWRT patch the theme?", "acceptedAnswer": {"@type": "Answer", "text": "Only the login page: it shows the CleanWRT logo instead of the router's hostname, and its card is centred on the screen instead of sitting near the top. Everything else is the upstream package at its pinned commit. The logo is this repository's own file (files/www/luci-static/cw-branding/login-logo.png), outside the theme's directory, so a theme update can neither overwrite it nor collide with the patch. The look a new router starts with is added by a first-boot script and two background files, not by a patch."}}]}</script>
 </head>
   
   
@@ -90,7 +90,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#the-footstrap-theme" class="md-skip">
+        <a href="#themes" class="md-skip">
           Skip to content
         </a>
       
@@ -125,7 +125,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Footstrap: the CleanWRT LuCI theme
+              Themes: Vantage and Footstrap
             
           </span>
         </div>
@@ -1169,7 +1169,7 @@
   <span class="md-ellipsis">
     
   
-    The Footstrap theme
+    Themes
   
 
     
@@ -1187,7 +1187,7 @@
   <span class="md-ellipsis">
     
   
-    The Footstrap theme
+    Themes
   
 
     
@@ -1213,6 +1213,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#vantage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vantage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#footstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Footstrap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Footstrap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#what-it-looks-like" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1222,8 +1245,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#screenshots" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1233,8 +1256,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#the-settings-page-system-footstrap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1244,8 +1267,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#the-look-a-new-router-starts-with" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1255,12 +1278,17 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#switching-back" class="md-nav__link">
+  <a href="#switching-themes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Switching back
+        Switching themes
       
     </span>
   </a>
@@ -2312,6 +2340,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#vantage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vantage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#footstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Footstrap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Footstrap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#what-it-looks-like" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2321,8 +2372,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#screenshots" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2332,8 +2383,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#the-settings-page-system-footstrap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2343,8 +2394,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#the-look-a-new-router-starts-with" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2354,12 +2405,17 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#switching-back" class="md-nav__link">
+  <a href="#switching-themes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Switching back
+        Switching themes
       
     </span>
   </a>
@@ -2413,19 +2469,60 @@
   
 
 
-<h1 id="the-footstrap-theme">The Footstrap theme<a class="headerlink" href="#the-footstrap-theme" title="Permanent link">&para;</a></h1>
-<p>CleanWRT ships with <strong>Footstrap</strong> as its web interface. It is an ordinary LuCI theme maintained
-upstream as
-<a href="https://github.com/VizzleTF/luci-theme-footstrap"><code>luci-theme-footstrap</code></a> (Apache-2.0), pinned to
-one commit in <code>configs/local-packages.pin</code>
-like every other out-of-feed package here. <strong>CleanWRT changes only its login page</strong>, with two small
-patches: <code>patches/packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo.patch</code> puts the
+<h1 id="themes">Themes<a class="headerlink" href="#themes" title="Permanent link">&para;</a></h1>
+<p>CleanWRT ships two third-party LuCI themes and LuCI's own Bootstrap as the fallback:</p>
+<table>
+<thead>
+<tr>
+<th>Theme</th>
+<th>Licence</th>
+<th>In the image</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#vantage">Vantage</a> (<a href="https://github.com/anothaDev/luci-theme-vantage"><code>luci-theme-vantage</code></a> + <code>luci-app-vantage</code>)</td>
+<td>GPL-3.0-or-later</td>
+<td>the default on a fresh flash</td>
+</tr>
+<tr>
+<td><a href="#footstrap">Footstrap</a> (<a href="https://github.com/VizzleTF/luci-theme-footstrap"><code>luci-theme-footstrap</code></a>)</td>
+<td>Apache-2.0</td>
+<td>installed, one click away</td>
+</tr>
+<tr>
+<td>Bootstrap (LuCI's own)</td>
+<td>Apache-2.0</td>
+<td>the fallback</td>
+</tr>
+</tbody>
+</table>
+<p>Both third-party themes are pinned to one commit each in <code>configs/local-packages.pin</code>, like every
+other out-of-feed package here.</p>
+<h2 id="vantage">Vantage<a class="headerlink" href="#vantage" title="Permanent link">&para;</a></h2>
+<p>Vantage is a console-style theme: an icon rail with flyout menus, a breadcrumb, page tabs, a
+<strong>Ctrl+K</strong> command palette, and light, dark and auto modes from the button in the top bar. Its
+companion package <code>luci-app-vantage</code> adds the <strong>Dashboard</strong>, the first page after login: live
+traffic, the network path, clients and radios. The Appearance settings under the gear button are
+saved on the router in <code>/etc/config/vantage_theme</code>, so every browser sees the same look.</p>
+<p>CleanWRT changes one thing in it:
+<code>patches/packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages.patch</code> makes Vantage
+publish the colour tokens LuCI's Bootstrap theme publishes (<code>--background-color-high</code>,
+<code>--text-color-highest</code> and the rest), mapped onto its own palette. Pages written for the stock themes
+colour themselves from those tokens - <em>Modem → 3gInfo-lite</em>, QModem's signal bars, the AWvoice phone
+page - and without them fell back to white tiles and dark text on Vantage's dark cards.
+<code>patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch</code> does the same for
+the lamps on the LED page, which read the browser's preference rather than the theme's switch.</p>
+<p>Vantage's full documentation, including its own troubleshooting, is in
+<a href="https://github.com/anothaDev/luci-theme-vantage/blob/main/docs/INSTALL.md">its repository</a>.</p>
+<h2 id="footstrap">Footstrap<a class="headerlink" href="#footstrap" title="Permanent link">&para;</a></h2>
+<p>Footstrap was the default before Vantage and stays in the image. <strong>CleanWRT changes only its login
+page</strong>, with two small patches:
+<code>patches/packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo.patch</code> puts the
 CleanWRT logo where the theme otherwise prints the router's hostname, and
 <code>0002-login-card-centred-in-the-viewport.patch</code> centres the login card on the screen. Everything else
-is the theme as its own author publishes it, selected by
-<code>files/etc/uci-defaults/96-cw-default-theme</code>
-on first boot.</p>
-<h2 id="what-it-looks-like">What it looks like<a class="headerlink" href="#what-it-looks-like" title="Permanent link">&para;</a></h2>
+is the theme as its own author publishes it.</p>
+<h3 id="what-it-looks-like">What it looks like<a class="headerlink" href="#what-it-looks-like" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Dark by default</strong>, with light and auto modes, and a choice per browser as well as one saved on
   the router.</li>
@@ -2439,7 +2536,7 @@ on first boot.</p>
   carries the CleanWRT logo above the username.</li>
 <li><strong>Density</strong> (normal, compact, large) and a <strong>content width</strong> from 1280 to 3840 px.</li>
 </ul>
-<h2 id="screenshots">Screenshots<a class="headerlink" href="#screenshots" title="Permanent link">&para;</a></h2>
+<h3 id="screenshots">Screenshots<a class="headerlink" href="#screenshots" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Dark</label><label for="__tabbed_1_2">Light</label><label for="__tabbed_1_3">Phone</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2475,7 +2572,7 @@ on first boot.</p>
 <p>These were taken from a real AW1000 running this firmware. The status page is LuCI's own: the
 theme draws its tables as boxes, and no part of it is patched by this repository.</p>
 </div>
-<h2 id="the-settings-page-system-footstrap">The settings page: System → Footstrap<a class="headerlink" href="#the-settings-page-system-footstrap" title="Permanent link">&para;</a></h2>
+<h3 id="the-settings-page-system-footstrap">The settings page: System → Footstrap<a class="headerlink" href="#the-settings-page-system-footstrap" title="Permanent link">&para;</a></h3>
 <p>The theme registers one page of its own, <strong>System → Footstrap</strong>, with four tabs: <em>Colour scheme</em>,
 <em>Interface</em>, <em>Background</em> and <em>Colours</em>.</p>
 <p>Changes there apply to the browser you are in immediately. Three buttons decide what happens next:</p>
@@ -2485,7 +2582,7 @@ theme draws its tables as boxes, and no part of it is patched by this repository
 <li><strong>Reset to router</strong> drops this browser's own changes and follows the router again.</li>
 <li><strong>Reset to built-in</strong> goes back to the defaults the theme itself ships with.</li>
 </ul>
-<h2 id="the-look-a-new-router-starts-with">The look a new router starts with<a class="headerlink" href="#the-look-a-new-router-starts-with" title="Permanent link">&para;</a></h2>
+<h3 id="the-look-a-new-router-starts-with">The look a new router starts with<a class="headerlink" href="#the-look-a-new-router-starts-with" title="Permanent link">&para;</a></h3>
 <p>A fresh install does not start at the theme's own defaults:
 <code>files/etc/uci-defaults/50-cw-footstrap-look</code>
 writes the image's default look into <code>/etc/config/footstrap</code> on first boot - dark mode, the top
@@ -2499,18 +2596,31 @@ make up its background:</p>
 the files actually installed rather than trusting a number written down. It runs once: it marks the
 look it applied, and a router whose look has already been saved to the router is left alone - your
 choice always outranks the image's.</p>
-<h2 id="switching-back">Switching back<a class="headerlink" href="#switching-back" title="Permanent link">&para;</a></h2>
-<p>Footstrap is selected on the first boot. To change it later:</p>
+<h2 id="switching-themes">Switching themes<a class="headerlink" href="#switching-themes" title="Permanent link">&para;</a></h2>
+<p>A fresh flash opens in Vantage. To change it:</p>
 <p><em>System → System → Language and Style → Design</em></p>
-<p>The stock Bootstrap theme is the only other one in the image, and it is there as the fallback: if
-the pinned theme did not install, <code>files/etc/uci-defaults/96-cw-default-theme</code> leaves the stock base
-alone, so the web interface still opens, and Bootstrap is always a choice in the selector.</p>
+<p>Vantage is listed as <code>Vantage</code>, Footstrap as <code>Footstrap</code>. Over SSH:</p>
+<div class="highlight"><pre><span></span><code>uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>luci.main.mediaurlbase<span class="o">=</span>/luci-static/footstrap<span class="w">   </span><span class="c1"># or /luci-static/vantage</span>
+uci<span class="w"> </span>commit<span class="w"> </span>luci
+</code></pre></div>
+<p><strong>An upgrade that keeps the settings keeps the theme.</strong> A router that was on Footstrap stays on
+Footstrap, with Vantage added to the design list: Vantage's own first-boot script selects Vantage
+whenever its entry is new, so <code>files/etc/uci-defaults/29-cw-keep-chosen-theme</code> registers the entry
+just before it runs on such a router. Only a router still on the stock Bootstrap base moves to Vantage.</p>
+<p>Bootstrap is the fallback: if the pinned theme did not install, <code>files/etc/uci-defaults/96-cw-default-theme</code>
+leaves the stock base alone, so the web interface still opens, and Bootstrap is always a choice in the
+selector.</p>
 <p>An upgrade from an older image can leave two things naming a theme this image no longer carries: the
 base the interface opens with, and the entry the design selector offers. Both are repaired at the
-first boot after the upgrade - the base moves to Footstrap and the entry is removed - so a router
-that had another design selected does not open on a page with no styles.</p>
+first boot after the upgrade - the base moves to Vantage and the entry is removed - so a router that
+had another design selected does not open on a page with no styles.</p>
 <h2 id="notes-for-developers">Notes for developers<a class="headerlink" href="#notes-for-developers" title="Permanent link">&para;</a></h2>
-<p>The theme installs its ucode templates under
+<p>Vantage installs its templates under <code>/usr/share/ucode/luci/template/themes/vantage/</code>, its resources
+under <code>/www/luci-static/vantage/</code> and <code>/www/luci-static/resources/vantage-theme/</code>, and the conffile
+<code>/etc/config/vantage_theme</code>. The Dashboard adds <code>admin/dashboard</code> as the first menu entry, the rpcd
+ACL <code>luci-app-vantage</code> and <code>/etc/config/vantage</code> (the names you give devices). Under another theme,
+<em>Dashboard</em> opens LuCI's Status → Overview instead.</p>
+<p>Footstrap installs its ucode templates under
 <code>/usr/share/ucode/luci/template/themes/footstrap/</code> (<code>header.ut</code>, <code>footer.ut</code>, <code>sysauth.ut</code> and two
 partials), its resources under <code>/www/luci-static/footstrap/</code>, its settings view at
 <code>/usr/share/luci/menu.d/luci-theme-footstrap.json</code> pointing at <code>footstrap/appearance</code>, and its own
@@ -2523,9 +2633,15 @@ there. <code>/www/luci-static/footstrap/bg</code> and <code>.../fonts</code> are
 <h2 id="common-questions">Common questions<a class="headerlink" href="#common-questions" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>Does CleanWRT have a dark mode?</summary>
-<p>Yes, and it is the default. <em>System → Footstrap → Colour scheme → Mode</em> offers Auto (follows
-your system), Light and Dark; a browser can also keep its own choice, which <strong>Reset to router</strong>
-gives up.</p>
+<p>Yes, in both themes. In Vantage, the light / dark / auto button in the top bar. In Footstrap,
+<em>System → Footstrap → Colour scheme → Mode</em> offers Auto (follows your system), Light and Dark; a
+browser can also keep its own choice, which <strong>Reset to router</strong> gives up.</p>
+</details>
+<details class="question">
+<summary>A page looks wrong in dark mode</summary>
+<p>Pages from LuCI apps colour themselves; most follow the theme, some carry light colours of their
+own. Reload with Ctrl+Shift+R first (LuCI caches scripts by its own version). If it persists,
+note the page and the theme and open an issue.</p>
 </details>
 <details class="question">
 <summary>Does the theme work on a phone?</summary>

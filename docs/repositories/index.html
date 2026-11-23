@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/img/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -1157,7 +1157,7 @@
   <span class="md-ellipsis">
     
   
-    The Footstrap theme
+    Themes
   
 
     
@@ -2331,16 +2331,22 @@
 <td><a href="../leds/">Front-panel LEDs</a></td>
 </tr>
 <tr>
+<td><a href="https://github.com/anothaDev/luci-theme-vantage">luci-theme-vantage</a></td>
+<td>the LuCI theme the image selects, and its Dashboard (upstream, one CSS patch)</td>
+<td><a href="../theme/">Themes</a></td>
+</tr>
+<tr>
 <td><a href="https://github.com/VizzleTF/luci-theme-footstrap">luci-theme-footstrap</a></td>
-<td>the LuCI theme the image selects (upstream, unpatched)</td>
-<td><a href="../theme/">The Footstrap theme</a></td>
+<td>the previous default theme, still in the image (upstream, two login-page patches)</td>
+<td><a href="../theme/#footstrap">Themes</a></td>
 </tr>
 </tbody>
 </table>
 <h2 id="how-they-fit-together">How they fit together<a class="headerlink" href="#how-they-fit-together" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>cleanwrt-aw1000-ng  (feeds.conf.default, configs/local-packages.pin, patches/)
    ├── pins  luci-app-cw-led      → LED daemon and page
-   ├── pins  luci-theme-footstrap → default theme
+   ├── pins  luci-theme-vantage   → default theme and Dashboard
+   ├── pins  luci-theme-footstrap → second theme
    ├── pins  AWvoice              → phone port
    └── pins  OpenWrt, LuCI, QModem, 3ginfo-lite, ... (upstream feeds)
 </code></pre></div>

@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/img/favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -1157,7 +1157,7 @@
   <span class="md-ellipsis">
     
   
-    The Footstrap theme
+    Themes
   
 
     
@@ -2943,6 +2943,10 @@ than shipping a half-applied change.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages</code></td>
+<td>Vantage publishes LuCI Bootstrap's colour tokens (<code>--background-color-high</code>, <code>--text-color-highest</code>, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text</td>
+</tr>
+<tr>
 <td><code>packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo</code></td>
 <td>one line: the login page shows the CleanWRT logo where the theme prints the router's hostname. The image file lives outside the theme's own directory, so a theme update can neither overwrite it nor collide with the patch</td>
 </tr>
@@ -2964,6 +2968,10 @@ than shipping a half-applied change.</p>
 <tr>
 <td><code>packages/awvoice-phoned/0001-indicator-dark-for-night-mode</code></td>
 <td>one ubus method, <code>awvoice indicator_dark {dark}</code>: a memory-only hold that keeps the phone LED dark while the line works underneath. Nothing is written to the phone's settings, and a restart clears it</td>
+</tr>
+<tr>
+<td><code>packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch</code></td>
+<td>the LED lamps on the settings page take their light or dark colours from the theme's own switch (<code>data-darkmode</code>, which Vantage, Footstrap and Bootstrap all set) instead of only the browser's preference</td>
 </tr>
 <tr>
 <td><code>packages/luci-app-cw-led/0001-night-mode-phone-led</code></td>
