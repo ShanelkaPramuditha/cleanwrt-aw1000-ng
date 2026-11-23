@@ -1976,6 +1976,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#one-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One command
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-progress-bar" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2457,6 +2468,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#one-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One command
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-progress-bar" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2801,16 +2823,27 @@ docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 compiling. Pass it with <code>-e CW_CHECK_ONLY=1</code> to <code>docker run</code>. It takes a few minutes and
 catches almost every configuration mistake.</p>
 </div>
+<h3 id="one-command">One command<a class="headerlink" href="#one-command" title="Permanent link">&para;</a></h3>
+<p><code>tools/cw-build.sh</code> is the whole local build in one command: it finds the repository and the tree
+(<code>openwrt</code> next to it, or <code>--tree DIR</code>) from where it is, so it works the same from your shell or
+a root shell; clones the tree at <code>OPENWRT_TAG</code> when there is none; starts
+<code>tools/cw-release-build.sh</code> as root in its own session with the local defaults
+(<code>CW_MAX_IMAGE_MB=130</code>, <code>CW_BUILD_OPT_ARTIFACTS=0</code>, <code>CW_CCACHE=1</code>); writes the output to
+<code>build.log</code> next to the repository; and shows the progress below. It ends with the image's path,
+size and sha256, or the lines around the error. Ctrl+C stops only the display and closing the
+terminal does not stop the build; run it again and it attaches to the running build. Flags:
+<code>--clean</code>, <code>--dirclean</code>, <code>--check</code>.</p>
 <h3 id="a-progress-bar">A progress bar<a class="headerlink" href="#a-progress-bar" title="Permanent link">&para;</a></h3>
 <p><code>tools/cw-build-progress.sh &lt;build.log&gt; &lt;openwrt-tree&gt;</code> follows a running build's log and shows
 one line that updates in place: the phase (setup, download, compile, image, checks), a bar, the
 build steps done out of the total, the package compiling now, the elapsed time and an estimate of
 the time left. It exits when the build ends: 0 with <code>IMAGE_OK</code>, 1 otherwise.</p>
 <p>Run the build in the background with its output in a log, and the bar in front of it:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/home/ubuntu/cw/cleanwrt-aw1000
-sudo<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s1">'env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \</span>
-<span class="s1">  tools/cw-release-build.sh /home/ubuntu/cw/openwrt &lt; /dev/null &gt; /home/ubuntu/cw/build.log 2&gt;&amp;1 &amp;'</span>
-tools/cw-build-progress.sh<span class="w"> </span>/home/ubuntu/cw/build.log<span class="w"> </span>/home/ubuntu/cw/openwrt
+<div class="highlight"><pre><span></span><code><span class="nv">CW</span><span class="o">=</span>/home/&lt;you&gt;/cw<span class="w">          </span><span class="c1"># the folder that holds cleanwrt-aw1000 and openwrt</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">"</span><span class="nv">$CW</span><span class="s2">/cleanwrt-aw1000"</span>
+sudo<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">"env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \</span>
+<span class="s2">  tools/cw-release-build.sh </span><span class="nv">$CW</span><span class="s2">/openwrt &lt; /dev/null &gt; </span><span class="nv">$CW</span><span class="s2">/build.log 2&gt;&amp;1 &amp;"</span>
+tools/cw-build-progress.sh<span class="w"> </span><span class="s2">"</span><span class="nv">$CW</span><span class="s2">/build.log"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$CW</span><span class="s2">/openwrt"</span>
 </code></pre></div>
 <p>Or run the build as usual, with <code>| tee build.log</code>, and the bar in a second terminal. Ctrl+C stops
 only the bar, never the build; run it again to pick up where the build is.</p>

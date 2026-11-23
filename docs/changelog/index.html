@@ -2470,6 +2470,9 @@
 <li><strong>Local builds finish clean.</strong> A build on your own machine no longer ends with a release-key
   error: the key file is locked down to mode 600 by the build, and a key that is not the release
   key is a note there. Release builds stay strict. See <a href="../building/">Building</a>.</li>
+<li><strong>One command for a local build:</strong> <code>tools/cw-build.sh</code> clones the tree if needed, builds in the
+  background (from your shell or a root shell), shows a progress display, and ends with the image's
+  path and sha256. See <a href="../building/#one-command">Building</a>.</li>
 <li><strong>A progress bar for local builds.</strong> <code>tools/cw-build-progress.sh</code> follows the build log and shows
   the phase, the steps done, the package compiling now and the time left. The GitHub Actions
   build prints the same progress as lines in its log. See <a href="../building/#a-progress-bar">Building</a>.</li>
