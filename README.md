@@ -158,9 +158,41 @@ git clone https://github.com/ShanelkaPramuditha/cleanwrt-aw1000-ng.git cleanwrt-
 git clone --depth 1 --branch v25.12.5 https://github.com/openwrt/openwrt.git openwrt
 ```
 
-**2. Build**, in one of two ways:
+**2. Build, with one command** (Ubuntu or Debian; install the build tools once first):
 
-*Option A: Docker* (any distribution)
+```sh
+sudo apt-get update && sudo apt-get install -y build-essential clang lld flex bison g++ gawk \
+  gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev python3 python3-setuptools \
+  rsync swig unzip zlib1g-dev file wget zstd texinfo curl ca-certificates jq xz-utils \
+  meson ninja-build pkg-config
+~/cw/cleanwrt-aw1000/tools/cw-build.sh
+```
+
+`tools/cw-build.sh` does the rest: it finds the folders by itself (from your shell or a root
+shell), clones the OpenWrt tree at the right tag if there is none, starts the build as root in
+the background, and shows its progress:
+
+```
+  CleanWRT 25.12.5-R2.2-SP2  for the Arcadyan AW1000, on OpenWrt v25.12.5
+ / compile  ██████████████░░░░░░░░░░░░░░░░░░░░░░░░  35%  142/406  luci-base  0:48:10  left 1:29:30
+```
+
+At the end it prints the image's path, size and sha256, or the lines around the error. The whole
+output is in `~/cw/build.log`. Ctrl+C stops only the display, and closing the window does not
+stop the build: run `tools/cw-build.sh` again and it shows the build that is running.
+
+| Command | What it does |
+|---|---|
+| `tools/cw-build.sh` | incremental: only what changed (10–30 minutes after the first build) |
+| `tools/cw-build.sh --clean` | rebuilds every package, keeps the toolchain |
+| `tools/cw-build.sh --dirclean` | rebuilds everything, the toolchain included |
+| `tools/cw-build.sh --check` | the feed, patch, pin and config checks in a few minutes, compiles nothing |
+
+The images are in `~/cw/openwrt/bin/targets/qualcommax/ipq807x/`; copy the one you want
+elsewhere, because the next build clears that folder.
+
+<details>
+<summary>With Docker instead (any distribution)</summary>
 
 ```sh
 cd ~/cw
@@ -170,48 +202,14 @@ docker run --rm -e CW_MAX_IMAGE_MB=130 -e CW_BUILD_OPT_ARTIFACTS=0 -e CW_CCACHE=
   cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build 2>&1 | tee ~/cw/build.log
 ```
 
-*Option B: plain Ubuntu or Debian*
+Rebuild the Docker image only when `docker/Dockerfile` changes. In a second terminal,
+`tools/cw-build-progress.sh ~/cw/build.log ~/cw/openwrt` shows the progress.
 
-```sh
-sudo apt-get update && sudo apt-get install -y build-essential clang lld flex bison g++ gawk \
-  gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev python3 python3-setuptools \
-  rsync swig unzip zlib1g-dev file wget zstd texinfo curl ca-certificates jq xz-utils \
-  meson ninja-build pkg-config
-cd ~/cw/cleanwrt-aw1000
-sudo env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \
-  tools/cw-release-build.sh ~/cw/openwrt < /dev/null 2>&1 | tee ~/cw/build.log
-```
-
-The script runs as root (it sets the overlay's file owners). In a root shell `~` is `/root`,
-so write the paths out in full there: `/home/<you>/cw/...`.
-
-The build is done when the log ends with `IMAGE_OK …sysupgrade.bin` and its sha256. The images
-are in `~/cw/openwrt/bin/targets/qualcommax/ipq807x/`; copy the one you want elsewhere, because
-the next build clears that folder.
-
-**A progress bar:** run the build in the background with its output in a log, and the bar in front:
-
-```sh
-cd ~/cw/cleanwrt-aw1000
-sudo sh -c "env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \
-  tools/cw-release-build.sh $HOME/cw/openwrt < /dev/null > $HOME/cw/build.log 2>&1 &"
-tools/cw-build-progress.sh ~/cw/build.log ~/cw/openwrt
-```
-
-Ctrl+C stops only the bar; run the second command again to pick the build up.
+</details>
 
 **Build again** after a `git pull` in `~/cw/cleanwrt-aw1000`: the same command. The script resets
-feeds, patches and pins to what the repository says, and rebuilds only what changed.
-
-| Option | What it does |
-|---|---|
-| no flag | incremental: only what changed (10–30 minutes) |
-| `--clean` (at the end of the command) | rebuilds every package, keeps the toolchain |
-| `--dirclean` | rebuilds everything, the toolchain included |
-| `CW_CHECK_ONLY=1` | runs the feed, patch, pin and config checks in a few minutes, compiles nothing |
-
-Clone OpenWrt again only when `OPENWRT_TAG` changes, and rebuild the Docker image only when
-`docker/Dockerfile` changes.
+feeds, patches and pins to what the repository says, and rebuilds only what changed. Clone OpenWrt
+again only when `OPENWRT_TAG` changes (the command tells you).
 
 **Release key:** your own build has no release signing key (it is a CI secret), so the log notes
 `local build - the tree's feed key is not the release key`. That image is fine to flash; only the

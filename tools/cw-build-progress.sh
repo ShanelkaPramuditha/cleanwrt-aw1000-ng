@@ -76,6 +76,13 @@ last_phase= last_step=-1 last_print=0
 
 start=$(date +%s)
 cols=$(tput cols 2>/dev/null || echo 100)
+if [ "$PLAIN" = 0 ]; then
+	cG=$(printf '\033[32m') cC=$(printf '\033[36m') cD=$(printf '\033[2m') cB=$(printf '\033[1m') cN=$(printf '\033[0m')
+else
+	cG= cC= cD= cB= cN=
+fi
+spin='|/-\\'
+tick=0
 [ "$cols" -lt 60 ] && cols=60
 barw=$((cols - 62)); [ "$barw" -lt 10 ] && barw=10; [ "$barw" -gt 40 ] && barw=40
 
@@ -97,12 +104,22 @@ while :; do
 		/^IMAGE_OK / { ok = 1 }
 		/^IMAGE_BUILT_WITH_PRIOR_ERRORS / { ok = 0 }
 		/=== CW RELEASE BUILD END/ { end = 1 }
+		/^== CW_CHECK_ONLY=1: .* passed/ { end = 1; ok = 1; ph = "checks" }
 		END {
 			if (ph == "") ph = "setup"
 			if (cur == "") cur = "-"
 			printf "%s %d %s %d %d\n", ph, done + 0, cur, end + 0, ok + 0
 		}')
 	phase=$1 done=$2 cur=$3 ended=$4 ok=$5
+	# a build that died without its end line (killed, or the machine ran out of memory):
+	# CW_PIDFILE names the build's process (tools/cw-build.sh sets it)
+	if [ "$ended" = 0 ] && [ -n "${CW_PIDFILE:-}" ] && [ -s "$CW_PIDFILE" ]; then
+		p=$(cat "$CW_PIDFILE")
+		if ! kill -0 "$p" 2>/dev/null && [ ! -d "/proc/$p" ]; then
+			sleep 1   # its last lines may still be on their way into the log
+			grep -q "=== CW RELEASE BUILD END\|^== CW_CHECK_ONLY=1: .* passed" "$LOG" || { ended=1; ok=0; }
+		fi
+	fi
 	# the build's own start time, when the log has it, so a watcher started late still times it
 	if [ -z "${bstart:-}" ]; then
 		d=$(sed -n 's/.*=== CW RELEASE BUILD START \(.*\) (clean=.*/\1/p' "$LOG" | head -1)
@@ -121,12 +138,24 @@ while :; do
 	fi
 	[ "$ended" = 1 ] && { pct=100; tot_s=$done; left="0:00:00"; }
 	fill=$((pct * barw / 100))
-	bar=$(printf '%*s' "$fill" '' | tr ' ' '#')$(printf '%*s' $((barw - fill)) '' | tr ' ' '.')
+	if [ "$PLAIN" = 0 ]; then
+		# a solid bar: full blocks done, light shade to go (UTF-8; # and . on other terminals)
+		case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+		*UTF-8* | *utf8* | *UTF8* | *utf-8*) fc='█' ec='░' ;;
+		*) fc='#' ec='.' ;;
+		esac
+		bar=$(i=0; while [ $i -lt "$fill" ]; do printf '%s' "$fc"; i=$((i + 1)); done)
+		rest=$(i=$fill; while [ $i -lt "$barw" ]; do printf '%s' "$ec"; i=$((i + 1)); done)
+		tick=$(( (tick + 1) % 4 ))
+		sp=$(printf '%s' "$spin" | cut -c$((tick + 1)))
+		[ "$ended" = 1 ] && sp=' '
+	fi
 	curw=$((cols - barw - 52)); [ "$curw" -lt 8 ] && curw=8
 	cur=$(printf '%.*s' "$curw" "$cur")
 	if [ "$PLAIN" = 0 ]; then
-		printf '\r\033[K%-8s [%s] %3d%%  %s/%s  %-*s  %s  left %s' \
-			"$phase" "$bar" "$pct" "$done" "$tot_s" "$curw" "$cur" "$(fmt "$el")" "$left"
+		printf '\r\033[K %s %s%-8s%s %s%s%s%s%s %s%3d%%%s  %s/%s  %s%-*s%s  %s  %sleft %s%s' \
+			"$sp" "$cB" "$phase" "$cN" "$cG" "$bar" "$cD" "$rest" "$cN" "$cB" "$pct" "$cN" \
+			"$done" "$tot_s" "$cC" "$curw" "$cur" "$cN" "$(fmt "$el")" "$cD" "$left" "$cN"
 	elif [ "$phase" != "$last_phase" ] || [ $((pct / 5)) -ne "$last_step" ] ||
 	     [ $((now - last_print)) -ge 600 ] || [ "$ended" = 1 ]; then
 		bar=$(printf '%*s' $((pct / 5)) '' | tr ' ' '#')$(printf '%*s' $((20 - pct / 5)) '' | tr ' ' '.')

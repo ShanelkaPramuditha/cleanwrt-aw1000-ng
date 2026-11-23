@@ -42,6 +42,9 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 - **Local builds finish clean.** A build on your own machine no longer ends with a release-key
   error: the key file is locked down to mode 600 by the build, and a key that is not the release
   key is a note there. Release builds stay strict. See [Building](building.md).
+- **One command for a local build:** `tools/cw-build.sh` clones the tree if needed, builds in the
+  background (from your shell or a root shell), shows a progress display, and ends with the image's
+  path and sha256. See [Building](building.md#one-command).
 - **A progress bar for local builds.** `tools/cw-build-progress.sh` follows the build log and shows
   the phase, the steps done, the package compiling now and the time left. The GitHub Actions
   build prints the same progress as lines in its log. See [Building](building.md#a-progress-bar).

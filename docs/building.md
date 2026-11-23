@@ -104,6 +104,18 @@ The sysupgrade image and a provenance bundle land in `openwrt/bin/targets/qualco
     compiling. Pass it with `-e CW_CHECK_ONLY=1` to `docker run`. It takes a few minutes and
     catches almost every configuration mistake.
 
+### One command
+
+`tools/cw-build.sh` is the whole local build in one command: it finds the repository and the tree
+(`openwrt` next to it, or `--tree DIR`) from where it is, so it works the same from your shell or
+a root shell; clones the tree at `OPENWRT_TAG` when there is none; starts
+`tools/cw-release-build.sh` as root in its own session with the local defaults
+(`CW_MAX_IMAGE_MB=130`, `CW_BUILD_OPT_ARTIFACTS=0`, `CW_CCACHE=1`); writes the output to
+`build.log` next to the repository; and shows the progress below. It ends with the image's path,
+size and sha256, or the lines around the error. Ctrl+C stops only the display and closing the
+terminal does not stop the build; run it again and it attaches to the running build. Flags:
+`--clean`, `--dirclean`, `--check`.
+
 ### A progress bar
 
 `tools/cw-build-progress.sh <build.log> <openwrt-tree>` follows a running build's log and shows
@@ -114,10 +126,11 @@ the time left. It exits when the build ends: 0 with `IMAGE_OK`, 1 otherwise.
 Run the build in the background with its output in a log, and the bar in front of it:
 
 ```sh
-cd /home/ubuntu/cw/cleanwrt-aw1000
-sudo sh -c 'env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \
-  tools/cw-release-build.sh /home/ubuntu/cw/openwrt < /dev/null > /home/ubuntu/cw/build.log 2>&1 &'
-tools/cw-build-progress.sh /home/ubuntu/cw/build.log /home/ubuntu/cw/openwrt
+CW=/home/<you>/cw          # the folder that holds cleanwrt-aw1000 and openwrt
+cd "$CW/cleanwrt-aw1000"
+sudo sh -c "env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \
+  tools/cw-release-build.sh $CW/openwrt < /dev/null > $CW/build.log 2>&1 &"
+tools/cw-build-progress.sh "$CW/build.log" "$CW/openwrt"
 ```
 
 Or run the build as usual, with `| tee build.log`, and the bar in a second terminal. Ctrl+C stops
