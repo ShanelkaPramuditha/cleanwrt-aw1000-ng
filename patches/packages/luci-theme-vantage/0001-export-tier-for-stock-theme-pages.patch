@@ -1,0 +1,68 @@
+Export tier: publish LuCI Bootstrap's colour tokens, mapped onto Vantage's palette
+
+Pages written for the stock themes colour themselves from Bootstrap's exported custom
+properties (--background-color-high, --text-color-highest, --border-color-medium,
+--success-color-high, ...). Bootstrap and Footstrap publish them; Vantage publishes its
+own --v-* tier only, so those pages fall back to the light-mode literals in their
+var() fallbacks. In dark mode that puts white tiles and near-black headings on Vantage's
+charcoal cards: 3gInfo-lite's radio view (Modem -> 3gInfo-lite) is the visible case,
+QModem's signal bars and the AWvoice phone page read the same tokens.
+
+One :root block maps the tier onto the palette tokens. Every value is resolved on <html>,
+where html[data-darkmode] swaps the palette, so the block follows the theme's light/dark
+switch with no second copy. Nothing in vantage.css reads these names, and none of the
+LuCI core views in the image does, so only pages that ask for them change.
+
+Applies to: https://github.com/anothaDev/luci-theme-vantage.git @ v1.2.0 (a7ff63b7)
+Upstream status: local to CleanWRT.
+
+diff --git a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
+index 7d69052..41da23a 100644
+--- a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
++++ b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
+@@ -272,6 +272,45 @@ html[data-darkmode="true"] {
+ 	--v-chart-fill-opacity: .2;
+ }
+ 
++/* The export tier: LuCI Bootstrap's colour tokens, as other themes publish
++   them (Footstrap does too), mapped onto this palette. Pages written for the
++   stock themes read these - 3gInfo-lite's radio view, QModem's progress bars,
++   the AWvoice phone page - and fall back to light-mode literals without them,
++   which put white tiles and near-black text on Vantage's dark cards. One block
++   serves both modes: each value is resolved on <html>, where data-darkmode
++   swaps the palette underneath. Nothing in this stylesheet reads them.
++   (CleanWRT: patches/packages/luci-theme-vantage/) */
++:root {
++	--background-color-high: var(--s2);
++	--background-color-medium: var(--s3);
++	--background-color-low: var(--s1);
++
++	--text-color-highest: var(--text);
++	--text-color-high: var(--text);
++	--text-color-medium: var(--text-2);
++	--text-color-low: var(--text-3);
++
++	--border-color-high: var(--line-2);
++	--border-color-medium: var(--line);
++	--border-color-low: var(--line);
++
++	--primary-color-high: var(--accent-text);
++	--primary-color-medium: var(--accent-line);
++	--primary-color-low: var(--accent-soft);
++
++	--success-color-high: var(--ok-text);
++	--success-color-medium: var(--ok);
++	--success-color-low: var(--ok-soft);
++
++	--warn-color-high: var(--warn-text);
++	--warn-color-medium: var(--warn);
++	--warn-color-low: var(--warn-soft);
++
++	--error-color-high: var(--err-text);
++	--error-color-medium: var(--err);
++	--error-color-low: var(--err-soft);
++}
++
+ /* -------------------------------------------------------------- 2. base */
+ 
+ *, *::before, *::after { box-sizing: border-box; }

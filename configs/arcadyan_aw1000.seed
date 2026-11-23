@@ -165,12 +165,16 @@ CONFIG_PACKAGE_luci-base=y
 # pull a theme in this feed, so without it LuCI renders a fatal error
 # ("Failed to load template 'themes/bootstrap/header'") and the web UI is dead.
 # luci.main.mediaurlbase starts at /luci-static/bootstrap; files/etc/uci-defaults/
-# 96-cw-default-theme switches a fresh install to Footstrap (bootstrap stays
+# 96-cw-default-theme switches a fresh install to Vantage (bootstrap stays
 # installed as the fallback / user choice).
 CONFIG_PACKAGE_luci-theme-bootstrap=y
-# One theme besides the fallback, pinned in configs/local-packages.pin (Apache-2.0):
-# Footstrap is the default and does not write that default itself - the seed selects it and
-# files/etc/uci-defaults/96-cw-default-theme points luci.main.mediaurlbase at it.
+# Two themes besides the fallback, pinned in configs/local-packages.pin.
+# Vantage (GPL-3.0-or-later) is the default, with its Dashboard as the first page after
+# login; files/etc/uci-defaults/29-cw-keep-chosen-theme keeps a router upgraded with its
+# settings on the theme it had, and 96-cw-default-theme points a fresh one at Vantage.
+CONFIG_PACKAGE_luci-theme-vantage=y
+CONFIG_PACKAGE_luci-app-vantage=y
+# Footstrap (Apache-2.0), the previous default, stays selectable.
 CONFIG_PACKAGE_luci-theme-footstrap=y
 # Transitive deps of the luci-mod-* set that a minimal seed must name explicitly,
 # else `make defconfig` drops the whole admin UI (status/network -> admin-full):

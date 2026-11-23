@@ -14,12 +14,22 @@
 # painting them itself, and the form styling written for one theme this image no longer ships
 # comes out: the form is LuCI's own under every theme.
 luci-app-cw-led https://github.com/Pr0Luci/luci-app-cw-led.git a65586cf81aff771d17183405965b40112d7deea
-# LuCI theme. One third-party theme ships, so the web UI looks the same on every
-# router of this build; it keeps its own package, licence file and pin, and none of
-# it is merged into CleanWRT code. LuCI's own Bootstrap theme stays in the image as
-# the fallback (configs/arcadyan_aw1000.seed names it, so it is not pinned here).
+# LuCI themes. Two third-party themes ship; each keeps its own package, licence file
+# and pin, and none of it is merged into CleanWRT code. LuCI's own Bootstrap theme
+# stays in the image as the fallback (configs/arcadyan_aw1000.seed names it, so it is
+# not pinned here).
 #
-# luci-theme-footstrap: the default theme (files/etc/uci-defaults/96-cw-default-theme).
+# luci-theme-vantage + luci-app-vantage: the default theme
+# (files/etc/uci-defaults/96-cw-default-theme) and its Dashboard, the first page after
+# login. GPL-3.0-or-later, by anothaDev; feed-layout repository, one subdirectory per
+# package, both at the commit tag v1.2.0 points to. Both are noarch luci.mk recipes
+# with their own PKG_VERSION. patches/packages/luci-theme-vantage/ adds the export
+# tier (Bootstrap's --*-color-* tokens) that pages written for the stock themes read.
+luci-theme-vantage https://github.com/anothaDev/luci-theme-vantage.git a7ff63b715bca51effb5ab2d488dfff6cff1b16a
+luci-app-vantage https://github.com/anothaDev/luci-theme-vantage.git a7ff63b715bca51effb5ab2d488dfff6cff1b16a
+#
+# luci-theme-footstrap: the previous default, still selectable under System ->
+# System -> Language and Style; a router upgraded with its settings kept stays on it.
 # Apache-2.0; the package builds its CSS with cat and awk only, so no node toolchain
 # enters the builder image. Pinned at the commit tag v0.14.20 points to. The LuCI feed also
 # carries a `luci-theme-footstrap` by the same author - an older copy, without the glass

@@ -13,12 +13,16 @@
 # The theme directory must exist before anything points at it: a pin that failed
 # to install must leave the working bootstrap in place rather than break the UI.
 #
+# A router upgraded with its settings kept from an image whose default was Footstrap
+# stays on Footstrap: 29-cw-keep-chosen-theme stops Vantage's own first-boot script
+# from taking the base over, and the case above leaves an installed theme alone.
+#
 # CW_ROOT prefixes the paths the script inspects. It is unset in the image and set
 # only by tools/tests/cw-default-theme-test.sh.
 ROOT="${CW_ROOT:-}"
 [ -f "$ROOT/etc/config/luci" ] || exit 0
 
-want='footstrap'
+want='vantage'
 base="/luci-static/$want"
 [ -d "$ROOT/www$base" ] || exit 0
 
@@ -43,9 +47,9 @@ case "$cur" in
 esac
 
 if [ "$need" = 1 ]; then
-	# Footstrap registers its own theme entry; naming it here keeps the switch
+	# Vantage registers its own theme entry; naming it here keeps the switch
 	# working even if that registration is deferred to a later first-boot script.
-	uci set "luci.themes.Footstrap=$base"
+	uci set "luci.themes.Vantage=$base"
 	uci set "luci.main.mediaurlbase=$base"
 	changed=1
 fi
@@ -60,6 +64,6 @@ fi
 [ "$changed" = 1 ] || exit 0
 
 uci commit luci
-[ "$need" = 1 ] && logger -t cw-firstboot "luci: default theme set to Footstrap"
+[ "$need" = 1 ] && logger -t cw-firstboot "luci: default theme set to Vantage"
 [ -n "$dropped" ] && logger -t cw-firstboot "luci: dropped theme entries without a directory:$dropped"
 exit 0

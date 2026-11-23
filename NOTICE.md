@@ -53,6 +53,8 @@ upstream's, unchanged.
 | 2026-11-15 | `files/etc/config/qbittorrent`, `files/etc/uci-defaults/53-cw-qbittorrent-port` | added: qBittorrent's web UI on 8081, off the provisioning listener's 8080, for new installs and upgraded configurations |
 | 2026-11-15 | `files/etc/uci-defaults/95-cw-drop-removed-apps`, `docs/install-apps.md`, `docs/` | modified: AdGuard Home and p910nd settings are kept for a reinstall; dnsmasq returns to port 53 while AdGuard Home is not installed; AdGuard Home install and setup guide |
 | 2026-11-15 | `tools/cw-release-build.sh`, `.github/workflows/check.yml` | modified: source downloads retry up to three times (GitHub rate limits on shared runners), and the check judges by make's result instead of mirror messages that precede a successful fallback |
+| 2026-11-23 | `configs/local-packages.pin`, `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/29-cw-keep-chosen-theme`, `files/etc/uci-defaults/96-cw-default-theme`, `tools/tests/cw-default-theme-test.sh`, `tools/tests/cw-keep-chosen-theme-test.sh`, `docs/` | added / modified: Vantage (theme + Dashboard, v1.2.0) pinned and made the default; Footstrap kept as a second theme; a keep-settings upgrade stays on the theme it had |
+| 2026-11-23 | `patches/packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages.patch`, `patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch` | added: dark mode for pages written for the stock themes under Vantage; the LED page lamps follow the theme switch |
 | 2026-11-14 | `.github/workflows/build.yml` | modified: Go build cache (`tmp/go-build`) kept between CI runs |
 | 2026-11-14 | `.devcontainer/cw-dev.sh`, `.devcontainer/devcontainer.json` | modified: local builds skip the optional cw-opt feed set unless `CW_BUILD_OPT_ARTIFACTS=1` |
 | 2026-11-14 | `README.md`, `NOTICE.md` | modified: fork notice, change list, credits |
@@ -75,7 +77,8 @@ upstream.
 | ath11k firmware | Qualcomm Atheros firmware licence (`LICENSE.qca_firmware`) | OpenWrt package Makefile |
 | AWvoice (kernel module, phone daemon, LuCI page) | GPL-2.0-only | shipped with the release |
 | `luci-app-cw-led` (this project's LED app) | GPL-2.0-only | <https://github.com/Pr0Luci/luci-app-cw-led> |
-| `luci-theme-footstrap` (the theme the image selects) | Apache-2.0, from its own upstream | pinned commit in `configs/local-packages.pin` |
+| `luci-theme-vantage`, `luci-app-vantage` (the theme the image selects, and its Dashboard) | GPL-3.0-or-later, © 2026 anothaDev, from its own upstream | `LICENSE` + `NOTICE` @ pinned commit in `configs/local-packages.pin` |
+| `luci-theme-footstrap` (the previous default, still selectable) | Apache-2.0, from its own upstream | pinned commit in `configs/local-packages.pin` |
 | `luci-theme-bootstrap` (LuCI's own, the fallback) | Apache-2.0 | LuCI feed @ pinned commit |
 
 Every other package's licence is listed, per package, in the generated

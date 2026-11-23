@@ -14,14 +14,16 @@ CleanWRT is built from a few small repositories, written by
 | [cleanwrt-aw1000](https://github.com/ShanelkaPramuditha/cleanwrt-aw1000-ng) | the firmware: build configuration, patches, rootfs overlay, workflows and this documentation | [Build from source](building.md), [Contributing](contributing.md) |
 | [openwrt-aw1000-voice-awvoice](https://github.com/Pr0Luci/openwrt-aw1000-voice-awvoice) | AWvoice: the kernel module, the phone daemon and the LuCI page for the RJ11 port | [AWvoice](awvoice.md) |
 | [luci-app-cw-led](https://github.com/Pr0Luci/luci-app-cw-led) | the front-panel LED daemon and its LuCI page | [Front-panel LEDs](leds.md) |
-| [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) | the LuCI theme the image selects (upstream, unpatched) | [The Footstrap theme](theme.md) |
+| [luci-theme-vantage](https://github.com/anothaDev/luci-theme-vantage) | the LuCI theme the image selects, and its Dashboard (upstream, one CSS patch) | [Themes](theme.md) |
+| [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) | the previous default theme, still in the image (upstream, two login-page patches) | [Themes](theme.md#footstrap) |
 
 ## How they fit together
 
 ```text
 cleanwrt-aw1000-ng  (feeds.conf.default, configs/local-packages.pin, patches/)
    ├── pins  luci-app-cw-led      → LED daemon and page
-   ├── pins  luci-theme-footstrap → default theme
+   ├── pins  luci-theme-vantage   → default theme and Dashboard
+   ├── pins  luci-theme-footstrap → second theme
    ├── pins  AWvoice              → phone port
    └── pins  OpenWrt, LuCI, QModem, 3ginfo-lite, ... (upstream feeds)
 ```

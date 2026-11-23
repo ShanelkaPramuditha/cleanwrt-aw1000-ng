@@ -61,13 +61,13 @@ chmod +x "$WORK/bin/uci"
 fail=0
 noted() { printf '  %-58s %s\n' "$1" "$2"; [ "$2" = ok ] || fail=1; }
 
-# A case is the config file's lines plus the theme directories that exist. Bootstrap
-# and Footstrap are in every image, so they are always there; more can be added.
+# A case is the config file's lines plus the theme directories that exist. Bootstrap,
+# Footstrap and Vantage are in every image, so they are always there; more can be added.
 run() { # <config-lines> [extra-dir...]
 	ROOT="$WORK/root"
 	rm -rf "$ROOT"
 	mkdir -p "$ROOT/etc/config" "$ROOT/www/luci-static/bootstrap" \
-	         "$ROOT/www/luci-static/footstrap"
+	         "$ROOT/www/luci-static/footstrap" "$ROOT/www/luci-static/vantage"
 	printf '%s\n' "$1" > "$ROOT/etc/config/luci"
 	shift
 	for d in "$@"; do mkdir -p "$ROOT/www/luci-static/$d"; done
@@ -83,13 +83,14 @@ case_run() { # <what> <expected log> <config lines> [extra-dir...]
 	[ "$got" = "$want" ] && noted "$what" ok || noted "$what" "FAIL: did [$got], expected [$want]"
 }
 
-set_strap="set luci.themes.Footstrap=/luci-static/footstrap set luci.main.mediaurlbase=/luci-static/footstrap commit luci"
-repair="delete luci.themes.Argon set luci.themes.Footstrap=/luci-static/footstrap set luci.main.mediaurlbase=/luci-static/footstrap commit luci"
+set_def="set luci.themes.Vantage=/luci-static/vantage set luci.main.mediaurlbase=/luci-static/vantage commit luci"
+repair="delete luci.themes.Argon set luci.themes.Vantage=/luci-static/vantage set luci.main.mediaurlbase=/luci-static/vantage commit luci"
 
 echo "the base:"
-case_run "already Footstrap: nothing is written" "" "luci.main.mediaurlbase=/luci-static/footstrap"
-case_run "the stock bootstrap base is replaced" "$set_strap" "luci.main.mediaurlbase=/luci-static/bootstrap"
-case_run "a base whose directory is gone is repaired" "$set_strap" "luci.main.mediaurlbase=/luci-static/argon"
+case_run "already Vantage: nothing is written" "" "luci.main.mediaurlbase=/luci-static/vantage"
+case_run "Footstrap, the previous default, is left alone" "" "luci.main.mediaurlbase=/luci-static/footstrap"
+case_run "the stock bootstrap base is replaced" "$set_def" "luci.main.mediaurlbase=/luci-static/bootstrap"
+case_run "a base whose directory is gone is repaired" "$set_def" "luci.main.mediaurlbase=/luci-static/argon"
 case_run "a chosen theme that is installed is left alone" "" "luci.main.mediaurlbase=/luci-static/custom" custom
 
 echo "the design selector:"
@@ -118,8 +119,8 @@ CW_ROOT="$WORK/none" PATH="$WORK/bin:$PATH" CFG="$WORK/none/none" LOG="$WORK/log
 rm -rf "$WORK/bare"; mkdir -p "$WORK/bare/etc/config" "$WORK/bare/www/luci-static/bootstrap"
 : > "$WORK/bare/etc/config/luci"; : > "$WORK/log"
 CFG="$WORK/bare/etc/config/luci" LOG="$WORK/log" CW_ROOT="$WORK/bare" PATH="$WORK/bin:$PATH" sh "$SCRIPT"
-[ ! -s "$WORK/log" ] && noted "Footstrap not installed: the stock theme stays" ok ||
-	noted "Footstrap not installed" "FAIL: wrote $(tr '\n' ' ' < "$WORK/log")"
+[ ! -s "$WORK/log" ] && noted "Vantage not installed: the stock theme stays" ok ||
+	noted "Vantage not installed" "FAIL: wrote $(tr '\n' ' ' < "$WORK/log")"
 
 echo
 [ "$fail" = 0 ] && echo "default-theme: all cases passed" || { echo "default-theme: failures above" >&2; exit 1; }

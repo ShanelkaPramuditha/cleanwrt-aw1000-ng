@@ -94,8 +94,8 @@ router supported?" to a flashed, working router, and tell you how to get out if 
   See [the phone port](awvoice.md), and its [quiet hours](awvoice/quiet-hours.md).
 - **A 5G stack that works out of the box:** QModem UI, auto-dial, dual-stack IPv4/IPv6 data,
   TTL control, SMS, a registration fix for data-only SIMs, per-interface vnStat accounting.
-- **A modern interface:** the [Footstrap theme](theme.md) with dark and light mode, a top bar or a
-  sidebar, five palettes, an accent colour of your choice and a photo or pattern behind the pages.
+- **A modern interface:** the [Vantage theme](theme.md) with an icon rail, a Ctrl+K command
+  palette, dark and light mode and a live Dashboard; [Footstrap](theme.md#footstrap) is one click away.
 - **Real front-panel LEDs:** a small daemon that shows 5G type, signal quality and internet
   reachability, with a night mode. See [Front-panel LEDs](leds.md).
 - **Proxy and VPN tools:** Nikki (mihomo, Clash profiles, Zashboard dashboard), WireGuard and OpenVPN,

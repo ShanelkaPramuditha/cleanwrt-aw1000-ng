@@ -1,0 +1,33 @@
+Lamp colours follow the theme's own light/dark switch
+
+The page draws the LED lamps in a dark-surface palette and switches to a light one when
+the browser prefers light, unless the theme says dark through data-theme. Footstrap sets
+data-theme; Vantage, the image's default theme, sets only data-darkmode. Under Vantage the
+lamps therefore followed the operating system instead of the theme's toggle: a light
+system with Vantage in dark mode drew the light palette on a dark card, and a dark system
+with Vantage in light mode drew the near-black "off" lamp and the pale white lamp on a
+light one.
+
+data-darkmode is read as well, in both directions. Footstrap sets it beside data-theme, so
+nothing changes under Footstrap. LuCI's Bootstrap sets data-darkmode too (from the system
+for "Bootstrap", fixed for "BootstrapDark" and "BootstrapLight"), so its forced variants
+now get the matching lamps as well.
+
+Applies to: https://github.com/Pr0Luci/luci-app-cw-led.git @ a65586cf, after 0001.
+Upstream status: local to CleanWRT.
+
+diff --git a/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js b/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js
+index cbf0f37..766fede 100644
+--- a/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js
++++ b/luci-app-cw-led/htdocs/luci-static/resources/view/cw-led/settings.js
+@@ -53,8 +53,8 @@ var CW_CSS = [
+ 	'--cl-ink:var(--ax-accent-text,#0f766e);--cl-acc:var(--ax-accent,#14b8a6);--cl-accink:#0b1f1d;--cl-tint:var(--ax-accent-dim,rgba(20,184,166,.14));',
+ 	'--cl-mono:var(--ax-mono,ui-monospace,monospace);--cl-h:40px;',
+ 	'--cl-g:#34d399;--cl-b:#60a5fa;--cl-r2:#f87171;--cl-am:#fbbf24;--cl-w:#e6eaee;--cl-off:#0e1114;display:flex;flex-direction:column;gap:16px;color:var(--cl-fg)}',
+-	'@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .cw-led-page{--cl-g:#2e8b57;--cl-b:#2563c9;--cl-r2:#b91c1c;--cl-am:#b7791f;--cl-w:#fff;--cl-off:#f3f4f6}}',
+-	':root[data-theme="light"] .cw-led-page{--cl-g:#2e8b57;--cl-b:#2563c9;--cl-r2:#b91c1c;--cl-am:#b7791f;--cl-w:#fff;--cl-off:#f3f4f6}',
++	'@media (prefers-color-scheme:light){:root:not([data-theme="dark"]):not([data-darkmode="true"]) .cw-led-page{--cl-g:#2e8b57;--cl-b:#2563c9;--cl-r2:#b91c1c;--cl-am:#b7791f;--cl-w:#fff;--cl-off:#f3f4f6}}',
++	':root[data-theme="light"] .cw-led-page,:root[data-darkmode="false"] .cw-led-page{--cl-g:#2e8b57;--cl-b:#2563c9;--cl-r2:#b91c1c;--cl-am:#b7791f;--cl-w:#fff;--cl-off:#f3f4f6}',
+ 	'@media (max-width:700px){.cw-led-page{--cl-h:44px}}',
+ 	'.cw-c-green{--c:var(--cl-g)}.cw-c-blue{--c:var(--cl-b)}.cw-c-red{--c:var(--cl-r2)}.cw-c-amber{--c:var(--cl-am)}.cw-c-white{--c:var(--cl-w)}',
+ 

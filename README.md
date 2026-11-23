@@ -45,7 +45,7 @@ checksums and a provenance bundle.
 |---|---|
 | **AWvoice, a phone on the router** | Plug an ordinary desk phone into the RJ11 socket and make and take calls over your SIM. Caller id, call waiting, hold, a three-way join, recall of a held call, a call log, call recordings, an answering machine, speed dial, call blocking and alarm calls. No extra box, no PBX, no SIP account. |
 | **5G that just works** | QModem, auto-dial and auto-recovery, dual-stack IPv4/IPv6, SMS, TTL control, per-interface data usage, and a registration fix for data-only SIMs. |
-| **A modern interface** | Footstrap: dark or light mode, a top bar or a sidebar, five palettes, an accent colour you choose, frosted surfaces, and a photo or pattern behind the pages. |
+| **A modern interface** | Vantage: a console-style theme with an icon rail, breadcrumbs, page tabs, a Ctrl+K command palette, light and dark modes, and a live Dashboard as the first page. Footstrap stays one click away. |
 | **LEDs that mean something** | The 5G LED shows SA or NSA, the signal LED shows quality, the internet LED runs a real connectivity check, and night mode switches them off at bedtime. |
 | **Tools, but off by default** | Nikki (mihomo with your Clash profiles and a dashboard), WireGuard, OpenVPN, DLNA and file sharing in the image; Tailscale, Cloudflare Tunnel, Syncthing and qBittorrent one `apk add` away. Nothing listens until you tick **Enable**. |
 | **Careful defaults** | HTTPS for the admin UI, no hidden remote access, BBR congestion control, pinned LuCI so an `apk upgrade` cannot undo the build. |
@@ -162,7 +162,8 @@ package feed.
 | [cleanwrt-aw1000](https://github.com/ShanelkaPramuditha/cleanwrt-aw1000-ng) | this repository (fork of [upstream](https://github.com/Pr0Luci/cleanwrt-aw1000)): configuration, patches, overlay, workflows, documentation |
 | [AWvoice](https://github.com/Pr0Luci/openwrt-aw1000-voice-awvoice) | the phone port: kernel module, daemon and LuCI page |
 | [luci-app-cw-led](https://github.com/Pr0Luci/luci-app-cw-led) | the front-panel LED daemon and its page |
-| [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) | the web interface: the theme the image selects |
+| [luci-theme-vantage](https://github.com/anothaDev/luci-theme-vantage) | the web interface: the theme the image selects, and its Dashboard |
+| [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) | the previous default theme, still selectable |
 
 ## Help and contributions
 
@@ -189,6 +190,8 @@ package feed.
 | Leftover configs of the removed apps cleaned up on a keep-settings upgrade | `files/etc/uci-defaults/95-cw-drop-removed-apps` |
 | CI caches the host tools, the cross toolchain and Go's build cache between runs | `.github/workflows/build.yml` |
 | A page for maintaining the fork | `docs/fork-maintenance.md`, `mkdocs.yml` |
+| Vantage is the default theme, with its Dashboard; Footstrap stays selectable, and a router upgraded with its settings kept stays on the theme it had | `configs/local-packages.pin`, `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/29-cw-keep-chosen-theme`, `files/etc/uci-defaults/96-cw-default-theme`, `tools/tests/`, `docs/` |
+| Pages written for the stock themes follow Vantage's dark mode (3gInfo-lite, QModem, AWvoice), and the LED page's lamps follow the theme's switch | `patches/packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages.patch`, `patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch` |
 | The login card is centred on the screen | `patches/packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport.patch` |
 | OpenClash no longer built for the optional feed (Nikki runs the same Clash profiles) | `feeds.conf.default`, `tools/`, `files/etc/`, `.devcontainer/cw-dev.sh`, `docs/` |
 | A missing or partly deleted OpenWrt tree stops the build in seconds instead of failing hours later | `tools/cw-release-build.sh` |

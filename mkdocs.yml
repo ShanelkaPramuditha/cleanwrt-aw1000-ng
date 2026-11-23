@@ -1,5 +1,5 @@
 site_name: CleanWRT
-site_description: OpenWrt firmware for the Arcadyan AW1000 5G router with AWvoice, an RJ11 phone port with VoLTE calls, a 5G modem stack and the Footstrap interface.
+site_description: OpenWrt firmware for the Arcadyan AW1000 5G router with AWvoice, an RJ11 phone port with VoLTE calls, a 5G modem stack and the Vantage interface.
 site_url: https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/
 repo_url: https://github.com/ShanelkaPramuditha/cleanwrt-aw1000-ng
 repo_name: ShanelkaPramuditha/cleanwrt-aw1000-ng
@@ -94,7 +94,7 @@ nav:
   - Using CleanWRT:
       - The 5G modem: modem.md
       - Front-panel LEDs: leds.md
-      - The Footstrap theme: theme.md
+      - Themes: theme.md
       - Security: features/security.md
       - Remote access: features/remote-access.md
       - VPN and proxies: features/vpn-proxy.md

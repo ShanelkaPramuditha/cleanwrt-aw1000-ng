@@ -193,6 +193,7 @@ than shipping a half-applied change.
 
 | patch | what it changes |
 |---|---|
+| `packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages` | Vantage publishes LuCI Bootstrap's colour tokens (`--background-color-high`, `--text-color-highest`, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text |
 | `packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo` | one line: the login page shows the CleanWRT logo where the theme prints the router's hostname. The image file lives outside the theme's own directory, so a theme update can neither overwrite it nor collide with the patch |
 | `packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport` | the login card sits in the middle of the screen instead of 7vh from the top; on a screen shorter than the card the page scrolls from the top as before |
 
@@ -201,6 +202,7 @@ than shipping a half-applied change.
 | patch | what it changes |
 |---|---|
 | `packages/awvoice-phoned/0001-indicator-dark-for-night-mode` | one ubus method, `awvoice indicator_dark {dark}`: a memory-only hold that keeps the phone LED dark while the line works underneath. Nothing is written to the phone's settings, and a restart clears it |
+| `packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch` | the LED lamps on the settings page take their light or dark colours from the theme's own switch (`data-darkmode`, which Vantage, Footstrap and Bootstrap all set) instead of only the browser's preference |
 | `packages/luci-app-cw-led/0001-night-mode-phone-led` | Phone joins *Keep on during night*: outside the keep-on list, night mode asks the phone service for that hold, re-sends it about once a minute and releases it at the end of the window or when the daemon stops. Phone is exempt by default, and added once to an older config, so nothing goes dark unasked |
 
 ## Changing a patch or moving a pin

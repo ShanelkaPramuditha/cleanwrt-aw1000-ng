@@ -1,0 +1,31 @@
+#!/bin/sh
+# Keep the theme a router already uses when Vantage arrives with an upgrade.
+#
+# Vantage's own first-boot script (30_luci-theme-vantage) selects Vantage whenever its
+# luci.themes entry is new. On a fresh flash that is what this image wants. After a
+# sysupgrade that kept the settings, the entry is new too - the previous image did not
+# carry Vantage - and the script would move a router off the theme it was on. This
+# runs just before it (uci-defaults run in name order) and, on such a router,
+# registers the entry first, so Vantage is added to the design list and the base stays.
+#
+# Left to Vantage's script: no base at all, the stock bootstrap base (a fresh flash, or
+# a router that never left it - 96-cw-default-theme moves that one too), and a base
+# whose directory is gone (96-cw-default-theme would repair that to Vantage anyway).
+#
+# CW_ROOT prefixes the paths the script inspects. It is unset in the image and set
+# only by tools/tests/cw-keep-chosen-theme-test.sh.
+ROOT="${CW_ROOT:-}"
+[ -f "$ROOT/etc/config/luci" ] || exit 0
+[ -d "$ROOT/www/luci-static/vantage" ] || exit 0
+uci -q get luci.themes.Vantage >/dev/null 2>&1 && exit 0
+
+cur=$(uci -q get luci.main.mediaurlbase)
+case "$cur" in
+	''|/luci-static/bootstrap|/luci-static/vantage) exit 0 ;;
+esac
+[ -d "$ROOT/www$cur" ] || exit 0
+
+uci set luci.themes.Vantage=/luci-static/vantage
+uci commit luci
+logger -t cw-firstboot "luci: kept $cur; Vantage added to the design list"
+exit 0
