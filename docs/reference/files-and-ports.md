@@ -15,7 +15,6 @@ creates; nothing is a guess.
 |---|---|---|
 | `/etc/config/awvoice` | the AWvoice page, or `uci` | the line, the network side, the quiet-hours windows, the phone book |
 | `/etc/config/cw-led` | the LED Management page, or `uci` | the daemon's settings. A package conffile, so an upgrade keeps your changes |
-| `/etc/config/footstrap` | the theme's page, or the image's first-boot script | the look. A package conffile |
 | `/etc/config/qmodem_sip` | the SIP service's package, edited on the AWvoice page | the network phone's account and media socket |
 | `/etc/config/uhttpd` | OpenWrt, extended by this image | the admin server, and the plain listener that serves a provisioning file |
 | `/etc/config/{network,wireless,system,dropbear,firewall}` | OpenWrt | the usual four, with this image's defaults |
@@ -52,8 +51,8 @@ creates; nothing is a guess.
 
 | path | what it is |
 |---|---|
-| `/etc/footstrap/login-bg`, `/etc/footstrap/pattern.svg` | the two files that make the image's background. The theme lists this directory in its own keep file, so a `sysupgrade` keeps whatever you uploaded there |
-| `/www/luci-static/cw-branding/login-logo.png` | the branding logo the login page shows. Outside the theme's directory, so a theme update can neither overwrite it nor collide with the patch that places it |
+| `/etc/uhttpd.crt`, `/etc/uhttpd.key` | LuCI's HTTPS certificate and key. On a fresh flash `cw-https-cert` makes them with the LAN address, the hostname and `<hostname>.lan` in them; run it again after changing the LAN address |
+| `/etc/cw-wireguard-restore` | present only while a WireGuard tunnel waits for WireGuard to be installed again after an upgrade (`55-cw-wireguard-restore`) |
 | `/var/run/qmodem_voip/sip.conf` | the derived credential file the SIP service actually reads. `/etc/config/qmodem_sip` is the record; this file is generated from it at start and on reload |
 | `/var/lock/cw-led-at.lock` | the LED daemon's claim on the modem's AT port while it is asking a question |
 | `/proc/mtd`, `/sys/class/leds/*` | the flash layout the [MTD page](../mtd-layout.md) is about, and the lamps the LED daemon writes |

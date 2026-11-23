@@ -32,11 +32,25 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 - **WireGuard is no longer in the image** (its kernel module, `wireguard-tools` and LuCI's WireGuard
   protocol), and with it the empty *Status → WireGuard* page. Tailscale is the VPN the image ships.
   WireGuard is one install away: `apk add kmod-wireguard wireguard-tools luci-proto-wireguard`.
-  **If you run a WireGuard tunnel on the router**, install those packages again right after
-  upgrading: until then that interface stays down (its settings are kept). See
+  A router that runs a WireGuard tunnel gets it installed again by itself once it is online after
+  the upgrade (below); until then that interface is down. See
   [VPN and proxies](features/vpn-proxy.md#wireguard).
+- **SSH refuses root until a root password is set.** Stock OpenWrt lets anyone who reaches
+  port 22 log in as root with no password while none is set; this image does not. Set the password
+  in LuCI (it asks on the first login) and SSH works at once. Failsafe mode still opens a shell with
+  no password, for recovery. If you only ever used SSH without a password, set one in LuCI first.
+- **"Not secure" can go away for good.** The router's HTTPS certificate now names its LAN address
+  and `cleanwrt.lan`, so trusting it once in your browser or computer ends the warning. A router
+  upgraded with its settings kept keeps its old certificate: run `cw-https-cert` to make the new
+  kind. See [Security](features/security.md#why-the-browser-says-not-secure).
+- **WireGuard comes back by itself** on a router that ran a WireGuard tunnel: the first time it is
+  online after the upgrade, it installs WireGuard again from the official repositories and brings
+  the tunnel up.
+- **Footstrap is no longer in the image.** Vantage is the one theme, so every page is made to look
+  right once. A router that was on Footstrap moves to Vantage when upgraded, and Footstrap's leftover
+  settings are removed. LuCI's Bootstrap stays as the fallback. See [Theme](theme.md).
 - **Tailscale is in the image** (about 10 MiB), with its page under *Services → Tailscale*. It
-  ships off: enable it under *System → Startup*, then log in from its page. A router that was
+  ships off: *Services → Tailscale → Enable and start*, then log in from the same page. A router that was
   logged in to Tailscale before the upgrade stays connected. See
   [Remote access](features/remote-access.md#tailscale).
 - **Local builds finish clean.** A build on your own machine no longer ends with a release-key

@@ -4,7 +4,7 @@
 # Vantage's own first-boot script (30_luci-theme-vantage) selects Vantage whenever its
 # luci.themes entry is new. On a fresh flash that is what this image wants. After a
 # sysupgrade that kept the settings, the entry is new too - the previous image did not
-# carry Vantage - and the script would move a router off the theme it was on. This
+# carry Vantage - and the script would move a router off a theme it still has installed. This
 # runs just before it (uci-defaults run in name order) and, on such a router,
 # registers the entry first, so Vantage is added to the design list and the base stays.
 #

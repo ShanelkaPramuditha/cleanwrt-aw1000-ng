@@ -343,6 +343,24 @@ jobs:
             on' docs/changelog.md |
             sed -E "s#\]\(([a-z0-9/_-]+)\.md(\#[^)]*)?\)#](${site}/\1/\2)#g" > changes.md
           [ -s changes.md ] || { echo "ERROR: docs/changelog.md has no section for $VERSION" >&2; exit 1; }
+          # Size, so creep shows release by release: the sysupgrade image, the change since the
+          # newest published release (its asset of the same kind), and the flash blocks the build's
+          # UBI check counted. Each part is left out when it cannot be read; none fails the build.
+          img=$(ls dist/*-squashfs-sysupgrade.bin | head -1)
+          bytes=$(stat -c %s "$img")
+          mib() { awk -v b="$1" 'BEGIN { printf "%.1f", b / 1048576 }'; }
+          size="**Size:** sysupgrade image $(mib "$bytes") MiB"
+          prev=$(gh release list --exclude-drafts --limit 1 --json tagName -q '.[0].tagName' 2>/dev/null || true)
+          if [ -n "$prev" ] && [ "$prev" != "$tag" ]; then
+            pbytes=$(gh release view "$prev" --json assets \
+              -q '.assets[] | select(.name | endswith("-squashfs-sysupgrade.bin")) | .size' 2>/dev/null | head -1)
+            if [ -n "$pbytes" ]; then
+              d=$((bytes - pbytes)); sign=+; [ "$d" -lt 0 ] && { sign=-; d=$((-d)); }
+              size="$size ($sign$(mib "$d") MiB since $prev)"
+            fi
+          fi
+          pebs=$(sed -n 's/^UBI_PEBS volumes need \([0-9]*\) PEBs.*capacity \([0-9]*\)).*/\1 of \2/p' /mnt/cw/build.log 2>/dev/null | tail -1)
+          [ -n "$pebs" ] && size="$size; $pebs flash blocks of the expanded layout"
           {
             echo "CleanWRT $VERSION for the Arcadyan AW1000 (OpenWrt ${{ steps.ver.outputs.tag }}, qualcommax/ipq807x)."
             echo
@@ -350,6 +368,8 @@ jobs:
             cat changes.md
             echo
             echo "## Files"
+            echo
+            echo "$size."
             echo
             echo "Flash the \`*-squashfs-sysupgrade.bin\` with sysupgrade; read [the flash layout page](${site}/mtd-layout/)"
             echo "first, the image needs the expanded MTD layout. \`sha256sums.cw\` lists the checksums of the images and"

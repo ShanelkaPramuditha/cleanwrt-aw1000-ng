@@ -520,7 +520,7 @@ fi
 #    Named must-haves (belt-and-suspenders; also covers script-added options).
 #    A package the seed does not select is SKIPPED, not failed (an experimental
 #    seed via CW_SEED may omit opt-in packages).
-for p in luci luci-mod-admin-full luci-theme-bootstrap luci-theme-footstrap \
+for p in luci luci-mod-admin-full luci-theme-bootstrap \
          luci-theme-vantage luci-app-vantage \
          libiwinfo rpcd-mod-iwinfo \
          luci-app-qmodem qmodem kmod-qmi_wwan_q qmodem-sipd \

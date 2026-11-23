@@ -61,13 +61,13 @@ chmod +x "$WORK/bin/uci"
 fail=0
 noted() { printf '  %-58s %s\n' "$1" "$2"; [ "$2" = ok ] || fail=1; }
 
-# A case is the config file's lines plus the theme directories that exist. Bootstrap,
-# Footstrap and Vantage are in every image, so they are always there; more can be added.
+# A case is the config file's lines plus the theme directories that exist. Bootstrap and
+# Vantage are in every image, so they are always there; more can be added (an installed
+# theme of the user's own, "custom" below).
 run() { # <config-lines> [extra-dir...]
 	ROOT="$WORK/root"
 	rm -rf "$ROOT"
-	mkdir -p "$ROOT/etc/config" "$ROOT/www/luci-static/bootstrap" \
-	         "$ROOT/www/luci-static/footstrap" "$ROOT/www/luci-static/vantage"
+	mkdir -p "$ROOT/etc/config" "$ROOT/www/luci-static/bootstrap" "$ROOT/www/luci-static/vantage"
 	printf '%s\n' "$1" > "$ROOT/etc/config/luci"
 	shift
 	for d in "$@"; do mkdir -p "$ROOT/www/luci-static/$d"; done
@@ -88,26 +88,29 @@ repair="delete luci.themes.Argon set luci.themes.Vantage=/luci-static/vantage se
 
 echo "the base:"
 case_run "already Vantage: nothing is written" "" "luci.main.mediaurlbase=/luci-static/vantage"
-case_run "Footstrap, the previous default, is left alone" "" "luci.main.mediaurlbase=/luci-static/footstrap"
+case_run "Footstrap, no longer in the image, moves to Vantage" \
+	"delete luci.themes.Footstrap set luci.themes.Vantage=/luci-static/vantage set luci.main.mediaurlbase=/luci-static/vantage commit luci" \
+	"luci.main.mediaurlbase=/luci-static/footstrap
+luci.themes.Footstrap=/luci-static/footstrap"
 case_run "the stock bootstrap base is replaced" "$set_def" "luci.main.mediaurlbase=/luci-static/bootstrap"
 case_run "a base whose directory is gone is repaired" "$set_def" "luci.main.mediaurlbase=/luci-static/argon"
 case_run "a chosen theme that is installed is left alone" "" "luci.main.mediaurlbase=/luci-static/custom" custom
 
 echo "the design selector:"
-case_run "an entry without a directory is removed" "delete luci.themes.Argon commit luci" "luci.main.mediaurlbase=/luci-static/footstrap
+case_run "an entry without a directory is removed" "delete luci.themes.Argon commit luci" "luci.main.mediaurlbase=/luci-static/custom
 luci.themes.Argon=/luci-static/argon
-luci.themes.Bootstrap=/luci-static/bootstrap"
-case_run "an entry that is installed is kept" "" "luci.main.mediaurlbase=/luci-static/footstrap
-luci.themes.Bootstrap=/luci-static/bootstrap"
-case_run "an entry with no path at all is removed" "delete luci.themes.Ghost commit luci" "luci.main.mediaurlbase=/luci-static/footstrap
-luci.themes.Ghost="
+luci.themes.Bootstrap=/luci-static/bootstrap" custom
+case_run "an entry that is installed is kept" "" "luci.main.mediaurlbase=/luci-static/custom
+luci.themes.Bootstrap=/luci-static/bootstrap" custom
+case_run "an entry with no path at all is removed" "delete luci.themes.Ghost commit luci" "luci.main.mediaurlbase=/luci-static/custom
+luci.themes.Ghost=" custom
 case_run "a stale entry and a lost theme together" "$repair" "luci.main.mediaurlbase=/luci-static/argon
 luci.themes.Argon=/luci-static/argon
 luci.themes.Bootstrap=/luci-static/bootstrap"
 
 echo "dead state:"
-case_run "a marker an older image left is removed" "delete luci.cw_state commit luci" "luci.main.mediaurlbase=/luci-static/footstrap
-luci.cw_state=1"
+case_run "a marker an older image left is removed" "delete luci.cw_state commit luci" "luci.main.mediaurlbase=/luci-static/custom
+luci.cw_state=1" custom
 
 echo "what must not happen:"
 rm -rf "$WORK/none"; mkdir -p "$WORK/none"

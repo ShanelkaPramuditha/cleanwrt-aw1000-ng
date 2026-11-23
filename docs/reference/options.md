@@ -84,17 +84,6 @@ after its [patch](../building.md#what-this-build-changes-upstream):
 Nothing in this file is *started* by the image. The service runs when the AWvoice page's switch
 starts it, and no SIP port is open until then.
 
-## `footstrap` — the look
-
-The image writes 27 options on first boot, listed option by option in
-[first-boot defaults](uci-defaults.md) and explained in [the theme](../theme.md). The two that
-behave differently from the rest:
-
-| option | what it holds |
-|---|---|
-| `settings.login_bg` | the **checksum** of the photo file, not a path. It is how the first-boot script recognises its own default |
-| `settings.cw_look` | the name of the look the image applied. A router that already carries it is left alone |
-
 ## `uhttpd` — the web server
 
 | option | shipped | why |

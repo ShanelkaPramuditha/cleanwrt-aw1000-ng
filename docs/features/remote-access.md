@@ -17,8 +17,8 @@ LAN from outside, pick **one** of these. All of them ship **disabled**; enable o
 A mesh VPN, and the easiest option: reach the router, and the devices behind it, from your phone
 or laptop anywhere. It is in the image and ships **off**, so nothing runs until you start it.
 
-1. **Start it:** *System → Startup*, find `tailscale`, click **Enable** and then **Start**.
-2. **Log in:** *Services → Tailscale → Account Settings* → **Login**. A new tab opens Tailscale's sign-in
+1. **Start it:** *Services → Tailscale*, **Enable and start** in the *Service* row at the top.
+2. **Log in:** on the same page, *Account Settings* → **Login**. A new tab opens Tailscale's sign-in
    page; sign in, and the router appears in your Tailscale admin console.
 3. **Optional, reach the whole LAN**, not only the router: on *General Settings*, pick
    `192.168.1.0/24` under **Advertise Routes**, **Save & Apply**, then approve the route in the
@@ -31,7 +31,7 @@ From the command line instead:
 tailscale up        # prints a login URL; open it to authenticate
 ```
 
-**Turn it off again:** *System → Startup* → `tailscale`: **Stop** and **Disable**. Logging out
+**Turn it off again:** *Services → Tailscale* → **Stop and disable**. Logging out
 first (`tailscale logout`) also removes the router from your Tailscale account.
 
 A router upgraded with *Keep settings* keeps its Tailscale login, and stays connected after the
@@ -79,7 +79,7 @@ You can also run your own WireGuard tunnel. It is not in the image: install it f
 
 | | state | what it needs |
 |---|---|---|
-| Tailscale | installed, **off** (System → Startup) | your login |
+| Tailscale | installed, **off** (*Services → Tailscale → Enable and start*) | your login |
 | Cloudflare Tunnel | **not in the image**: `apk add cloudflared luci-app-cloudflared` | your tunnel token |
 | WireGuard | **not in the image**: `apk add kmod-wireguard wireguard-tools luci-proto-wireguard` | a peer config from wherever you keep one |
 | OpenVPN | **not in the image**: `apk add openvpn-openssl luci-app-openvpn` | your `.ovpn` file |

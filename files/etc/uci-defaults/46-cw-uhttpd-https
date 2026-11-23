@@ -6,5 +6,9 @@
 [ -f /etc/config/uhttpd ] || exit 0
 uci set uhttpd.main.redirect_https='1'
 uci commit uhttpd
+# A certificate that names the LAN address, so trusting it once ends the "Not secure"
+# warning (uhttpd's own names only the hostname). Only when there is none yet: a router upgraded
+# with its settings kept keeps its certificate. uhttpd has not started, so no restart.
+[ -x /usr/sbin/cw-https-cert ] && /usr/sbin/cw-https-cert --if-missing --no-restart >/dev/null 2>&1
 logger -t cw-firstboot "uhttpd: HTTP->HTTPS redirect enabled"
 exit 0

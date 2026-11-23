@@ -1,0 +1,63 @@
+#!/bin/sh
+# cw-https-cert - a certificate for LuCI's HTTPS that names the router's own address.
+#
+#   usage: cw-https-cert [--if-missing] [--no-restart]
+#
+# uhttpd makes its own self-signed certificate on first start, but names only DNS:<hostname>
+# in it. A browser checks the address it opened against the names in the certificate, so even
+# after you trust that certificate, https://192.168.1.1 still shows "Not secure": the address
+# is not in it. This makes the certificate with the names you actually type - the LAN address,
+# the hostname and <hostname>.lan - so trusting it once (docs/features/security.md) removes the
+# warning for good.
+#
+#   --if-missing   do nothing when a certificate exists already (first boot uses this, so a
+#                  router upgraded with its settings kept keeps the certificate it has, and any
+#                  trust you gave it)
+#   --no-restart   do not restart uhttpd (first boot: uhttpd has not started yet)
+#
+# Run it again after changing the router's LAN address; the old certificate is replaced, so a
+# browser that trusted it needs the new one. Valid 825 days, the longest Apple's platforms
+# accept for a certificate you trust yourself.
+#
+# CW_ROOT points it at another root (tools/tests/cw-https-cert-test.sh uses that).
+set -eu
+
+R=${CW_ROOT:-}
+CRT="$R/etc/uhttpd.crt"
+KEY="$R/etc/uhttpd.key"
+ifmissing=0 restart=1
+for a in "$@"; do
+	case "$a" in
+	--if-missing) ifmissing=1 ;;
+	--no-restart) restart=0 ;;
+	*) echo "usage: cw-https-cert [--if-missing] [--no-restart]" >&2; exit 2 ;;
+	esac
+done
+
+[ "$ifmissing" = 1 ] && [ -s "$CRT" ] && [ -s "$KEY" ] && exit 0
+
+host=$(uci -q get system.@system[0].hostname || true); [ -n "$host" ] || host=OpenWrt
+# the LAN address without its prefix length (CIDR notation is allowed in the config)
+ip=$(uci -q get network.lan.ipaddr || true); ip=${ip%%/*}
+domain=$(uci -q get dhcp.@dnsmasq[0].domain || true); [ -n "$domain" ] || domain=lan
+lhost=$(printf '%s' "$host" | tr 'A-Z' 'a-z')
+
+set -- -addext extendedKeyUsage=serverAuth \
+	-addext "subjectAltName=DNS:$lhost" -addext "subjectAltName=DNS:$lhost.$domain"
+# one IP entry: px5g keeps every IP name in one shared buffer, so a second would overwrite it
+[ -n "$ip" ] && set -- "$@" -addext "subjectAltName=IP:$ip"
+
+px5g selfsigned -der -days 825 -newkey ec -pkeyopt ec_paramgen_curve:P-256 \
+	-keyout "$KEY.new" -out "$CRT.new" \
+	-subj "/O=CleanWRT/CN=${ip:-$lhost}" "$@" >/dev/null 2>&1 || {
+	rm -f "$KEY.new" "$CRT.new"
+	echo "cw-https-cert: px5g could not make the certificate" >&2
+	exit 1
+}
+chmod 600 "$KEY.new"
+mv "$KEY.new" "$KEY"
+mv "$CRT.new" "$CRT"
+logger -t cw-https-cert "LuCI certificate made for ${ip:+$ip, }$lhost, $lhost.$domain (825 days)"
+[ "$restart" = 1 ] && [ -x "$R/etc/init.d/uhttpd" ] && "$R/etc/init.d/uhttpd" restart >/dev/null 2>&1
+echo "certificate for ${ip:+$ip, }$lhost, $lhost.$domain: $CRT"
+exit 0

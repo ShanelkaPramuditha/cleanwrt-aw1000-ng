@@ -28,15 +28,9 @@ luci-app-cw-led https://github.com/Pr0Luci/luci-app-cw-led.git a65586cf81aff771d
 luci-theme-vantage https://github.com/anothaDev/luci-theme-vantage.git a7ff63b715bca51effb5ab2d488dfff6cff1b16a
 luci-app-vantage https://github.com/anothaDev/luci-theme-vantage.git a7ff63b715bca51effb5ab2d488dfff6cff1b16a
 #
-# luci-theme-footstrap: the previous default, still selectable under System ->
-# System -> Language and Style; a router upgraded with its settings kept stays on it.
-# Apache-2.0; the package builds its CSS with cat and awk only, so no node toolchain
-# enters the builder image. Pinned at the commit tag v0.14.20 points to. The LuCI feed also
-# carries a `luci-theme-footstrap` by the same author - an older copy, without the glass
-# surfaces and the opacity controls the image's look writes - and one package name is built
-# from one recipe only, so the feed's link is removed for the pin to win
-# (tools/cw-reset-pinned-package.sh says so on every build).
-luci-theme-footstrap https://github.com/VizzleTF/luci-theme-footstrap.git a1711eda02fefe87a12590bae9eaa80c373a4bd9
+# Footstrap, the previous default, is no longer in the image: Vantage is the one theme, so a
+# layout fix is made and checked once. A router that was on it moves to Vantage on upgrade
+# (files/etc/uci-defaults/96-cw-default-theme repairs a theme whose directory is gone).
 
 # AWvoice: the RJ11 phone port (feed-layout repo; the three packages live at the
 # repository root). GPL-2.0-only, the board configuration data file included.

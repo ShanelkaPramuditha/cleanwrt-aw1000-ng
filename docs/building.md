@@ -35,8 +35,8 @@ The build needs nothing but the repository.
 
 | Workflow | When | What it does |
 |---|---|---|
-| `check` | every push and pull request | shell syntax, the version label, that the pins resolve, and a **config check**: feeds, patches, pins, defconfig and the seed checks, without compiling |
-| `build` | by hand (*Actions → build → Run workflow*) | builds the image in the Docker environment, with a download cache and a compiler cache, and puts it in the private draft release |
+| `check` | every push and pull request | shell syntax, the version label, that the pins resolve, a **config check** (feeds, patches, pins, defconfig and the seed checks, without compiling), and that every LuCI script and JSON file a patch touches still parses, read as the patched file |
+| `build` | by hand (*Actions → build → Run workflow*) | builds the image in the Docker environment, with a download cache and a compiler cache, and puts it in the private draft release. Its notes carry the image size, the change since the last release and the flash blocks used |
 | `release` | by hand (*Actions → release → Run workflow*) | publishes the draft release as it is. It builds nothing |
 | `feed` | by hand (*Actions → feed → Run workflow*) | builds and publishes the `cw-opt` package feed (qBittorrent, the Syncthing switch) to the site. Needed before the first image that lists the feed, then only when those packages or the OpenWrt base change ([extra packages](extra-packages.md#the-cleanwrt-feed-cw-opt)) |
 
@@ -228,6 +228,7 @@ than shipping a half-applied change.
 | `0001-status-firmware-version-drop-luci-suffix` | the *Firmware Version* row shows the release description alone. A detached-HEAD feed was stamping "LuCI (HEAD detached at …)" into a user-facing page |
 | `0007-upgrade-check-cdn-no-asu` | the newer-version notice: the wording says CleanWRT, the links point at this project's releases rather than the OpenWrt CDN, and the version feed is `shanelkapramuditha.github.io/cleanwrt-aw1000-ng/.versions.json`, and the comparison counts every number of the label (`-R2.2`, `-SP1`), not only the OpenWrt base |
 | `0009-filemanager-default-width` | the file manager's default width, 400 to 800 |
+| `0010-tailscale-service-switch` | the Tailscale page gets a Service row with one button, *Enable and start* or *Stop and disable*, so turning Tailscale on no longer needs *System → Startup* first; the ACL gains `luci` `getInitList` / `setInitAction`, the calls that page makes |
 
 ### Other feeds, and the OpenWrt tree itself
 
@@ -240,6 +241,7 @@ than shipping a half-applied change.
 | `3ginfo/0006-radio-spacing-follows-the-theme` | the radio page takes its card gaps, radii and control height from the theme (Vantage's `--v-*` tokens), so its cards are evenly spaced and its refresh controls stay on one line |
 | `diskman/0001-disk-manager-menu-rename-services-move` | Disk Manager moves from the System menu to Services, with its title and every internal link |
 | `tree/0001-apk-package-timestamps-zero` | `apk mkpkg` runs with a fixed epoch, so two builds of one commit produce identical images |
+| `tree/0002-dropbear-no-blank-root-password` | OpenWrt's dropbear lets root log in over SSH with no password while none is set; that patch is removed, so SSH refuses root until a password exists. Failsafe's own dropbear gains `-B` and keeps its blank-password recovery shell |
 
 ### Themes
 
@@ -247,8 +249,6 @@ than shipping a half-applied change.
 |---|---|
 | `packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages` | Vantage publishes LuCI Bootstrap's colour tokens (`--background-color-high`, `--text-color-highest`, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text |
 | `packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards` | pages that build their own markup: tabs made of bare list items (no link) get the tab look and the selected state, and a card headed by a `<legend>` gets the header bar inside the card instead of on its border. QModem's Advance Modem Settings, Information and SMS pages use both |
-| `packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo` | one line: the login page shows the CleanWRT logo where the theme prints the router's hostname. The image file lives outside the theme's own directory, so a theme update can neither overwrite it nor collide with the patch |
-| `packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport` | the login card sits in the middle of the screen instead of 7vh from the top; on a screen shorter than the card the page scrolls from the top as before |
 
 ### Out-of-feed packages
 

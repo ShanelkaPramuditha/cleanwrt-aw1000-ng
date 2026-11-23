@@ -45,7 +45,7 @@ checksums and a provenance bundle.
 |---|---|
 | **AWvoice, a phone on the router** | Plug an ordinary desk phone into the RJ11 socket and make and take calls over your SIM. Caller id, call waiting, hold, a three-way join, recall of a held call, a call log, call recordings, an answering machine, speed dial, call blocking and alarm calls. No extra box, no PBX, no SIP account. |
 | **5G that just works** | QModem, auto-dial and auto-recovery, dual-stack IPv4/IPv6, SMS, TTL control, per-interface data usage, and a registration fix for data-only SIMs. |
-| **A modern interface** | Vantage: a console-style theme with an icon rail, breadcrumbs, page tabs, a Ctrl+K command palette, light and dark modes, and a live Dashboard as the first page. Footstrap stays one click away. |
+| **A modern interface** | Vantage: a console-style theme with an icon rail, breadcrumbs, page tabs, a Ctrl+K command palette, light and dark modes, and a live Dashboard as the first page. |
 | **LEDs that mean something** | The 5G LED shows 4G, 4G+, NSA or SA in colours you choose, the signal LED shows quality, the internet LED runs a real connectivity check, and night mode switches them off at bedtime. |
 | **Tools, but off by default** | Nikki (mihomo with your Clash profiles and a dashboard), Tailscale, DLNA and file sharing in the image; WireGuard, Cloudflare Tunnel, Syncthing and qBittorrent one `apk add` away. Nothing listens until you tick **Enable**. |
 | **Careful defaults** | HTTPS for the admin UI, no hidden remote access, BBR congestion control, pinned LuCI so an `apk upgrade` cannot undo the build. |
@@ -226,7 +226,6 @@ More (CI, signing, the optional package feed): the
 | [AWvoice](https://github.com/Pr0Luci/openwrt-aw1000-voice-awvoice) | the phone port: kernel module, daemon and LuCI page |
 | [luci-app-cw-led](https://github.com/Pr0Luci/luci-app-cw-led) | the front-panel LED daemon and its page |
 | [luci-theme-vantage](https://github.com/anothaDev/luci-theme-vantage) | the web interface: the theme the image selects, and its Dashboard |
-| [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) | the previous default theme, still selectable |
 
 ## Help and contributions
 
@@ -260,6 +259,12 @@ More (CI, signing, the optional package feed): the
 | The 3gInfo-lite radio page takes its spacing from the theme, and QModem's hand-built pages are laid out properly under Vantage (tabs, card titles, buttons, labels) | `patches/feeds/3ginfo/0006-radio-spacing-follows-the-theme.patch`, `patches/feeds/qmodem/0011-luci-button-spacing.patch`, `patches/packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards.patch` |
 | OpenVPN and WireGuard removed, and with them the VPN menu and the empty WireGuard status page (both one `apk add` away; Tailscale is the VPN in the image) | `configs/arcadyan_aw1000.seed`, `docs/` |
 | Tailscale in the image, shipped off; a router logged in already stays connected across an upgrade | `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/54-cw-tailscale-off`, `tools/tests/cw-tailscale-off-test.sh`, `docs/` |
+| Tailscale's page gets an Enable and start / Stop and disable switch | `patches/feeds/luci/0010-tailscale-service-switch.patch` |
+| WireGuard is installed again by itself on an upgraded router that runs a tunnel | `files/etc/uci-defaults/55-cw-wireguard-restore`, `files/etc/hotplug.d/iface/95-cw-wireguard-restore`, `tools/tests/cw-wireguard-restore-test.sh` |
+| SSH refuses root until a root password is set; failsafe keeps its recovery shell | `patches/tree/0002-dropbear-no-blank-root-password.patch` |
+| CI parses every patched LuCI script and JSON file; release notes carry the image size | `.github/workflows/check.yml`, `.github/workflows/build.yml` |
+| The HTTPS certificate names the LAN address, so trusting it once ends the browser warning | `files/usr/sbin/cw-https-cert`, `files/etc/uci-defaults/46-cw-uhttpd-https`, `tools/tests/cw-https-cert-test.sh`, `docs/features/security.md` |
+| Footstrap removed: Vantage is the one theme; routers on Footstrap move to Vantage | `configs/`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/`, `tools/tests/`, `docs/` |
 | The login card is centred on the screen | `patches/packages/luci-theme-footstrap/0002-login-card-centred-in-the-viewport.patch` |
 | OpenClash no longer built for the optional feed (Nikki runs the same Clash profiles) | `feeds.conf.default`, `tools/`, `files/etc/`, `.devcontainer/cw-dev.sh`, `docs/` |
 | A missing or partly deleted OpenWrt tree stops the build in seconds instead of failing hours later | `tools/cw-release-build.sh` |

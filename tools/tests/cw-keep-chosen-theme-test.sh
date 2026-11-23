@@ -65,7 +65,7 @@ case_run() { # <what> <expected base> <config lines> [extra-dir...]
 	what=$1; want=$2; cfg=$3; shift 3
 	ROOT="$WORK/root"; rm -rf "$ROOT"
 	mkdir -p "$ROOT/etc/config"
-	for d in bootstrap footstrap vantage "$@"; do mkdir -p "$ROOT/www/luci-static/$d"; done
+	for d in bootstrap vantage "$@"; do mkdir -p "$ROOT/www/luci-static/$d"; done
 	printf '%s\n' "$cfg" > "$ROOT/etc/config/luci"
 	for s in "$KEEP" "$WORK/30_luci-theme-vantage" "$DEF"; do
 		CFG="$ROOT/etc/config/luci" CW_ROOT="$ROOT" PATH="$WORK/bin:$PATH" sh "$s"
@@ -84,7 +84,7 @@ luci.themes.Bootstrap=/luci-static/bootstrap"
 case_run "no base at all opens in Vantage" /luci-static/vantage ""
 
 echo "an upgrade that kept the settings:"
-case_run "a router on Footstrap stays on Footstrap" /luci-static/footstrap \
+case_run "a router on Footstrap, no longer in the image, moves to Vantage" /luci-static/vantage \
 	"luci.main.mediaurlbase=/luci-static/footstrap
 luci.themes.Footstrap=/luci-static/footstrap"
 case_run "a router on another installed theme stays on it" /luci-static/custom \
@@ -97,8 +97,8 @@ case_run "a router already on Vantage stays on it" /luci-static/vantage \
 luci.themes.Vantage=/luci-static/vantage"
 
 echo "what must not happen:"
-rm -rf "$WORK/nov"; mkdir -p "$WORK/nov/etc/config" "$WORK/nov/www/luci-static/footstrap"
-printf 'luci.main.mediaurlbase=/luci-static/footstrap\n' > "$WORK/nov/etc/config/luci"
+rm -rf "$WORK/nov"; mkdir -p "$WORK/nov/etc/config" "$WORK/nov/www/luci-static/custom"
+printf 'luci.main.mediaurlbase=/luci-static/custom\n' > "$WORK/nov/etc/config/luci"
 CFG="$WORK/nov/etc/config/luci" CW_ROOT="$WORK/nov" PATH="$WORK/bin:$PATH" sh "$KEEP"
 grep -q '^luci\.themes\.Vantage=' "$WORK/nov/etc/config/luci" &&
 	noted "Vantage not installed: no entry is written" "FAIL: an entry for a missing theme" ||

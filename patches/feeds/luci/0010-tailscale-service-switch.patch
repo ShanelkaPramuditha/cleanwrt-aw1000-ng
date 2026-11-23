@@ -1,0 +1,95 @@
+Tailscale page: a service switch
+
+The image ships Tailscale off: 54-cw-tailscale-off takes its init script off the boot path on a
+fresh flash, so nothing runs for an account nobody has connected. The Tailscale page had no way
+to turn it back on. Its Login button needs a running tailscaled, so the first step was always
+System -> Startup, a page most people never open.
+
+A Service row at the top of the page now says whether Tailscale is on and has one button:
+"Enable and start" (enable at boot, then start), or "Stop and disable". It reads and sets the
+init script's state through luci's own rpc object (getInitList / setInitAction), the calls
+System -> Startup makes, so the ACL gains exactly those two methods. The button is not
+cbi-button-apply on purpose: the page's status poll takes the first button of that class as
+its Login button and disables it while logged in.
+
+Applies to: the luci feed pin, applications/luci-app-tailscale-community.
+Upstream status: local to CleanWRT.
+
+--- a/applications/luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js
++++ b/applications/luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js
+@@ -13,6 +13,10 @@
+ const callDoLogout = rpc.declare({ object: 'tailscale', method: 'do_logout' });
+ const callGetSubroutes = rpc.declare({ object: 'tailscale', method: 'get_subroutes' });
+ const callSetupFirewall = rpc.declare({ object: 'tailscale', method: 'setup_firewall' });
++// CleanWRT: the service switch reads and sets the init script's boot state through luci's own
++// rpc object, the one System -> Startup uses
++const callInitList = rpc.declare({ object: 'luci', method: 'getInitList', params: ['name'], expect: { tailscale: {} } });
++const callInitAction = rpc.declare({ object: 'luci', method: 'setInitAction', params: ['name', 'action'], expect: { result: false } });
+ let map;
+ 
+ const tailscaleSettingsConf = [
+@@ -341,6 +345,42 @@
+ 		let s;
+ 		map = new form.Map('tailscale', _('Tailscale'), _('Tailscale is a mesh VPN solution that makes it easy to connect your devices securely. This configuration page allows you to manage Tailscale settings on your OpenWrt device.'));
+ 
++		// CleanWRT: the service switch. The image ships Tailscale off (its init script disabled),
++		// and this page had no way to turn it on: that took System -> Startup first. One button
++		// here enables and starts it, or stops and disables it, and says which state it is in.
++		// Not cbi-button-apply: the status poll below takes the first such button for Login.
++		s = map.section(form.NamedSection, '_service');
++		s.anonymous = true;
++		s.render = function () {
++			const box = E('div', { 'class': 'cbi-value', 'id': 'cw_tailscale_service' });
++			const paint = function () {
++				return L.resolveDefault(callInitList('tailscale'), {}).then(function (init) {
++					const on = !!init.enabled;
++					const btn = E('button', {
++						'class': 'btn cbi-button ' + (on ? 'cbi-button-negative' : 'cbi-button-positive'),
++						'click': ui.createHandlerFn(this, function () {
++							const steps = on ? ['stop', 'disable'] : ['enable', 'start'];
++							return steps.reduce(function (p, action) {
++								return p.then(function () { return callInitAction('tailscale', action); });
++							}, Promise.resolve()).then(function () {
++								return new Promise(function (resolve) { setTimeout(resolve, 1500); });
++							}).then(paint);
++						})
++					}, on ? _('Stop and disable') : _('Enable and start'));
++					box.replaceChildren(
++						E('label', { 'class': 'cbi-value-title' }, _('Service')),
++						E('div', { 'class': 'cbi-value-field' }, [
++							btn,
++							E('div', { 'class': 'cbi-value-description' }, on
++								? _('Tailscale runs and starts with the router. Stopping it takes this router off your Tailscale network until you start it again.')
++								: _('Tailscale is off: it does not run and does not start with the router. Enable it, then log in under Account Settings.'))
++						]));
++				});
++			};
++			paint();
++			return box;
++		};
++
+ 		s = map.section(form.NamedSection, '_status');
+ 		s.anonymous = true;
+ 		s.render = function (section_id) {
+--- a/applications/luci-app-tailscale-community/root/usr/share/rpcd/acl.d/luci-app-tailscale-community.json
++++ b/applications/luci-app-tailscale-community/root/usr/share/rpcd/acl.d/luci-app-tailscale-community.json
+@@ -7,7 +7,8 @@
+ 					"get_status",
+ 					"get_settings",
+ 					"get_subroutes"
+-				]
++				],
++				"luci": [ "getInitList" ]
+ 			},
+ 			"uci": [ "tailscale" ]
+ 		},
+@@ -18,7 +19,8 @@
+ 					"do_logout",
+ 					"setup_firewall",
+ 					"set_settings"
+-				]
++				],
++				"luci": [ "setInitAction" ]
+ 			},
+ 			"uci": [ "tailscale" ]
+ 		}

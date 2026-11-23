@@ -1,0 +1,23 @@
+#!/bin/sh
+# Bring WireGuard back on a router that uses it.
+#
+# WireGuard is not in the image any more (it is one `apk add` away). A router upgraded with
+# its settings kept may still have a WireGuard tunnel in /etc/config/network; without the
+# kernel module and netifd's protocol handler that interface stays down after the upgrade.
+#
+# Nothing can be downloaded here: first-boot scripts run before the network is up. So this
+# only leaves a marker, /etc/cw-wireguard-restore, when a tunnel is configured and WireGuard
+# is missing. /etc/hotplug.d/iface/95-cw-wireguard-restore sees the marker the first time an
+# interface comes up, installs the packages from the official repositories, brings the
+# tunnels up and removes the marker. A router with no WireGuard tunnel finds nothing to do.
+#
+# CW_ROOT points it at another root (tools/tests/cw-wireguard-restore-test.sh uses that).
+R=${CW_ROOT:-}
+MARK="$R/etc/cw-wireguard-restore"
+
+uci -q show network | grep -q "\.proto='wireguard'$" || exit 0
+[ -e "$R/lib/netifd/proto/wireguard.sh" ] && exit 0
+
+: > "$MARK"
+logger -t cw-firstboot "wireguard: a tunnel is configured but WireGuard is not installed; it is installed again once the router is online"
+exit 0

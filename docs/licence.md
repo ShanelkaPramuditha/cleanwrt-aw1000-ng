@@ -11,9 +11,8 @@ The build configuration, patches and rootfs overlay in the
 [repository](https://github.com/ShanelkaPramuditha/cleanwrt-aw1000-ng) (all repositories: [Repositories](repositories.md)) are licensed **GPL-2.0-only**. The LED
 app ([`luci-app-cw-led`](https://github.com/Pr0Luci/luci-app-cw-led)) is GPL-2.0-only too. The web
 interface is a third-party theme: [`luci-theme-vantage`](https://github.com/anothaDev/luci-theme-vantage)
-with its dashboard `luci-app-vantage`, GPL-3.0-or-later, pinned to one commit.
-[`luci-theme-footstrap`](https://github.com/VizzleTF/luci-theme-footstrap) (Apache-2.0) ships beside
-it as a second choice, and LuCI's own Bootstrap theme as the fallback.
+with its dashboard `luci-app-vantage`, GPL-3.0-or-later, pinned to one commit, and LuCI's own
+Bootstrap theme as the fallback.
 
 A CleanWRT image is an **aggregate** of many independently licensed programs. Each keeps its own
 licence and copyright; nothing here relicenses them.
@@ -34,7 +33,6 @@ licence and copyright; nothing here relicenses them.
 | luci-app-diskman | AGPL-3.0 |
 | luci-app-cw-led | GPL-2.0-only |
 | luci-theme-vantage, luci-app-vantage | GPL-3.0-or-later |
-| luci-theme-footstrap | Apache-2.0 |
 | luci-theme-bootstrap | Apache-2.0 |
 | AWvoice (kernel module, phone daemon, LuCI page) | GPL-2.0-only |
 | libubox / libubus / libuci (used by the AWvoice daemon) | ISC / LGPL-2.1 / LGPL-2.1, linked dynamically |

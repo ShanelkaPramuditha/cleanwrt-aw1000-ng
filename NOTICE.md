@@ -64,6 +64,12 @@ upstream's, unchanged.
 | 2026-11-23 | `tools/cw-release-build.sh`, `tools/cw-check-image.sh`, `docs/building.md` | modified: the build sets the feed key to mode 600; a local build notes a non-release key instead of failing |
 | 2026-11-23 | `tools/cw-build-progress.sh`, `.github/workflows/build.yml`, `docs/building.md` | added: a progress bar that follows a build's log, and progress lines in the CI build log |
 | 2026-11-23 | `tools/cw-build.sh`, `tools/cw-build-progress.sh`, `README.md`, `docs/building.md` | added: the local build in one command, with a colour progress display |
+| 2026-11-23 | `patches/feeds/luci/0010-tailscale-service-switch.patch` | added: a service switch on the Tailscale page (modifies luci-app-tailscale-community, Apache-2.0) |
+| 2026-11-23 | `files/etc/uci-defaults/55-cw-wireguard-restore`, `files/etc/hotplug.d/iface/95-cw-wireguard-restore`, `tools/tests/cw-wireguard-restore-test.sh` | added: WireGuard reinstalled after an upgrade on routers that run a tunnel |
+| 2026-11-23 | `patches/tree/0002-dropbear-no-blank-root-password.patch` | added: no blank-password root SSH outside failsafe (modifies OpenWrt's dropbear packaging, GPL-2.0) |
+| 2026-11-23 | `.github/workflows/check.yml`, `.github/workflows/build.yml` | modified: patched LuCI scripts and JSON parsed in CI; image size in the release notes |
+| 2026-11-23 | `files/usr/sbin/cw-https-cert`, `files/etc/uci-defaults/46-cw-uhttpd-https`, `tools/tests/cw-https-cert-test.sh`, `docs/features/security.md` | added: an HTTPS certificate that names the LAN address |
+| 2026-11-23 | `configs/`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/`, `files/etc/footstrap/`, `files/www/luci-static/cw-branding/`, `patches/packages/luci-theme-footstrap/`, `tools/tests/`, `docs/` | removed: the Footstrap theme, its patches and its look |
 | 2026-11-14 | `.github/workflows/build.yml` | modified: Go build cache (`tmp/go-build`) kept between CI runs |
 | 2026-11-14 | `.devcontainer/cw-dev.sh`, `.devcontainer/devcontainer.json` | modified: local builds skip the optional cw-opt feed set unless `CW_BUILD_OPT_ARTIFACTS=1` |
 | 2026-11-14 | `README.md`, `NOTICE.md` | modified: fork notice, change list, credits |
@@ -136,12 +142,10 @@ path. Same terms as above: a modification of QModem's code, published here.
 
 ### Theme patches
 
-`patches/packages/luci-theme-footstrap/0001-login-page-carries-the-image-logo.patch` changes one line of
-`luci-theme-footstrap/ucode/template/themes/footstrap/sysauth.ut` at the pinned commit, so the login page
-shows this project's logo instead of the router's hostname. It is a modification of Apache-2.0 code, stays
-under that licence, and is published here, which is the source of the modified file. The logo itself is
-`files/www/luci-static/cw-branding/login-logo.png` - this repository's own file, outside the theme's
-directory, so a theme update can neither overwrite it nor collide with the patch.
+`patches/packages/luci-theme-vantage/` holds this project's modifications of Vantage (GPL-3.0-or-later): the
+colour tokens stock-theme pages read (0001) and the layout of tabs without links and legend-headed cards (0002).
+They stay under Vantage's licence and are published here, which is the source of the modified file. Footstrap
+and its two login-page patches are no longer part of the image (2026-11-23).
 
 
 ### 3ginfo-lite feed patches

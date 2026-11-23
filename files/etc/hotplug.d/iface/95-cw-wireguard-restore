@@ -1,0 +1,42 @@
+#!/bin/sh
+# Install WireGuard again once the router is online, after an upgrade dropped it.
+#
+# Armed by /etc/uci-defaults/55-cw-wireguard-restore, which leaves /etc/cw-wireguard-restore
+# when a WireGuard tunnel is configured and WireGuard is not installed. On the first interface
+# that comes up after that, this installs the kernel module, the tools and netifd's protocol
+# handler from the official repositories, brings every WireGuard interface up and removes the
+# marker. A failed download (no internet on that interface yet) leaves the marker, and the next
+# interface that comes up tries again. Without the marker it does nothing.
+#
+# The install runs in the background: a hotplug handler must not hold up the interface event.
+# CW_ROOT points it at another root (tools/tests/cw-wireguard-restore-test.sh uses that), and
+# CW_WG_FOREGROUND=1 runs the install in the foreground.
+R=${CW_ROOT:-}
+MARK="$R/etc/cw-wireguard-restore"
+LOCK="$R/tmp/cw-wireguard-restore.lock"
+
+[ "$ACTION" = ifup ] || exit 0
+[ -f "$MARK" ] || exit 0
+# one install at a time: several interfaces come up together at boot
+mkdir "$LOCK" 2>/dev/null || exit 0
+
+restore() {
+	if apk update >/dev/null 2>&1 &&
+	   apk add kmod-wireguard wireguard-tools luci-proto-wireguard >/dev/null 2>&1; then
+		rm -f "$MARK"
+		logger -t cw-wireguard "installed WireGuard again (it is not in the image); bringing the tunnels up"
+		for iface in $(uci -q show network | sed -n "s/^network\.\([^.]*\)\.proto='wireguard'$/\1/p"); do
+			ifup "$iface"
+		done
+	else
+		logger -t cw-wireguard "could not install WireGuard yet (offline?); trying again when the next interface comes up"
+	fi
+	rmdir "$LOCK" 2>/dev/null
+}
+
+if [ "${CW_WG_FOREGROUND:-0}" = 1 ]; then
+	restore
+else
+	restore </dev/null >/dev/null 2>&1 &
+fi
+exit 0

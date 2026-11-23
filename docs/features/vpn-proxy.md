@@ -22,6 +22,11 @@ apk update && apk add kmod-wireguard wireguard-tools luci-proto-wireguard
 Then reload LuCI. **WireGuard VPN** appears as a protocol under *Network → Interfaces*, and its
 tunnels are listed on *Status → WireGuard* once one exists.
 
+**Upgrading a router that runs a WireGuard tunnel:** with *Keep settings*, the tunnel's settings
+stay, and the first time the router is online after the upgrade it installs these three packages
+again by itself and brings the tunnel up (`logread -e cw-wireguard` shows it). Until then, that
+interface is down.
+
 **Create a tunnel:** *Network → Interfaces → Add new interface*, name it (for example `wg0`),
 protocol **WireGuard VPN**, *Create interface*. In the interface's *Configuration* tab set the
 private key and the peers (a peer is an endpoint plus allowed IPs).
@@ -93,7 +98,7 @@ install brings back the version the image ships.
 | OpenVPN | **not in the image**, one `apk add` away (see [above](#openvpn)) |
 | Nikki | installed, **off**. Its core is `mihomo-meta` (stable); the Zashboard dashboard is preinstalled. First boot moves its HTTP proxy port from 8080 (taken) to **7893** and sets a random dashboard secret and proxy password |
 | HomeProxy, Passwall, Passwall 2, OpenClash | **not in the image**. OpenClash is no longer built either: Nikki runs the same Clash profiles |
-| Tailscale | installed, **off**: enable it under *System → Startup*, then log in. See [remote access](remote-access.md#tailscale) |
+| Tailscale | installed, **off**: *Services → Tailscale → Enable and start*, then log in. See [remote access](remote-access.md#tailscale) |
 | Cloudflare Tunnel | **not in the image**, one `apk add` away. See [remote access](remote-access.md) |
 
 ## What is listening

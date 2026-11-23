@@ -3,8 +3,8 @@
 #
 # Its init script arrives enabled for boot, so tailscaled would start on every router,
 # logged out, holding memory and UDP port 41641 for an account nobody has connected. This
-# takes it off the boot path. Turning it on is System -> Startup -> tailscale: Enable,
-# Start; Services -> Tailscale then logs it in (docs/features/remote-access.md).
+# takes it off the boot path. Turning it on is Services -> Tailscale -> Enable and start (the
+# switch patches/feeds/luci/0010 adds), then Login on the same page.
 #
 # A router already logged in to Tailscale is left alone: tailscaled.state is the login it
 # keeps across a keep-settings upgrade, and an upgrade must not cut the tunnel someone uses

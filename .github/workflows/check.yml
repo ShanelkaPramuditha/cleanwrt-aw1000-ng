@@ -123,6 +123,45 @@ jobs:
             -v /mnt/cw/openwrt:/build -v "$PWD":/cleanwrt \
             cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build
 
+      - name: Patched LuCI scripts and JSON parse
+        run: |
+          set -eu
+          # Every .js and .json file a patch in this repository touches - read as the patched file the
+          # check pass above left in the tree - plus the overlay's and cwfeed's own scripts. A syntax
+          # error in one is a blank page or a page without permissions on the router, and nothing else
+          # here would notice. A LuCI view is run as the body of a function (it ends in
+          # `return view.extend(...)`), so each script is parsed the same way, with new Function();
+          # nothing is executed. The runner's own node does the parsing.
+          tree=/mnt/cw/openwrt
+          list=$(mktemp)
+          for pf in patches/feeds/*/*.patch; do
+            feed=$(basename "$(dirname "$pf")")
+            sed -n 's#^+++ b/\([^[:space:]]*\.js\(on\)\{0,1\}\)\([[:space:]].*\)\{0,1\}$#\1#p' "$pf" | sed "s#^#$tree/feeds/$feed/#" >> "$list"
+          done
+          for pf in patches/packages/*/*.patch; do
+            pkg=$(basename "$(dirname "$pf")")
+            sed -n 's#^+++ b/[^/]*/\([^[:space:]]*\.js\(on\)\{0,1\}\)\([[:space:]].*\)\{0,1\}$#\1#p' "$pf" | sed "s#^#$tree/package/$pkg/#" >> "$list"
+          done
+          find files feeds-src -name '*.js' -o -name '*.json' >> "$list"
+          sort -u -o "$list" "$list"
+          # tests/fixtures are data for the collector's own tests, some deliberately not JSON
+          grep -v '/tests/fixtures/' "$list" | xargs node -e '
+            const fs = require("fs");
+            let bad = 0;
+            const files = process.argv.slice(1);
+            for (const f of files) {
+              try {
+                const src = fs.readFileSync(f, "utf8");
+                if (f.endsWith(".json")) JSON.parse(src); else new Function(src);
+              } catch (e) {
+                console.log(`::error file=${f}::${e.message}`);
+                bad++;
+              }
+            }
+            console.log(`${files.length} files parsed, ${bad} failed`);
+            process.exit(bad ? 1 : 0);
+          '
+
       - name: Download all sources
         if: steps.chg.outputs.run == 'true'
         run: |

@@ -49,6 +49,17 @@ drop_fw_include passwall2 passwall2 passwall2_server
 
 [ "$changed_fw" = 1 ] && uci commit firewall
 
+# Footstrap, the previous default theme, is not in the image any more. Its settings and the
+# background files the image put next to them have nothing left to read them; LuCI itself
+# moves to Vantage (96-cw-default-theme).
+if [ ! -d /www/luci-static/footstrap ]; then
+	for left in /etc/config/footstrap /etc/footstrap; do
+		[ -e "$left" ] || continue
+		rm -rf "$left"
+		logger -t cw-firstboot "removed $left (Footstrap is not in this image)"
+	done
+fi
+
 # DNS without AdGuard Home. Its setup moves dnsmasq off port 53 (to 54) so AdGuard Home can
 # answer there. A firmware upgrade drops the installed app but keeps that dnsmasq setting,
 # which would leave nothing on port 53: every name lookup fails, on the router and the LAN,

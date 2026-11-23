@@ -22,7 +22,7 @@ switch.
 | sms-forwarder | part of QModem | On | forwards received SMS |
 | SIP service for the phone port | no page of its own — the switch is on AWvoice → SIP | Off until the AWvoice SIP switch turns it on | a soft phone on your own network rings and dials through the SIM's line; off means no port is open ([AWvoice](awvoice.md)) |
 | Nikki | Services → Nikki | Off (add a Clash profile) | mihomo transparent proxy with the Zashboard dashboard ([VPN and proxies](features/vpn-proxy.md#nikki)) |
-| Tailscale | Services → Tailscale | Off (enable it under System → Startup, then log in) | mesh VPN: reach the router and the LAN from anywhere ([remote access](features/remote-access.md#tailscale)) |
+| Tailscale | Services → Tailscale | Off (*Enable and start* on its page, then log in) | mesh VPN: reach the router and the LAN from anywhere ([remote access](features/remote-access.md#tailscale)) |
 | Watchcat | Tools → Watchcat | **no rule at all**, deliberately | reboot or restart an interface when the connection is lost. The package default would reboot a router on its own; this image ships it empty |
 | Disk Manager | Services → Disk Manager | On | partition and format USB drives |
 | HDD Idle | Tools → HDD Idle | Off | spin down a USB hard disk |
@@ -34,7 +34,6 @@ switch.
 | SQM QoS | Network → SQM QoS | Off (set your speeds) | fix bufferbloat |
 | Web terminal (ttyd) | Tools → Terminal | On | a shell in the browser |
 | Vantage theme and Dashboard | Dashboard (first page after login) | On | the default look ([theme](theme.md)) |
-| Footstrap theme | System → Footstrap | installed, not selected | the previous default, one click away ([theme](theme.md#footstrap)) |
 | LED Management | System → LED Management | On | front-panel LEDs ([LEDs](leds.md)) |
 | New-version notice | Status → Overview | On | tells you when a newer CleanWRT is published ([releases](releases.md#the-new-version-notice)) |
 | Quiet hours, recordings, the answering machine | inside AWvoice → Rules and Phone settings | all **off** until you write them | [quiet hours](awvoice/quiet-hours.md), [recordings and the machine](awvoice/recordings-and-machine.md) |

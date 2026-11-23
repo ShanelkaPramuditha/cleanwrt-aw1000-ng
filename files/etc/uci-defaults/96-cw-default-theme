@@ -13,9 +13,10 @@
 # The theme directory must exist before anything points at it: a pin that failed
 # to install must leave the working bootstrap in place rather than break the UI.
 #
-# A router upgraded with its settings kept from an image whose default was Footstrap
-# stays on Footstrap: 29-cw-keep-chosen-theme stops Vantage's own first-boot script
-# from taking the base over, and the case above leaves an installed theme alone.
+# A router upgraded from an image whose default was Footstrap, which this image no longer
+# carries, is the third case: its base names a directory that is gone, so it moves to
+# Vantage, and the Footstrap entry goes from the design list. A theme that is still
+# installed is left alone (29-cw-keep-chosen-theme keeps Vantage's own script off it).
 #
 # CW_ROOT prefixes the paths the script inspects. It is unset in the image and set
 # only by tools/tests/cw-default-theme-test.sh.

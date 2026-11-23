@@ -95,7 +95,7 @@ router supported?" to a flashed, working router, and tell you how to get out if 
 - **A 5G stack that works out of the box:** QModem UI, auto-dial, dual-stack IPv4/IPv6 data,
   TTL control, SMS, a registration fix for data-only SIMs, per-interface vnStat accounting.
 - **A modern interface:** the [Vantage theme](theme.md) with an icon rail, a Ctrl+K command
-  palette, dark and light mode and a live Dashboard; [Footstrap](theme.md#footstrap) is one click away.
+  palette, dark and light mode and a live Dashboard.
 - **Real front-panel LEDs:** a small daemon that shows 5G type, signal quality and internet
   reachability, with a night mode. See [Front-panel LEDs](leds.md).
 - **Proxy and VPN tools:** Nikki (mihomo, Clash profiles, Zashboard dashboard) and
@@ -134,7 +134,7 @@ before relying on it for anything important.
 ## Common questions
 
 ??? question "What is CleanWRT?"
-    CleanWRT is an independent build of OpenWrt 25.12.5 for the Arcadyan AW1000 5G router. On top of stock OpenWrt it adds a working RJ11 phone port (AWvoice), a 5G modem stack that dials and recovers by itself, the Footstrap theme, front-panel LED management and a set of apps that stay off until you enable them.
+    CleanWRT is an independent build of OpenWrt 25.12.5 for the Arcadyan AW1000 5G router. On top of stock OpenWrt it adds a working RJ11 phone port (AWvoice), a 5G modem stack that dials and recovers by itself, the Vantage theme with its Dashboard, front-panel LED management and a set of apps that stay off until you enable them.
 
 ??? question "Which routers does CleanWRT support?"
     Only the Arcadyan AW1000 (the Telstra variant) with the expanded flash layout. Never flash it on another router, because an image built for a different partition table can brick the device. See [Hardware](hardware.md) and [MTD layout](mtd-layout.md).
