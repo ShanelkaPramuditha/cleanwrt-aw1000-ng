@@ -1972,6 +1972,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Locally">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-progress-bar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A progress bar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2436,6 +2453,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Locally">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-progress-bar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A progress bar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2767,6 +2801,22 @@ docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 compiling. Pass it with <code>-e CW_CHECK_ONLY=1</code> to <code>docker run</code>. It takes a few minutes and
 catches almost every configuration mistake.</p>
 </div>
+<h3 id="a-progress-bar">A progress bar<a class="headerlink" href="#a-progress-bar" title="Permanent link">&para;</a></h3>
+<p><code>tools/cw-build-progress.sh &lt;build.log&gt; &lt;openwrt-tree&gt;</code> follows a running build's log and shows
+one line that updates in place: the phase (setup, download, compile, image, checks), a bar, the
+build steps done out of the total, the package compiling now, the elapsed time and an estimate of
+the time left. It exits when the build ends: 0 with <code>IMAGE_OK</code>, 1 otherwise.</p>
+<p>Run the build in the background with its output in a log, and the bar in front of it:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/home/ubuntu/cw/cleanwrt-aw1000
+sudo<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s1">'env -u TERM CW_MAX_IMAGE_MB=130 CW_BUILD_OPT_ARTIFACTS=0 CW_CCACHE=1 \</span>
+<span class="s1">  tools/cw-release-build.sh /home/ubuntu/cw/openwrt &lt; /dev/null &gt; /home/ubuntu/cw/build.log 2&gt;&amp;1 &amp;'</span>
+tools/cw-build-progress.sh<span class="w"> </span>/home/ubuntu/cw/build.log<span class="w"> </span>/home/ubuntu/cw/openwrt
+</code></pre></div>
+<p>Or run the build as usual, with <code>| tee build.log</code>, and the bar in a second terminal. Ctrl+C stops
+only the bar, never the build; run it again to pick up where the build is.</p>
+<p>The total of the first run in a tree is an estimate from the selected packages, so the bar holds
+at 99% until the build reports its end. Every finished run saves its real count in
+<code>&lt;tree&gt;/.cw-progress-total</code>, and later runs use that.</p>
 <h2 id="what-the-build-script-guarantees">What the build script guarantees<a class="headerlink" href="#what-the-build-script-guarantees" title="Permanent link">&para;</a></h2>
 <p><code>tools/cw-release-build.sh</code> applies the overlay, the pinned feeds and the patches (to the feeds
 and to the tree), then runs the mandatory post-defconfig fixups, and it <strong>fails</strong> rather than ship
