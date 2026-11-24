@@ -65,6 +65,7 @@ upstream's, unchanged.
 | 2026-11-24 | `tools/cw-build.sh`, `tools/cw-settings-pack.sh`, `tools/cw-release-build.sh`, `docs/custom-settings.md`, `docs/building.md`, `README.md` | added: `cw-build.sh` asks for the hostname, LAN address and Wi-Fi before a local build and builds them in (`CW_LOCAL_SETTINGS`, refused in release builds); `cw-settings-pack.sh --script` |
 | 2026-11-24 | `patches/feeds/luci/0011-vnstat2-graphs-drawn-in-the-page.patch`, `configs/arcadyan_aw1000.seed`, `docs/building.md` | added: the vnStat graphs drawn in the page from `vnstat --json`; `vnstati2` (and libgd, libpng, libwebp) out of the image |
 | 2026-11-24 | `patches/packages/luci-theme-vantage/0003-page-actions-without-card.patch`, `docs/building.md`, `docs/theme.md` | added: grouped buttons without a card behind them in Vantage (the page's Reset / Save / Save & Apply bar, and dialog footers) |
+| 2026-11-24 | `patches/feeds/nikki/0001-luci-pages-redesign.patch`, `docs/features/vpn-proxy.md`, `docs/modem.md`, `docs/included.md`, `docs/changelog.md` | added: Nikki's LuCI pages redesigned (status header, setup checklist, profile list, log viewer, editor, help text; modifies luci-app-nikki, GPL-3.0) |
 | 2026-11-23 | `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/54-cw-tailscale-off`, `tools/tests/cw-tailscale-off-test.sh`, `docs/` | added: Tailscale in the image, off until enabled |
 | 2026-11-23 | `tools/cw-release-build.sh`, `tools/cw-check-image.sh`, `docs/building.md` | modified: the build sets the feed key to mode 600; a local build notes a non-release key instead of failing |
 | 2026-11-23 | `tools/cw-build-progress.sh`, `.github/workflows/build.yml`, `docs/building.md` | added: a progress bar that follows a build's log, and progress lines in the CI build log |
@@ -159,6 +160,14 @@ and its two login-page patches are no longer part of the image (2026-11-23).
 © Rafał Wabik / IceG; GPL-3.0) at build time, applied zero-fuzz to the pinned commit (the
 build fails rather than shipping a stale patch): it marks `3ginfo.sh` executable and shortens
 one menu title. The patches modify GPL-3.0 files and stay under **GPL-3.0**.
+
+### Nikki feed patch
+
+`patches/feeds/nikki/` modifies the upstream luci-app-nikki package (© nikkinikki-org; GPL-3.0)
+at build time, applied zero-fuzz to the commit pinned in `feeds.conf.default`. It redesigns the
+LuCI pages: the views, their helper module and menu titles, plus a new stylesheet. The
+configuration, the backend and the core are not touched. The patch modifies GPL-3.0 files and
+stays under **GPL-3.0**.
 
 ## Source availability
 

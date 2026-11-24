@@ -38,6 +38,15 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   *Select All* and *Scan* buttons no longer lie on top of the band list, and radio and checkbox
   labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
   status card no longer touches the Save bar.
+- **Nikki's pages are redesigned.** *Services → Nikki* now opens on an *Overview* with a
+  **Get started** checklist, the profile in use, how traffic is captured and the versions. Every
+  page shows whether Nikki is running and has **Restart** and **Open Dashboard**. *Profiles* lists
+  your files with **Use**, **Edit**, **Download** and **Delete**, takes a dropped YAML file, and
+  shows each subscription's data use and expiry. It also flags the placeholder subscription the
+  package ships. *Logs* has a filter, an errors-only view and level colours. The *Editor* says
+  which files are regenerated and warns before unsaved changes are lost. Every option has a short
+  explanation. The tabs are now *Overview*, *Profiles*, *Proxy*, *Mixin*, *Editor* and *Logs*.
+  The settings themselves are unchanged. See [Nikki](features/vpn-proxy.md#nikki).
 - **Your own defaults in a local build.** `tools/cw-build.sh` asks for the hostname, LAN address,
   Wi-Fi names and Wi-Fi password before it builds, and builds your answers into the image, so
   the router starts with them and a reset brings them back. Press Enter to keep the stock

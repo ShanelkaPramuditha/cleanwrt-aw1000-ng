@@ -1,7 +1,7 @@
 ---
 title: "Nikki, WireGuard and OpenVPN on OpenWrt"
 description: "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles)."
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 # VPN and proxies
@@ -62,22 +62,35 @@ OpenVPN keeps `/etc/config/openvpn`, so installing it again brings your settings
 Nikki runs the mihomo core with an ordinary Clash (Clash Meta) configuration, so a profile from
 your provider or one you wrote yourself works as it is.
 
-1. *Services → Nikki → Profile*. Either upload your `config.yaml` (**Upload Profile**), or add a
-   **subscription** with the URL your provider gave you and press **Update**.
-2. *Services → Nikki → App Config*: pick that profile, tick **Enable**, **Save & Apply**.
-3. **Open Dashboard** on the same page opens Zashboard, already installed, with the secret filled
-   in. There you switch proxies and groups, run latency tests, and watch connections, rules and
-   logs live.
+Until Nikki is set up, *Services → Nikki → Overview* shows a three-step **Get started** checklist
+that links to each step:
 
-*Mixin Config* overrides parts of the profile without editing it: ports, DNS mode (fake-ip by
-default), TUN or TProxy, and the dashboard address. *Proxy Config* chooses which LAN devices and
-which traffic go through the proxy.
+1. *Services → Nikki → Profiles*. Either drop your `config.yaml` on **Profile files**, or press
+   **Add subscription**, enter the URL your provider gave you, and press **Update**. The package
+   ships a placeholder subscription named `default`, marked **No URL set**: edit it or add your own.
+2. Press **Use** next to that profile. It applies at once. You can also pick it under **Profile** on
+   the Overview page.
+3. On *Overview*, tick **Enable** and press **Save & Apply**.
+
+Every Nikki page shows whether Nikki is **Running**, **Stopped** (enabled, but the core is not
+running: see *Logs*) or **Disabled**. Every page also has **Restart** and **Open Dashboard**. The
+dashboard is Zashboard, already installed, and LuCI fills in the secret. There you switch proxies
+and groups, run latency tests, and watch connections, rules and logs live.
+
+| Page | What it is for |
+|---|---|
+| *Overview* | on/off, the profile in use, startup and scheduled restart, process limits |
+| *Profiles* | profile files (upload, use, edit, download, delete) and subscriptions with their data use and expiry |
+| *Proxy* | which traffic goes through Nikki: LAN devices, the router itself, ports and addresses that bypass it |
+| *Mixin* | overrides parts of the profile without editing it: ports, DNS mode (fake-ip by default), TUN, the dashboard address. A setting left at *Unmodified* keeps the profile's value |
+| *Editor* | the YAML files themselves. It says when a file is regenerated, so edits to it would not last |
+| *Logs* | the app and core logs with a filter, an errors-only view and a download; the debug report |
 
 **Dashboard address:** `http://192.168.1.1:9090/ui/`. The API on port 9090 needs the secret, which
 the first boot sets to 32 random characters (`nikki.mixin.api_secret`). LuCI passes it for you.
 
-**Update Dashboard** downloads the newest Zashboard release over the installed one. A clean
-install brings back the version the image ships.
+**Update dashboard** (in the Dashboard tile on *Overview*) downloads the newest Zashboard release
+over the installed one. A clean install brings back the version the image ships.
 
 ## Common questions
 
@@ -85,7 +98,7 @@ install brings back the version the image ships.
     Neither is in the image; both are one install away (see [WireGuard](#wireguard) and [OpenVPN](#openvpn)). Tailscale is the VPN in the image.
 
 ??? question "Can I use my Clash config?"
-    Yes, with Nikki. Upload the YAML file or add its subscription URL on *Services → Nikki → Profile*. mihomo reads Clash and Clash Meta profiles.
+    Yes, with Nikki. Upload the YAML file or add its subscription URL on *Services → Nikki → Profiles*. mihomo reads Clash and Clash Meta profiles.
 
 ??? question "Where did Passwall go?"
     Passwall and Passwall 2 are not in this build. Nikki (mihomo) covers the same use, with Clash profiles.
@@ -112,8 +125,9 @@ the router and the LAN, and none of them is forwarded from the cellular side by 
 
 | symptom | what it means |
 |---|---|
-| Nikki will not start | the profile failed its test. *Services → Nikki → Log* shows mihomo's reason; a common one is a port in the profile that another service already uses |
-| The dashboard says it cannot connect | the API address or secret. Open it from LuCI's **Open Dashboard**, which fills both in |
+| Nikki will not start | the status says **Stopped**: the profile failed its test. *Services → Nikki → Logs* shows mihomo's reason (choose *Errors only*); a common one is a port in the profile that another service already uses |
+| The dashboard says it cannot connect | the API address or secret. Open it from LuCI's **Open Dashboard**, which fills both in. The button is greyed out while Nikki is not running |
+| A subscription shows **Failed** | its last update did not download a valid profile. Check the URL; *Logs → App log* has the reason |
 | Nikki and a VPN fight over the traffic | run Nikki or a full-tunnel VPN, not both. Each installs its own routing rules |
 | A proxy in your profile is refused | check that mihomo supports its protocol. mihomo is the only proxy core in the image |
 | `apk upgrade` pulled a different mihomo | the feed pins decide what the image is built with; see [updating and pinning](../updating.md) |

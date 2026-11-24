@@ -1,0 +1,3038 @@
+Nikki's LuCI pages, redesigned around the tasks people come for
+
+The six pages were a plain transcription of the configuration: unlabelled options with no
+help text, a Profile page that offered a bare file browser, an editor and log viewer built
+from textareas inside a form, and nothing that said whether Nikki was running or set up.
+The configuration and its option names are unchanged; only the pages are.
+
+- Every page opens with the same header: what the page is for, a live status (Running,
+  Stopped = enabled but not running, Disabled), Restart, and Open Dashboard, which is greyed
+  out while the core is down and explains why it cannot open instead of failing silently.
+- Overview (was App Config): a three-step "Get started" checklist until a profile exists,
+  is chosen and Nikki is enabled; tiles for the profile in use, how traffic is captured,
+  the dashboard port and the versions. The procd limits move to an "Advanced: Process"
+  card. Every option has a description.
+- Profiles: a list of profile files with size, date, an "In use" badge and Use / Edit /
+  Download / Delete, plus a drop zone that takes .yaml/.yml only. Subscriptions show a
+  usage meter, the expiry with a warning in the last week, a failed last update, and a
+  "No URL set" badge on the placeholder subscription the package ships, which can no
+  longer be updated or used until it has a real URL. Use applies at once.
+- Proxy: tabs named for what they decide (LAN Devices, Router Itself, Bypass), with the
+  first-match semantics of the access-control tables spelled out.
+- Mixin: says what Unmodified means, splits the DNS tab into DNS and Hosts & Nameservers,
+  and explains the options people actually change.
+- Editor: a file list grouped by kind, a line under it saying whether edits to that file
+  last (the startup profile and subscriptions are regenerated), unsaved-change tracking,
+  Ctrl+S, Tab indents, Revert, Download, and ?file= links from the Profiles page.
+- Logs: one viewer for the app and core logs with time / level / message columns, level
+  colours, a text filter, an errors-only view, follow-the-tail, and download. The debug
+  report asks first when Nikki is off, since its script enables and starts it.
+
+Colours, spacing and radii come from the theme (Vantage's --v-* tier, then Bootstrap's
+exported tokens), so the pages follow the light/dark switch.
+
+Applies to: https://github.com/nikkinikki-org/OpenWrt-nikki.git @ 0c56ba5f (feeds.conf.default pin).
+Upstream status: local to CleanWRT.
+
+diff --git b/luci-app-nikki/htdocs/luci-static/resources/nikki/nikki.css b/luci-app-nikki/htdocs/luci-static/resources/nikki/nikki.css
+new file mode 100644
+index 0000000..1d5b2dd
+--- /dev/null
++++ b/luci-app-nikki/htdocs/luci-static/resources/nikki/nikki.css
+@@ -0,0 +1,500 @@
++/*
++ * Nikki pages: the shared surface (status header, tiles, profile list,
++ * editor and log viewer).
++ *
++ * This is a page surface, not a theme. Colour, type, spacing and radii come
++ * from the active LuCI theme: Vantage's --v-* tier first, then the Bootstrap
++ * colour tokens other themes export, then literals that keep the page
++ * readable on a theme that publishes neither.
++ */
++
++.nk-page {
++	--nk-bg: var(--v-surface, var(--background-color-high, #fff));
++	--nk-bg-soft: var(--v-surface-2, var(--background-color-low, #f6f8fa));
++	--nk-bg-sunk: var(--v-surface-3, var(--background-color-medium, #eef1f4));
++	--nk-text: var(--v-text, var(--text-color-highest, #1f2328));
++	--nk-dim: var(--v-text-2, var(--text-color-medium, #57606a));
++	--nk-faint: var(--v-text-3, var(--text-color-low, #8c959f));
++	--nk-line: var(--v-line, var(--border-color-medium, #d0d7de));
++	--nk-accent: var(--v-accent-text, var(--primary-color-high, #0969da));
++	--nk-accent-soft: var(--v-accent-soft, var(--primary-color-low, #ddf4ff));
++	--nk-ok: var(--v-ok-text, var(--success-color-high, #197c36));
++	--nk-ok-dot: var(--v-ok, var(--success-color-medium, #2da44e));
++	--nk-ok-soft: var(--v-ok-soft, var(--success-color-low, #dafbe1));
++	--nk-warn: var(--v-warn-text, var(--warn-color-high, #946300));
++	--nk-warn-dot: var(--v-warn, var(--warn-color-medium, #d4a72c));
++	--nk-warn-soft: var(--v-warn-soft, var(--warn-color-low, #fff8c5));
++	--nk-err: var(--v-err-text, var(--error-color-high, #cf222e));
++	--nk-err-dot: var(--v-err, var(--error-color-medium, #e5534b));
++	--nk-err-soft: var(--v-err-soft, var(--error-color-low, #ffebe9));
++	--nk-mono: var(--v-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
++	--nk-r: var(--v-r, 6px);
++	--nk-r-lg: var(--v-r-lg, 8px);
++	--nk-gap: var(--v-sp-4, 16px);
++	--nk-sp: var(--v-sp-2, 8px);
++	--nk-fs-sm: var(--v-fs-sm, 12px);
++	--nk-fs-base: var(--v-fs-base, 13px);
++	--nk-fs-lg: var(--v-fs-lg, 16px);
++	--nk-fs-xl: var(--v-fs-xl, 20px);
++	--nk-ctl-h: var(--v-ctl-h, 34px);
++
++	min-width: 0;
++	color: var(--nk-text);
++}
++
++.nk-page *,
++.nk-page *::before,
++.nk-page *::after { box-sizing: border-box; }
++
++/* ------------------------------------------------------------ header */
++
++.nk-header {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	justify-content: space-between;
++	gap: var(--nk-gap);
++	margin: 0 0 var(--nk-gap);
++}
++.nk-header-main { min-width: 0; flex: 1 1 320px; }
++.nk-header-title {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: var(--nk-sp) 12px;
++	margin: 0;
++	font-size: var(--nk-fs-xl);
++	font-weight: 600;
++	line-height: 1.3;
++	color: var(--nk-text);
++}
++.nk-header-desc {
++	margin: 4px 0 0;
++	max-width: 72ch;
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-base);
++	line-height: 1.5;
++}
++.nk-header-desc a { color: var(--nk-accent); }
++.nk-header-actions {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: var(--nk-sp);
++}
++.nk-header-actions .btn,
++.nk-actions .btn { margin: 0 !important; }
++
++/* status pill: a dot and a word, coloured by state */
++.nk-pill {
++	display: inline-flex;
++	align-items: center;
++	gap: 6px;
++	height: 24px;
++	padding: 0 10px;
++	border-radius: 999px;
++	background: var(--nk-bg-sunk);
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-sm);
++	font-weight: 600;
++	line-height: 1;
++	white-space: nowrap;
++	vertical-align: middle;
++}
++.nk-pill::before {
++	content: "";
++	width: 8px;
++	height: 8px;
++	border-radius: 50%;
++	background: currentColor;
++	opacity: .9;
++}
++.nk-pill.is-ok { background: var(--nk-ok-soft); color: var(--nk-ok); }
++.nk-pill.is-ok::before { background: var(--nk-ok-dot); box-shadow: 0 0 0 3px color-mix(in srgb, var(--nk-ok-dot) 25%, transparent); }
++.nk-pill.is-err { background: var(--nk-err-soft); color: var(--nk-err); }
++.nk-pill.is-err::before { background: var(--nk-err-dot); }
++.nk-pill.is-warn { background: var(--nk-warn-soft); color: var(--nk-warn); }
++.nk-pill.is-warn::before { background: var(--nk-warn-dot); }
++.nk-pill.is-plain::before { display: none; }
++
++/* small inline badge (Active, Placeholder, Failed) */
++.nk-badge {
++	display: inline-flex;
++	align-items: center;
++	height: 20px;
++	padding: 0 7px;
++	border-radius: var(--nk-r);
++	background: var(--nk-bg-sunk);
++	color: var(--nk-dim);
++	font-size: 11px;
++	font-weight: 600;
++	letter-spacing: .02em;
++	white-space: nowrap;
++	vertical-align: middle;
++}
++.nk-badge.is-accent { background: var(--nk-accent-soft); color: var(--nk-accent); }
++.nk-badge.is-ok { background: var(--nk-ok-soft); color: var(--nk-ok); }
++.nk-badge.is-warn { background: var(--nk-warn-soft); color: var(--nk-warn); }
++.nk-badge.is-err { background: var(--nk-err-soft); color: var(--nk-err); }
++
++/* ------------------------------------------------------------ cards */
++
++.nk-card {
++	margin: 0 0 var(--nk-gap);
++	padding: var(--v-card-py, 16px) var(--v-card-px, 20px);
++	border: 1px solid var(--nk-line);
++	border-radius: var(--nk-r-lg);
++	background: var(--nk-bg);
++}
++.nk-card-head {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	justify-content: space-between;
++	gap: var(--nk-sp);
++	margin: 0 0 12px;
++}
++.nk-card-title {
++	margin: 0;
++	font-size: var(--v-fs-md, 14px);
++	font-weight: 600;
++	color: var(--nk-text);
++}
++.nk-card-sub {
++	margin: 2px 0 0;
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-sm);
++	line-height: 1.5;
++}
++.nk-actions {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: var(--nk-sp);
++}
++
++/* ------------------------------------------------------------ tiles */
++
++.nk-tiles {
++	display: grid;
++	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
++	gap: 1px;
++	margin: 0 0 var(--nk-gap);
++	border: 1px solid var(--nk-line);
++	border-radius: var(--nk-r-lg);
++	background: var(--nk-line);
++	overflow: hidden;
++}
++.nk-tile {
++	min-width: 0;
++	padding: 14px var(--v-card-px, 20px);
++	background: var(--nk-bg);
++}
++.nk-tile-label {
++	margin: 0 0 6px;
++	color: var(--nk-faint);
++	font-size: 11px;
++	font-weight: 600;
++	letter-spacing: .06em;
++	text-transform: uppercase;
++}
++.nk-tile-value {
++	overflow: hidden;
++	color: var(--nk-text);
++	font-size: var(--nk-fs-lg);
++	font-weight: 600;
++	line-height: 1.35;
++	text-overflow: ellipsis;
++	white-space: nowrap;
++}
++.nk-tile-value.is-muted { color: var(--nk-faint); font-weight: 500; }
++.nk-tile-note {
++	margin: 4px 0 0;
++	overflow: hidden;
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-sm);
++	text-overflow: ellipsis;
++	white-space: nowrap;
++}
++.nk-tile-note a { color: var(--nk-accent); }
++
++/* ------------------------------------------------------------ setup steps */
++
++.nk-steps {
++	display: grid;
++	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
++	gap: 12px;
++	margin: 0;
++	padding: 0;
++	list-style: none;
++	counter-reset: nk-step;
++}
++.nk-step {
++	position: relative;
++	display: flex;
++	flex-direction: column;
++	gap: 8px;
++	min-width: 0;
++	margin: 0;
++	padding: 14px 14px 14px 52px;
++	border: 1px solid var(--nk-line);
++	border-radius: var(--nk-r-lg);
++	background: var(--nk-bg-soft);
++	counter-increment: nk-step;
++}
++.nk-step::before {
++	content: counter(nk-step);
++	position: absolute;
++	top: 14px;
++	left: 14px;
++	display: flex;
++	align-items: center;
++	justify-content: center;
++	width: 26px;
++	height: 26px;
++	border: 2px solid var(--nk-line);
++	border-radius: 50%;
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-sm);
++	font-weight: 700;
++}
++.nk-step.is-done::before {
++	content: "\2713";
++	border-color: var(--nk-ok-dot);
++	background: var(--nk-ok-dot);
++	color: #fff;
++}
++.nk-step-title { margin: 3px 0 0; font-weight: 600; color: var(--nk-text); }
++.nk-step.is-done .nk-step-title { color: var(--nk-dim); }
++.nk-step-text { margin: 0; color: var(--nk-dim); font-size: var(--nk-fs-sm); line-height: 1.5; }
++.nk-step .btn { align-self: flex-start; margin: 0 !important; }
++
++/* ------------------------------------------------------------ notices */
++
++.nk-note {
++	display: flex;
++	gap: 10px;
++	margin: 0 0 var(--nk-gap);
++	padding: 10px 14px;
++	border: 1px solid var(--nk-line);
++	border-left: 3px solid var(--nk-accent);
++	border-radius: var(--nk-r);
++	background: var(--nk-bg-soft);
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-base);
++	line-height: 1.5;
++}
++.nk-note strong { color: var(--nk-text); }
++.nk-note.is-warn { border-left-color: var(--nk-warn-dot); }
++.nk-note.is-err { border-left-color: var(--nk-err-dot); }
++.nk-note code { font-family: var(--nk-mono); font-size: .95em; }
++
++/* ------------------------------------------------------------ profile files */
++
++.nk-drop {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	justify-content: space-between;
++	gap: 12px;
++	margin: 0 0 12px;
++	padding: 14px 16px;
++	border: 1.5px dashed var(--nk-line);
++	border-radius: var(--nk-r-lg);
++	background: var(--nk-bg-soft);
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-base);
++	transition: border-color .15s, background-color .15s;
++}
++.nk-drop strong { color: var(--nk-text); }
++.nk-drop.is-over {
++	border-color: var(--nk-accent);
++	background: var(--nk-accent-soft);
++}
++.nk-drop input[type="file"] { display: none; }
++
++.nk-files { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
++.nk-file {
++	display: grid;
++	grid-template-columns: minmax(0, 1fr) auto;
++	align-items: center;
++	gap: 8px 16px;
++	padding: 10px 0;
++	border-top: 1px solid var(--nk-line);
++}
++.nk-file:first-child { border-top: 0; }
++.nk-file-name {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: 8px;
++	min-width: 0;
++	font-weight: 600;
++	color: var(--nk-text);
++	word-break: break-all;
++}
++.nk-file-meta { margin: 2px 0 0; color: var(--nk-faint); font-size: var(--nk-fs-sm); }
++.nk-file .nk-actions { justify-content: flex-end; }
++.nk-file .btn { margin: 0 !important; }
++.nk-empty {
++	margin: 0;
++	padding: 18px 0 6px;
++	color: var(--nk-dim);
++	text-align: center;
++	font-size: var(--nk-fs-base);
++}
++
++/* subscription usage meter */
++.nk-meter { min-width: 120px; }
++.nk-meter-bar {
++	height: 6px;
++	margin: 0 0 4px;
++	border-radius: 3px;
++	background: var(--nk-bg-sunk);
++	overflow: hidden;
++}
++.nk-meter-bar > span {
++	display: block;
++	height: 100%;
++	border-radius: 3px;
++	background: var(--v-meter, var(--nk-accent));
++}
++.nk-meter.is-warn .nk-meter-bar > span { background: var(--nk-warn-dot); }
++.nk-meter.is-err .nk-meter-bar > span { background: var(--nk-err-dot); }
++.nk-meter-text { color: var(--nk-dim); font-size: var(--nk-fs-sm); white-space: nowrap; }
++.nk-sub-name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 600; }
++.nk-dim { color: var(--nk-dim); font-size: var(--nk-fs-sm); }
++
++/* ------------------------------------------------------------ editor + log toolbar */
++
++.nk-toolbar {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: var(--nk-sp);
++	margin: 0 0 12px;
++}
++.nk-toolbar .nk-grow { flex: 1 1 240px; min-width: 0; }
++.nk-toolbar select,
++.nk-toolbar input[type="search"],
++.nk-toolbar input[type="text"] { width: 100%; min-width: 0; margin: 0; }
++.nk-toolbar .btn { margin: 0 !important; }
++.nk-toolbar label.nk-check {
++	display: inline-flex;
++	align-items: center;
++	gap: 6px;
++	margin: 0;
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-base);
++	white-space: nowrap;
++	cursor: pointer;
++}
++.nk-toolbar label.nk-check input { margin: 0; }
++.nk-select-auto { width: auto !important; flex: 0 0 auto; }
++
++.nk-fileinfo {
++	display: flex;
++	flex-wrap: wrap;
++	align-items: center;
++	gap: 6px 14px;
++	margin: 0 0 10px;
++	color: var(--nk-dim);
++	font-size: var(--nk-fs-sm);
++}
++.nk-fileinfo code { font-family: var(--nk-mono); color: var(--nk-text); word-break: break-all; }
++
++/* segmented switch (log source) */
++.nk-seg {
++	display: inline-flex;
++	gap: 2px;
++	padding: 3px;
++	border-radius: calc(var(--nk-r) + 3px);
++	background: var(--v-seg-bg, var(--nk-bg-sunk));
++}
++.nk-seg > button {
++	height: calc(var(--nk-ctl-h) - 6px);
++	margin: 0;
++	padding: 0 12px;
++	border: 0;
++	border-radius: var(--nk-r);
++	background: transparent;
++	color: var(--nk-dim);
++	font: inherit;
++	font-size: var(--nk-fs-base);
++	font-weight: 500;
++	cursor: pointer;
++}
++.nk-seg > button:hover { color: var(--nk-text); }
++.nk-seg > button[aria-pressed="true"] {
++	background: var(--v-seg-on, var(--nk-bg));
++	box-shadow: var(--v-seg-on-ring, 0 1px 2px rgba(0, 0, 0, .12));
++	color: var(--nk-accent);
++	font-weight: 600;
++}
++
++/* code / log surface */
++.nk-code {
++	display: block;
++	width: 100%;
++	min-height: 360px;
++	height: 62vh;
++	margin: 0;
++	padding: 12px 14px;
++	border: 1px solid var(--nk-line);
++	border-radius: var(--nk-r);
++	background: var(--nk-bg-soft);
++	color: var(--nk-text);
++	font-family: var(--nk-mono);
++	font-size: 12.5px;
++	line-height: 1.6;
++	tab-size: 2;
++	white-space: pre;
++	overflow: auto;
++	resize: vertical;
++}
++textarea.nk-code:focus {
++	outline: none;
++	border-color: var(--v-focus, var(--nk-accent));
++	box-shadow: 0 0 0 1px var(--v-focus, var(--nk-accent));
++}
++textarea.nk-code[disabled] { opacity: .6; }
++
++.nk-log { white-space: normal; padding: 6px 0; }
++.nk-log-line {
++	display: grid;
++	grid-template-columns: 9.5em 5.5em minmax(0, 1fr);
++	gap: 10px;
++	padding: 1px 14px;
++	white-space: pre-wrap;
++	word-break: break-word;
++}
++.nk-log-line:hover { background: var(--v-hover, var(--nk-bg-sunk)); }
++.nk-log-time { color: var(--nk-faint); white-space: nowrap; }
++.nk-log-tag { color: var(--nk-dim); font-weight: 600; text-transform: uppercase; font-size: 11px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
++.nk-log-line.is-warn .nk-log-tag,
++.nk-log-line.is-warn .nk-log-msg { color: var(--nk-warn); }
++.nk-log-line.is-err { background: color-mix(in srgb, var(--nk-err-soft) 55%, transparent); }
++.nk-log-line.is-err .nk-log-tag,
++.nk-log-line.is-err .nk-log-msg { color: var(--nk-err); }
++.nk-log-line.is-debug .nk-log-msg { color: var(--nk-dim); }
++.nk-log-line.is-raw { grid-template-columns: minmax(0, 1fr); }
++.nk-log-empty { padding: 40px 14px; color: var(--nk-faint); text-align: center; font-family: inherit; }
++.nk-log-foot {
++	display: flex;
++	flex-wrap: wrap;
++	justify-content: space-between;
++	gap: 8px;
++	margin: 8px 0 0;
++	color: var(--nk-faint);
++	font-size: var(--nk-fs-sm);
++}
++
++.nk-dirty { color: var(--nk-warn); font-weight: 600; }
++
++@media (max-width: 640px) {
++	.nk-file { grid-template-columns: minmax(0, 1fr); }
++	.nk-file .nk-actions { justify-content: flex-start; }
++	.nk-log-line { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 4px 14px; }
++	.nk-log-tag { line-height: 1.6; }
++	.nk-code { height: 55vh; }
++}
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js b/luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js
+index e8dae45..bde7bc5 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js
+@@ -4,6 +4,9 @@
+ 'require fs';
+ 'require rpc';
+ 'require request';
++'require ui';
++'require dom';
++'require poll';
+ 
+ const callRCList = rpc.declare({
+     object: 'rc',
+@@ -227,4 +230,195 @@ return baseclass.extend({
+     debug: function () {
+         return callNikkiDebug();
+     },
++
++    /* ---------------------------------------------------------------
++     * Page helpers shared by the views (CleanWRT redesign).
++     * ------------------------------------------------------------- */
++
++    loadStyle: function () {
++        if (document.querySelector('link[data-nikki-style]')) {
++            return;
++        }
++        document.head.appendChild(E('link', {
++            'rel': 'stylesheet',
++            'href': L.resource('nikki/nikki.css'),
++            'data-nikki-style': ''
++        }));
++    },
++
++    // 'file:<name>' or 'subscription:<section>' -> { kind, name } for display
++    describeProfile: function (value) {
++        if (!value) {
++            return null;
++        }
++        const sep = value.indexOf(':');
++        const type = value.substring(0, sep);
++        const ref = value.substring(sep + 1);
++        if (type === 'file') {
++            return { type: 'file', kind: _('File'), name: ref };
++        }
++        if (type === 'subscription') {
++            const name = uci.get('nikki', ref, 'name');
++            return { type: 'subscription', kind: _('Subscription'), name: name ?? ref, section: ref };
++        }
++        return { type: type, kind: type, name: ref };
++    },
++
++    // the placeholder subscription the package ships with
++    isPlaceholderUrl: function (url) {
++        return !url || /^https?:\/\/example\.com\//.test(url);
++    },
++
++    statusState: function (running) {
++        const enabled = uci.get('nikki', 'config', 'enabled') === '1';
++        if (running) {
++            return { cls: 'is-ok', text: _('Running'), hint: _('The mihomo core is running.') };
++        }
++        if (enabled) {
++            return { cls: 'is-err', text: _('Stopped'), hint: _('Nikki is enabled but the core is not running. The Logs page shows why.') };
++        }
++        return { cls: '', text: _('Disabled'), hint: _('Nikki is turned off. Enable it on the Overview page.') };
++    },
++
++    updateStatusPills: function (running) {
++        const state = this.statusState(running);
++        document.querySelectorAll('.nk-status-pill').forEach(function (node) {
++            node.className = 'nk-pill nk-status-pill ' + state.cls;
++            node.textContent = state.text;
++            node.title = state.hint;
++        });
++        document.querySelectorAll('[data-nk-when-running]').forEach(function (node) {
++            node.disabled = !running;
++        });
++    },
++
++    // The heading every Nikki page opens with: title, live status, the actions
++    // people reach for most, and a line saying what the page is for.
++    renderHeader: function (title, description, running, extraActions) {
++        const self = this;
++        const state = this.statusState(running);
++
++        if (!this._statusPolling) {
++            this._statusPolling = true;
++            poll.add(function () {
++                return L.resolveDefault(self.status(), false).then(function (running) {
++                    self.updateStatusPills(running);
++                });
++            });
++        }
++
++        const actions = [];
++        for (const a of (extraActions ?? [])) {
++            actions.push(a);
++        }
++        actions.push(E('button', {
++            'class': 'btn cbi-button',
++            'title': _('Restart the service and reload the profile'),
++            'click': ui.createHandlerFn(this, 'handleRestart')
++        }, [_('Restart')]));
++        actions.push(E('button', {
++            'class': 'btn cbi-button cbi-button-action important',
++            'title': _('Open the dashboard (Zashboard) in a new tab'),
++            'data-nk-when-running': '',
++            'disabled': running ? null : '',
++            'click': ui.createHandlerFn(this, 'handleOpenDashboard')
++        }, [_('Open Dashboard')]));
++
++        return E('div', { 'class': 'nk-header' }, [
++            E('div', { 'class': 'nk-header-main' }, [
++                E('h2', { 'class': 'nk-header-title' }, [
++                    title,
++                    E('span', { 'class': 'nk-pill nk-status-pill ' + state.cls, 'title': state.hint }, [state.text])
++                ]),
++                description ? E('p', { 'class': 'nk-header-desc' }, description) : ''
++            ]),
++            E('div', { 'class': 'nk-header-actions' }, actions)
++        ]);
++    },
++
++    handleRestart: function () {
++        const self = this;
++        return this.restart().then(function () {
++            ui.addTimeLimitedNotification(null, E('p', _('Nikki is restarting.')), 4000, 'info');
++            return new Promise(function (resolve) { window.setTimeout(resolve, 1500); });
++        }).then(function () {
++            return L.resolveDefault(self.status(), false).then(function (running) {
++                self.updateStatusPills(running);
++            });
++        });
++    },
++
++    handleOpenDashboard: function () {
++        return this.openDashboard().catch(function (err) {
++            ui.addTimeLimitedNotification(null, E('p', [
++                _('The dashboard cannot be opened: %s').format(err?.message ?? err),
++                ' ',
++                _('Nikki must be running, and the profile (or Mixin → Dashboard & API) must set an API address.')
++            ]), 8000, 'warning');
++        });
++    },
++
++    formatSize: function (bytes) {
++        if (bytes == null || isNaN(bytes)) {
++            return '';
++        }
++        return '%1024.1mB'.format(bytes);
++    },
++
++    formatTime: function (epoch) {
++        if (!epoch) {
++            return '';
++        }
++        const d = new Date(epoch * 1000);
++        const pad = function (n) { return String(n).padStart(2, '0'); };
++        return '%s-%s-%s %s:%s'.format(d.getFullYear(), pad(d.getMonth() + 1), pad(d.getDate()), pad(d.getHours()), pad(d.getMinutes()));
++    },
++
++    // "12.5 GB" (the backend's format_filesize) -> bytes, for the usage meter
++    parseSize: function (text) {
++        const m = String(text ?? '').trim().match(/^([\d.]+)\s*([KMGTP]?B)$/i);
++        if (!m) {
++            return null;
++        }
++        const units = { B: 0, KB: 1, MB: 2, GB: 3, TB: 4, PB: 5 };
++        return parseFloat(m[1]) * Math.pow(1024, units[m[2].toUpperCase()]);
++    },
++
++    saveBlob: function (blob, filename) {
++        const url = window.URL.createObjectURL(blob);
++        const link = E('a', { 'href': url, 'download': filename, 'style': 'display:none' });
++        document.body.appendChild(link);
++        link.click();
++        document.body.removeChild(link);
++        window.setTimeout(function () { window.URL.revokeObjectURL(url); }, 1000);
++    },
++
++    downloadFile: function (path, filename) {
++        const self = this;
++        return fs.read_direct(path, 'blob').then(function (blob) {
++            self.saveBlob(blob, filename ?? path.replace(/^.*\//, ''));
++        }).catch(function (err) {
++            ui.addTimeLimitedNotification(null, E('p', _('Download failed: %s').format(err?.message ?? err)), 6000, 'error');
++        });
++    },
++
++    // Upload one profile file into the profiles directory, as LuCI's own
++    // upload dialog does (cgi-upload, checked against this app's ACL).
++    uploadProfile: function (file, name) {
++        const data = new FormData();
++        data.append('sessionid', rpc.getSessionID());
++        data.append('filename', `${profilesDir}/${name}`);
++        data.append('filedata', file);
++        return request.post(`${L.env.cgi_base}/cgi-upload`, data, { timeout: 0 }).then(function (res) {
++            const reply = res.json();
++            if (L.isObject(reply) && reply.failure) {
++                throw new Error(reply.message ?? reply.failure);
++            }
++            return reply;
++        });
++    },
++
++    removeFile: function (path) {
++        return fs.remove(path);
++    },
+ })
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js
+index d9d19da..81606b7 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js
+@@ -2,185 +2,248 @@
+ 'require form';
+ 'require view';
+ 'require uci';
+-'require poll';
++'require ui';
+ 'require tools.nikki as nikki';
+ 
+-function renderStatus(running) {
+-    return updateStatus(E('input', { id: 'core_status', style: 'border: unset; font-style: italic; font-weight: bold;', readonly: '' }), running);
++function tile(label, value, note, muted) {
++    return E('div', { 'class': 'nk-tile' }, [
++        E('p', { 'class': 'nk-tile-label' }, [label]),
++        E('div', { 'class': 'nk-tile-value' + (muted ? ' is-muted' : ''), 'title': typeof value === 'string' ? value : null }, [value]),
++        note ? E('p', { 'class': 'nk-tile-note' }, note) : ''
++    ]);
+ }
+ 
+-function updateStatus(element, running) {
+-    if (element) {
+-        element.style.color = running ? 'green' : 'red';
+-        element.value = running ? _('Running') : _('Not Running');
++function focusOption(name) {
++    const field = document.querySelector(`[data-name="${name}"]`);
++    if (!field) {
++        return;
++    }
++    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
++    const input = field.querySelector('select, input:not([type="hidden"])');
++    if (input) {
++        window.setTimeout(function () { input.focus(); }, 300);
+     }
+-    return element;
+ }
+ 
++const modeNames = {
++    redirect: _('Redirect'),
++    tproxy: _('TPROXY'),
++    tun: _('TUN')
++};
++
+ return view.extend({
+     load: function () {
+         return Promise.all([
+             uci.load('nikki'),
+-            nikki.version(),
+-            nikki.status(),
++            L.resolveDefault(nikki.version(), {}),
++            L.resolveDefault(nikki.status(), false),
+             nikki.listProfiles()
+         ]);
+     },
+-    render: function (data) {
+-        const subscriptions = uci.sections('nikki', 'subscription');
+-        const appVersion = data[1].app ?? '';
+-        const coreVersion = data[1].core ?? '';
+-        const running = data[2];
+-        const profiles = data[3];
+-
+-        let m, s, o;
+ 
+-        m = new form.Map('nikki', _('Nikki'), `${_('Transparent Proxy with Mihomo on OpenWrt.')} <a href="https://github.com/nikkinikki-org/OpenWrt-nikki/wiki" target="_blank">${_('How To Use')}</a>`);
+-
+-        s = m.section(form.TableSection, 'status', _('Status'));
+-        s.anonymous = true;
+-
+-        o = s.option(form.Value, '_app_version', _('App Version'));
+-        o.readonly = true;
+-        o.load = function () {
+-            return appVersion;
++    renderSetup: function (profiles, subscriptions) {
++        const realSubs = subscriptions.filter(function (s) { return !nikki.isPlaceholderUrl(s.url); });
++        const current = nikki.describeProfile(uci.get('nikki', 'config', 'profile'));
++
++        const hasSource = profiles.length > 0 || realSubs.length > 0;
++        let chosen = false;
++        if (current?.type === 'file') {
++            chosen = profiles.some(function (p) { return p.name === current.name; });
++        } else if (current?.type === 'subscription') {
++            chosen = realSubs.some(function (s) { return s['.name'] === current.section; });
++        }
++        const enabled = uci.get('nikki', 'config', 'enabled') === '1';
++
++        if (hasSource && chosen && enabled) {
++            return '';
++        }
++
++        const step = function (done, title, text, button) {
++            return E('li', { 'class': 'nk-step' + (done ? ' is-done' : '') }, [
++                E('p', { 'class': 'nk-step-title' }, [title]),
++                E('p', { 'class': 'nk-step-text' }, [text]),
++                done ? '' : button
++            ]);
+         };
+-        o.write = function () { };
+ 
+-        o = s.option(form.Value, '_core_version', _('Core Version'));
+-        o.readonly = true;
+-        o.load = function () {
+-            return coreVersion;
+-        };
+-        o.write = function () { };
++        return E('div', { 'class': 'nk-card' }, [
++            E('div', { 'class': 'nk-card-head' }, [
++                E('div', {}, [
++                    E('h3', { 'class': 'nk-card-title' }, [_('Get started')]),
++                    E('p', { 'class': 'nk-card-sub' }, [_('Three steps to route your traffic through Nikki.')])
++                ])
++            ]),
++            E('ol', { 'class': 'nk-steps' }, [
++                step(hasSource, _('Add a profile'),
++                    _('Upload your Clash / mihomo YAML file, or add the subscription URL your provider gave you.'),
++                    E('a', { 'class': 'btn cbi-button cbi-button-action', 'href': L.url('admin/services/nikki/profile') }, [_('Go to Profiles')])),
++                step(chosen, _('Choose it'),
++                    _('Pick that profile in "Profile" below. Nikki starts mihomo with it.'),
++                    E('button', { 'class': 'btn cbi-button', 'click': function () { focusOption('profile'); } }, [_('Choose profile')])),
++                step(enabled, _('Enable and apply'),
++                    _('Tick "Enable", then press Save & Apply at the bottom of the page.'),
++                    E('button', { 'class': 'btn cbi-button', 'click': function () { focusOption('enabled'); } }, [_('Show the switch')]))
++            ])
++        ]);
++    },
+ 
+-        o = s.option(form.DummyValue, '_core_status', _('Core Status'));
+-        o.cfgvalue = function () {
+-            return renderStatus(running);
+-        };
+-        poll.add(function () {
+-            return L.resolveDefault(nikki.status()).then(function (running) {
+-                updateStatus(document.getElementById('core_status'), running);
+-            });
+-        });
+-
+-        o = s.option(form.Button, 'reload');
+-        o.inputstyle = 'action';
+-        o.inputtitle = _('Reload Service');
+-        o.onclick = function () {
+-            return nikki.reload();
+-        };
++    renderTiles: function (versions) {
++        const current = nikki.describeProfile(uci.get('nikki', 'config', 'profile'));
++        const coreOnly = uci.get('nikki', 'config', 'core_only') === '1';
++        const proxyOn = uci.get('nikki', 'proxy', 'enabled') === '1';
++        const tcp = uci.get('nikki', 'proxy', 'tcp_mode');
++        const udp = uci.get('nikki', 'proxy', 'udp_mode');
++        const apiListen = uci.get('nikki', 'mixin', 'api_listen');
++
++        let profileTile;
++        if (current) {
++            const placeholder = current.type === 'subscription' &&
++                nikki.isPlaceholderUrl(uci.get('nikki', current.section, 'url'));
++            profileTile = tile(_('Profile'), current.name, [
++                placeholder ? E('span', { 'class': 'nk-badge is-warn' }, [_('No URL set')]) : current.kind,
++                ' · ',
++                E('a', { 'href': L.url('admin/services/nikki/profile') }, [placeholder ? _('Set it up') : _('Manage')])]);
++        } else {
++            profileTile = tile(_('Profile'), _('None chosen'), [
++                E('a', { 'href': L.url('admin/services/nikki/profile') }, [_('Add a profile')])], true);
++        }
++
++        let modeValue, modeNote;
++        if (coreOnly) {
++            modeValue = _('Core only');
++            modeNote = _('No firewall rules; use the proxy ports directly.');
++        } else if (!proxyOn) {
++            modeValue = _('Transparent proxy off');
++            modeNote = E('a', { 'href': L.url('admin/services/nikki/proxy') }, [_('Proxy settings')]);
++        } else {
++            modeValue = 'TCP %s · UDP %s'.format(modeNames[tcp] ?? _('off'), modeNames[udp] ?? _('off'));
++            modeNote = E('a', { 'href': L.url('admin/services/nikki/proxy') }, [_('Proxy settings')]);
++        }
++
++        const port = apiListen ? apiListen.substring(apiListen.lastIndexOf(':') + 1) : null;
++
++        return E('div', { 'class': 'nk-tiles' }, [
++            profileTile,
++            tile(_('Traffic'), modeValue, modeNote, coreOnly || !proxyOn),
++            tile(_('Dashboard'), port ? _('Port %s').format(port) : _('From profile'), [
++                E('a', {
++                    'href': '#',
++                    'click': ui.createHandlerFn(this, function (ev) {
++                        ev.preventDefault();
++                        return nikki.updateDashboard().then(function () {
++                            ui.addTimeLimitedNotification(null, E('p', _('Dashboard update requested. It downloads in the background.')), 5000, 'info');
++                        });
++                    })
++                }, [_('Update dashboard')])
++            ], !port),
++            tile(_('Versions'), versions.core ? _('Core %s').format(versions.core) : _('Core unknown'),
++                versions.app ? _('LuCI app %s').format(versions.app) : null, !versions.core)
++        ]);
++    },
+ 
+-        o = s.option(form.Button, 'restart');
+-        o.inputstyle = 'negative';
+-        o.inputtitle = _('Restart Service');
+-        o.onclick = function () {
+-            return nikki.restart();
+-        };
++    render: function (data) {
++        const subscriptions = uci.sections('nikki', 'subscription');
++        const versions = data[1] ?? {};
++        const running = data[2];
++        const profiles = data[3];
+ 
+-        o = s.option(form.Button, 'update_dashboard');
+-        o.inputstyle = 'positive';
+-        o.inputtitle = _('Update Dashboard');
+-        o.onclick = function () {
+-            return nikki.updateDashboard();
+-        };
++        nikki.loadStyle();
+ 
+-        o = s.option(form.Button, 'open_dashboard');
+-        o.inputtitle = _('Open Dashboard');
+-        o.onclick = function () {
+-            return nikki.openDashboard();
+-        };
++        let m, s, o;
++
++        m = new form.Map('nikki');
+ 
+-        s = m.section(form.NamedSection, 'config', 'config', _('App Config'));
++        s = m.section(form.NamedSection, 'config', 'config', _('Service'));
++        s.tab('general', _('General'));
++        s.tab('schedule', _('Startup & Schedule'));
+ 
+-        o = s.option(form.Flag, 'enabled', _('Enable'));
++        o = s.taboption('general', form.Flag, 'enabled', _('Enable'),
++            _('Start Nikki at boot and keep it running.'));
+         o.rmempty = false;
+ 
+-        o = s.option(form.ListValue, 'profile', _('Choose Profile'));
++        o = s.taboption('general', form.ListValue, 'profile', _('Profile'),
++            _('The Clash / mihomo configuration Nikki runs. Add files and subscriptions on the Profiles page.'));
+         o.optional = true;
+ 
+         for (const profile of profiles) {
+-            o.value('file:' + profile.name, _('File:') + profile.name);
++            o.value('file:' + profile.name, '%s: %s'.format(_('File'), profile.name));
+         };
+ 
+         for (const subscription of subscriptions) {
+-            o.value('subscription:' + subscription['.name'], _('Subscription:') + subscription.name);
++            const label = '%s: %s'.format(_('Subscription'), subscription.name ?? subscription['.name']);
++            o.value('subscription:' + subscription['.name'],
++                nikki.isPlaceholderUrl(subscription.url) ? '%s (%s)'.format(label, _('no URL set')) : label);
+         };
+ 
+-        o = s.option(form.Value, 'start_delay', _('Start Delay'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Start Immidiately');
+-
+-        o = s.option(form.Flag, 'scheduled_restart', _('Scheduled Restart'));
++        o = s.taboption('general', form.Flag, 'test_profile', _('Test Profile'),
++            _('Check the profile with mihomo before starting, and refuse to start with a broken one.'));
+         o.rmempty = false;
+ 
+-        o = s.option(form.Value, 'scheduled_restart_cron', _('Scheduled Restart Cron'));
+-        o.retain = true;
++        o = s.taboption('general', form.Flag, 'core_only', _('Core Only'),
++            _('Run mihomo without the transparent-proxy firewall rules. Devices then use the proxy ports (7890 mixed, 7893 HTTP) themselves.'));
+         o.rmempty = false;
+-        o.depends('scheduled_restart', '1');
+ 
+-        o = s.option(form.Flag, 'test_profile', _('Test Profile'));
+-        o.rmempty = false;
++        o = s.taboption('schedule', form.Value, 'start_delay', _('Start Delay'),
++            _('Seconds to wait at boot before starting, for example until the mobile connection is up.'));
++        o.datatype = 'uinteger';
++        o.placeholder = _('Start immediately');
+ 
+-        o = s.option(form.Flag, 'core_only', _('Core Only'));
++        o = s.taboption('schedule', form.Flag, 'scheduled_restart', _('Scheduled Restart'),
++            _('Restart Nikki on a schedule, which also refreshes subscriptions set to prefer the remote copy.'));
+         o.rmempty = false;
+ 
+-        s = m.section(form.NamedSection, 'procd', 'procd', _('procd Config'));
+-
+-        s.tab('general', _('General Config'));
+-
+-        o = s.taboption('general', form.Flag, 'fast_reload', _('Fast Reload'));
++        o = s.taboption('schedule', form.Value, 'scheduled_restart_cron', _('Restart Schedule'),
++            _('Cron format: minute hour day month weekday. "0 3 * * *" is every day at 03:00.'));
++        o.retain = true;
+         o.rmempty = false;
++        o.placeholder = '0 3 * * *';
++        o.depends('scheduled_restart', '1');
+ 
+-        s.tab('rlimit', _('RLIMIT Config'));
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_nproc_soft', _('Number of Processes Soft Limit'));
+-        o.datatype = 'uinteger';
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_nproc_hard', _('Number of Processes Hard Limit'));
+-        o.datatype = 'uinteger';
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_address_space_soft', _('Address Space Size Soft Limit'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Unlimited');
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_address_space_hard', _('Address Space Size Hard Limit'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Unlimited');
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_data_soft', _('Heap Size Soft Limit'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Unlimited');
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_data_hard', _('Heap Size Hard Limit'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Unlimited');
++        s = m.section(form.NamedSection, 'procd', 'procd', _('Advanced: Process'),
++            _('Limits and environment for the mihomo process. The defaults suit most routers; change them only when you know you need to.'));
+ 
+-        o = s.taboption('rlimit', form.Value, 'rlimit_stack_soft', _('Stack Size Soft Limit'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Unlimited');
++        s.tab('general', _('General'));
+ 
+-        o = s.taboption('rlimit', form.Value, 'rlimit_stack_hard', _('Stack Size Hard Limit'));
+-        o.datatype = 'uinteger';
+-        o.placeholder = _('Unlimited');
+-
+-        o = s.taboption('rlimit', form.Value, 'rlimit_nofile_soft', _('Number of Open Files Soft Limit'));
+-        o.datatype = 'uinteger';
++        o = s.taboption('general', form.Flag, 'fast_reload', _('Fast Reload'),
++            _('On a configuration change, reload mihomo in place instead of restarting it. Faster, but some changes only take effect after a restart.'));
++        o.rmempty = false;
+ 
+-        o = s.taboption('rlimit', form.Value, 'rlimit_nofile_hard', _('Number of Open Files Hard Limit'));
+-        o.datatype = 'uinteger';
++        s.tab('rlimit', _('Resource Limits'));
+ 
+-        s.tab('environment_variable', _('Environment Variable Config'));
++        const limit = function (name, title, unlimited) {
++            const opt = s.taboption('rlimit', form.Value, name, title);
++            opt.datatype = 'uinteger';
++            if (unlimited) {
++                opt.placeholder = _('Unlimited');
++            }
++            return opt;
++        };
+ 
+-        o = s.taboption('environment_variable', form.Value, 'env_go_max_procs', 'GOMAXPROCS');
++        limit('rlimit_nproc_soft', _('Number of Processes Soft Limit'));
++        limit('rlimit_nproc_hard', _('Number of Processes Hard Limit'));
++        limit('rlimit_address_space_soft', _('Address Space Size Soft Limit'), true);
++        limit('rlimit_address_space_hard', _('Address Space Size Hard Limit'), true);
++        limit('rlimit_data_soft', _('Heap Size Soft Limit'), true);
++        limit('rlimit_data_hard', _('Heap Size Hard Limit'), true);
++        limit('rlimit_stack_soft', _('Stack Size Soft Limit'), true);
++        limit('rlimit_stack_hard', _('Stack Size Hard Limit'), true);
++        limit('rlimit_nofile_soft', _('Number of Open Files Soft Limit'));
++        limit('rlimit_nofile_hard', _('Number of Open Files Hard Limit'));
++
++        s.tab('environment_variable', _('Environment'));
++
++        o = s.taboption('environment_variable', form.Value, 'env_go_max_procs', 'GOMAXPROCS',
++            _('How many CPU cores mihomo may use at once.'));
+         o.datatype = 'uinteger';
+         o.placeholder = _('Unlimited');
+ 
+-        o = s.taboption('environment_variable', form.Value, 'env_go_mem_limit', 'GOMEMLIMIT');
++        o = s.taboption('environment_variable', form.Value, 'env_go_mem_limit', 'GOMEMLIMIT',
++            _('A soft memory limit for mihomo, in bytes. Lower it if the router runs short of memory.'));
+         o.datatype = 'uinteger';
+         o.placeholder = _('Unlimited');
+ 
+-        o = s.taboption('environment_variable', form.DynamicList, 'env_safe_paths', _('Safe Paths'));
++        o = s.taboption('environment_variable', form.DynamicList, 'env_safe_paths', _('Safe Paths'),
++            _('Extra directories mihomo may read files from.'));
+         o.load = function (section_id) {
+             return this.super('load', section_id)?.split(':');
+         };
+@@ -200,6 +263,29 @@ return view.extend({
+         o = s.taboption('environment_variable', form.Flag, 'env_skip_system_ipv6_check', _('Skip System IPv6 Check'));
+         o.rmempty = false;
+ 
+-        return m.render();
++        const header = nikki.renderHeader(_('Nikki'), [
++            _('Transparent proxy for the whole network, powered by the mihomo (Clash Meta) core.'),
++            ' ',
++            E('a', { 'href': 'https://github.com/nikkinikki-org/OpenWrt-nikki/wiki', 'target': '_blank', 'rel': 'noreferrer' }, [_('How to use')])
++        ], running, [
++            E('button', {
++                'class': 'btn cbi-button',
++                'title': _('Apply configuration changes without restarting the core'),
++                'click': ui.createHandlerFn(this, function () {
++                    return nikki.reload().then(function () {
++                        ui.addTimeLimitedNotification(null, E('p', _('Nikki is reloading its configuration.')), 4000, 'info');
++                    });
++                })
++            }, [_('Reload')])
++        ]);
++
++        return m.render().then(L.bind(function (formNode) {
++            return E('div', { 'class': 'nk-page' }, [
++                header,
++                this.renderSetup(profiles, subscriptions),
++                this.renderTiles(versions),
++                formNode
++            ]);
++        }, this));
+     }
+ });
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/editor.js b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/editor.js
+index 52abc35..12cd6af 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/editor.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/editor.js
+@@ -1,8 +1,9 @@
+ 'use strict';
+-'require form';
+ 'require view';
+ 'require uci';
+ 'require fs';
++'require ui';
++'require dom';
+ 'require tools.nikki as nikki';
+ 
+ return view.extend({
+@@ -12,69 +13,262 @@ return view.extend({
+             nikki.listProfiles(),
+             nikki.listRuleProviders(),
+             nikki.listProxyProviders(),
++            L.resolveDefault(nikki.status(), false)
+         ]);
+     },
+-    render: function (data) {
++
++    buildGroups: function (profiles, ruleProviders, proxyProviders) {
+         const subscriptions = uci.sections('nikki', 'subscription');
+-        const profiles = data[1];
+-        const ruleProviders = data[2];
+-        const proxyProviders = data[3];
++        const files = function (list) {
++            return (list ?? []).filter(function (f) { return f.type === 'file'; })
++                .sort(function (a, b) { return a.name.localeCompare(b.name); });
++        };
+ 
+-        let m, s, o;
++        return [
++            {
++                label: _('Profile files'),
++                hint: _('Your own profile. Changes apply at the next start or reload.'),
++                items: files(profiles).map(function (f) {
++                    return { path: nikki.profilesDir + '/' + f.name, label: f.name };
++                })
++            },
++            {
++                label: _('Subscriptions'),
++                hint: _('A downloaded subscription. The next update replaces it; put lasting changes in Mixin instead.'),
++                items: subscriptions.map(function (s) {
++                    return { path: nikki.subscriptionsDir + '/' + s['.name'] + '.yaml', label: s.name ?? s['.name'] };
++                })
++            },
++            {
++                label: _('Nikki'),
++                items: [
++                    { path: nikki.mixinFilePath, label: _('File for Mixin'), hint: _('Merged over the profile when "Mixin File" is enabled on the Mixin page.') },
++                    { path: nikki.runProfilePath, label: _('Profile for Startup'), hint: _('Generated at every start from the profile and Mixin. Read it to see what mihomo really runs; edits here are lost on the next start.') }
++                ]
++            },
++            {
++                label: _('Rule providers'),
++                hint: _('Downloaded by mihomo; it may replace this file on its next update.'),
++                items: files(ruleProviders).map(function (f) {
++                    return { path: nikki.ruleProvidersDir + '/' + f.name, label: f.name };
++                })
++            },
++            {
++                label: _('Proxy providers'),
++                hint: _('Downloaded by mihomo; it may replace this file on its next update.'),
++                items: files(proxyProviders).map(function (f) {
++                    return { path: nikki.proxyProvidersDir + '/' + f.name, label: f.name };
++                })
++            }
++        ].filter(function (g) { return g.items.length > 0; });
++    },
+ 
+-        m = new form.Map('nikki');
++    findItem: function (path) {
++        for (const g of this.groups) {
++            for (const item of g.items) {
++                if (item.path === path) {
++                    return { item: item, group: g };
++                }
++            }
++        }
++        return null;
++    },
+ 
+-        s = m.section(form.NamedSection, 'editor', 'editor', _('Editor'));
++    setDirty: function (dirty) {
++        this.dirty = dirty;
++        this.dirtyNode.style.display = dirty ? '' : 'none';
++    },
+ 
+-        o = s.option(form.ListValue, '_file', _('Choose File'));
+-        o.optional = true;
++    updateStats: function () {
++        const text = this.textarea.value;
++        const lines = text === '' ? 0 : text.split('\n').length;
++        this.statsNode.textContent = _('%d lines · %s').format(lines, nikki.formatSize(new Blob([text]).size));
++    },
+ 
+-        for (const profile of profiles) {
+-            o.value(nikki.profilesDir + '/' + profile.name, _('File:') + profile.name);
+-        };
++    openFile: function (path) {
++        const self = this;
++        const found = this.findItem(path);
+ 
+-        for (const subscription of subscriptions) {
+-            o.value(nikki.subscriptionsDir + '/' + subscription['.name'] + '.yaml', _('Subscription:') + subscription.name);
+-        };
++        this.path = found ? path : null;
++        this.textarea.value = '';
++        this.textarea.disabled = true;
++        this.setDirty(false);
+ 
+-        for (const ruleProvider of ruleProviders) {
+-            o.value(nikki.ruleProvidersDir + '/' + ruleProvider.name, _('Rule Provider:') + ruleProvider.name);
+-        };
++        if (!found) {
++            dom.content(this.infoNode, E('span', [_('Choose a file to view or edit it.')]));
++            this.statsNode.textContent = '';
++            this.toolButtons.forEach(function (b) { b.disabled = true; });
++            return Promise.resolve();
++        }
+ 
+-        for (const proxyProvider of proxyProviders) {
+-            o.value(nikki.proxyProvidersDir + '/' + proxyProvider.name, _('Proxy Provider:') + proxyProvider.name);
+-        };
++        const hint = found.item.hint ?? found.group.hint;
++        dom.content(this.infoNode, [
++            E('code', [path]),
++            hint ? E('span', [hint]) : ''
++        ]);
+ 
+-        o.value(nikki.mixinFilePath, _('File for Mixin'));
+-        o.value(nikki.runProfilePath, _('Profile for Startup'));
++        // keep the choice in the address, so a reload or a shared link opens it again
++        const url = new URL(window.location.href);
++        url.searchParams.set('file', path);
++        window.history.replaceState(null, '', url);
+ 
+-        o.write = function (section_id, formvalue) {
+-            return true;
+-        };
+-        o.onchange = function (event, section_id, value) {
+-            return L.resolveDefault(fs.read_direct(value), '').then(function (content) {
+-                m.lookupOption('_file_content', section_id)[0].getUIElement(section_id).setValue(content);
+-            });
+-        };
++        return L.resolveDefault(fs.read_direct(path), null).then(function (content) {
++            if (self.path !== path) {
++                return;
++            }
++            if (content == null) {
++                self.infoNode.appendChild(E('span', { 'class': 'nk-badge is-warn' }, [_('Not created yet')]));
++            }
++            self.loaded = content ?? '';
++            self.textarea.value = self.loaded;
++            self.textarea.disabled = false;
++            self.toolButtons.forEach(function (b) { b.disabled = false; });
++            self.updateStats();
++        });
++    },
+ 
+-        o = s.option(form.TextValue, '_file_content',);
+-        o.rows = 25;
+-        o.wrap = false;
+-        o.write = function (section_id, formvalue) {
+-            const path = m.lookupOption('_file', section_id)[0].formvalue(section_id);
+-            return nikki.writefile(path, formvalue);
+-        };
+-        o.remove = function (section_id) {
+-            const path = m.lookupOption('_file', section_id)[0].formvalue(section_id);
+-            return nikki.writefile(path);
+-        };
++    confirmDiscard: function () {
++        return !this.dirty || window.confirm(_('Discard the unsaved changes to this file?'));
++    },
+ 
+-        return m.render();
++    handleSave: function () {
++        const self = this;
++        if (!this.path) {
++            return Promise.resolve();
++        }
++        const path = this.path;
++        const content = this.textarea.value;
++        return nikki.writefile(path, content).then(function () {
++            self.loaded = content;
++            self.setDirty(false);
++            ui.addTimeLimitedNotification(null, E('p', _('Saved %s.').format(path)), 3000, 'info');
++        }).catch(function (err) {
++            ui.addNotification(null, E('p', _('Could not save %s: %s').format(path, err?.message ?? err)), 'error');
++            throw err;
++        });
+     },
++
+     handleSaveApply: function (ev, mode) {
+-        return this.handleSave(ev).finally(function () {
++        return this.handleSave(ev).then(function () {
+             return mode === '0' ? nikki.reload() : nikki.restart();
++        }).then(function () {
++            ui.addTimeLimitedNotification(null, E('p', _('Nikki is applying the change.')), 4000, 'info');
+         });
+     },
+-    handleReset: null
++
++    handleReset: function () {
++        if (!this.path || !this.confirmDiscard()) {
++            return Promise.resolve();
++        }
++        return this.openFile(this.path);
++    },
++
++    render: function (data) {
++        const self = this;
++        const running = data[4];
++
++        nikki.loadStyle();
++
++        this.groups = this.buildGroups(data[1], data[2], data[3]);
++
++        // a ?file= link (from the Profiles page) wins; then the profile in use
++        let initial = new URLSearchParams(window.location.search).get('file');
++        if (!initial || !this.findItem(initial)) {
++            const current = nikki.describeProfile(uci.get('nikki', 'config', 'profile'));
++            if (current?.type === 'file') {
++                initial = nikki.profilesDir + '/' + current.name;
++            } else if (current?.type === 'subscription') {
++                initial = nikki.subscriptionsDir + '/' + current.section + '.yaml';
++            }
++        }
++
++        const select = E('select', {
++            'class': 'cbi-input-select',
++            'aria-label': _('File'),
++            'change': function (ev) {
++                if (!self.confirmDiscard()) {
++                    ev.target.value = self.path ?? '';
++                    return;
++                }
++                self.openFile(ev.target.value);
++            }
++        }, [E('option', { 'value': '' }, [_('-- Choose a file --')])].concat(this.groups.map(function (g) {
++            return E('optgroup', { 'label': g.label }, g.items.map(function (item) {
++                return E('option', { 'value': item.path }, [item.label]);
++            }));
++        })));
++
++        this.textarea = E('textarea', {
++            'class': 'nk-code',
++            'spellcheck': 'false',
++            'autocomplete': 'off',
++            'autocapitalize': 'off',
++            'wrap': 'off',
++            'disabled': '',
++            'aria-label': _('File content'),
++            'input': function () {
++                self.setDirty(self.textarea.value !== self.loaded);
++                self.updateStats();
++            },
++            'keydown': function (ev) {
++                // Tab indents (YAML wants spaces) instead of leaving the editor
++                if (ev.key === 'Tab' && !ev.ctrlKey && !ev.altKey && !ev.metaKey && !ev.shiftKey) {
++                    ev.preventDefault();
++                    document.execCommand('insertText', false, '  ');
++                }
++                if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') {
++                    ev.preventDefault();
++                    self.handleSave();
++                }
++            }
++        });
++
++        this.infoNode = E('div', { 'class': 'nk-fileinfo' });
++        this.statsNode = E('span');
++        this.dirtyNode = E('span', { 'class': 'nk-dirty', 'style': 'display:none' }, [_('Unsaved changes')]);
++
++        this.toolButtons = [
++            E('button', {
++                'class': 'btn cbi-button',
++                'disabled': '',
++                'click': function () { return self.path && nikki.downloadFile(self.path); }
++            }, [_('Download')]),
++            E('button', {
++                'class': 'btn cbi-button',
++                'disabled': '',
++                'title': _('Load the file from the router again, dropping unsaved changes'),
++                'click': ui.createHandlerFn(this, 'handleReset')
++            }, [_('Revert')])
++        ];
++
++        window.addEventListener('beforeunload', function (ev) {
++            if (self.dirty) {
++                ev.preventDefault();
++                ev.returnValue = '';
++            }
++        });
++
++        const header = nikki.renderHeader(_('Editor'),
++            _('View and edit Nikki\'s YAML files directly. Save writes the file; Save & Apply also reloads Nikki. Ctrl+S saves.'),
++            running);
++
++        const page = E('div', { 'class': 'nk-page' }, [
++            header,
++            E('div', { 'class': 'nk-card' }, [
++                E('div', { 'class': 'nk-toolbar' }, [
++                    E('div', { 'class': 'nk-grow' }, [select])
++                ].concat(this.toolButtons)),
++                this.infoNode,
++                this.textarea,
++                E('div', { 'class': 'nk-log-foot' }, [this.dirtyNode, this.statsNode])
++            ])
++        ]);
++
++        if (initial && this.findItem(initial)) {
++            select.value = initial;
++        }
++        this.openFile(select.value);
++
++        return page;
++    }
+ });
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/log.js b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/log.js
+index dd2dbb8..0a7562d 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/log.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/log.js
+@@ -3,47 +3,214 @@
+ 'require view';
+ 'require uci';
+ 'require fs';
++'require ui';
++'require dom';
+ 'require poll';
+ 'require tools.nikki as nikki';
+ 
++// lines drawn at most; the rest stays in the file (Download has it all)
++const MAX_LINES = 1500;
++
++const coreRe = /^time="([^"]+)"\s+level=(\w+)\s+msg="((?:[^"\\]|\\.)*)"/;
++const appRe = /^\[([^\]]+)\]\s+\[([^\]]+)\]\s+(.*)$/;
++const badRe = /\b(fail(ed|ure)?|error|invalid|not valid|not found|exit)\b/i;
++
++function shortTime(t) {
++    // "2026-11-24T10:00:00.123+08:00" or "2026-11-24 10:00:00" -> "11-24 10:00:00"
++    const m = String(t).match(/^\d{4}-(\d\d-\d\d)[T ](\d\d:\d\d:\d\d)/);
++    return m ? m[1] + ' ' + m[2] : t;
++}
++
++function parseLine(line) {
++    let m = line.match(coreRe);
++    if (m) {
++        const level = m[2].toLowerCase();
++        let cls = '';
++        if (level === 'error' || level === 'fatal' || level === 'panic') {
++            cls = 'is-err';
++        } else if (level === 'warning' || level === 'warn') {
++            cls = 'is-warn';
++        } else if (level === 'debug') {
++            cls = 'is-debug';
++        }
++        return { time: m[1], tag: level, msg: m[3].replace(/\\(["\\])/g, '$1'), cls: cls };
++    }
++    m = line.match(appRe);
++    if (m) {
++        return { time: m[1], tag: m[2], msg: m[3], cls: badRe.test(m[3]) ? 'is-err' : '' };
++    }
++    return { raw: line, cls: badRe.test(line) ? 'is-err' : '' };
++}
++
+ return view.extend({
+     load: function () {
+         return Promise.all([
+             uci.load('nikki'),
+             nikki.getAppLog(),
+-            nikki.getCoreLog()
++            nikki.getCoreLog(),
++            L.resolveDefault(nikki.status(), false)
+         ]);
+     },
+-    render: function (data) {
+-        const appLog = data[1];
+-        const coreLog = data[2];
+ 
++    sources: {
++        app: { label: _('App log'), file: 'nikki-app.log', read: 'getAppLog', clear: 'clearAppLog',
++            note: _('What Nikki itself does: starting, stopping, profile and subscription updates, firewall rules.') },
++        core: { label: _('Core log'), file: 'nikki-core.log', read: 'getCoreLog', clear: 'clearCoreLog',
++            note: _('What mihomo reports: connections, rule matches, DNS, errors. Its detail is set by Log Level on the Mixin page.') }
++    },
++
++    renderLog: function (force) {
++        const text = this.text[this.source] ?? '';
++        const filter = this.filterInput.value.trim().toLowerCase();
++        const level = this.levelSelect.value;
++        const key = [this.source, text.length, text.slice(-200), filter, level].join('\u0000');
++
++        if (!force && key === this.lastKey) {
++            return;
++        }
++        this.lastKey = key;
++
++        const all = text.split('\n').filter(function (l) { return l !== ''; });
++        let rows = all.map(parseLine);
++
++        if (level === 'warn') {
++            rows = rows.filter(function (r) { return r.cls === 'is-warn' || r.cls === 'is-err'; });
++        } else if (level === 'err') {
++            rows = rows.filter(function (r) { return r.cls === 'is-err'; });
++        }
++        if (filter) {
++            rows = rows.filter(function (r) {
++                return (r.raw ?? (r.tag + ' ' + r.msg)).toLowerCase().indexOf(filter) >= 0;
++            });
++        }
++
++        const matched = rows.length;
++        rows = rows.slice(-MAX_LINES);
++
++        const frag = document.createDocumentFragment();
++        for (const r of rows) {
++            if (r.raw != null) {
++                frag.appendChild(E('div', { 'class': 'nk-log-line is-raw ' + r.cls }, [
++                    E('span', { 'class': 'nk-log-msg' }, [document.createTextNode(r.raw)])
++                ]));
++            } else {
++                frag.appendChild(E('div', { 'class': 'nk-log-line ' + r.cls }, [
++                    E('span', { 'class': 'nk-log-time', 'title': r.time }, [document.createTextNode(shortTime(r.time))]),
++                    E('span', { 'class': 'nk-log-tag' }, [document.createTextNode(r.tag)]),
++                    E('span', { 'class': 'nk-log-msg' }, [document.createTextNode(r.msg)])
++                ]));
++            }
++        }
++
++        if (!rows.length) {
++            frag.appendChild(E('div', { 'class': 'nk-log-empty' }, [
++                all.length ? _('No lines match the filter.') : _('The log is empty.')
++            ]));
++        }
++
++        dom.content(this.logNode, frag);
++
++        let summary;
++        if (matched > rows.length) {
++            summary = _('Showing the last %d of %d lines. Download has them all.').format(rows.length, matched);
++        } else if (filter || level !== 'all') {
++            summary = _('%d of %d lines').format(matched, all.length);
++        } else {
++            summary = _('%d lines').format(all.length);
++        }
++        this.summaryNode.textContent = summary;
++
++        if (this.follow.checked) {
++            this.logNode.scrollTop = this.logNode.scrollHeight;
++        }
++    },
++
++    refresh: function () {
++        const self = this;
++        const source = this.source;
++        return L.resolveDefault(nikki[this.sources[source].read](), '').then(function (text) {
++            self.text[source] = text ?? '';
++            self.updatedNode.textContent = _('Updated %s').format(new Date().toLocaleTimeString());
++            if (source === self.source) {
++                self.renderLog(false);
++            }
++        });
++    },
++
++    selectSource: function (source) {
++        this.source = source;
++        this.segButtons.forEach(function (b) {
++            b.setAttribute('aria-pressed', b.dataset.source === source ? 'true' : 'false');
++        });
++        this.noteNode.textContent = this.sources[source].note;
++        this.follow.checked = true;
++        this.renderLog(true);
++        return this.refresh();
++    },
++
++    handleClear: function () {
++        const self = this;
++        const src = this.sources[this.source];
++        if (!window.confirm(_('Clear the %s? This cannot be undone.').format(src.label.toLowerCase()))) {
++            return Promise.resolve();
++        }
++        return nikki[src.clear]().then(function () {
++            self.text[self.source] = '';
++            self.renderLog(true);
++        });
++    },
++
++    handleDownload: function () {
++        const src = this.sources[this.source];
++        nikki.saveBlob(new Blob([this.text[this.source] ?? ''], { type: 'text/plain' }), src.file);
++    },
++
++    handleDebug: function () {
++        // the debug script turns Nikki on and restarts it when it is off
++        if (uci.get('nikki', 'config', 'enabled') !== '1' &&
++            !window.confirm(_('Nikki is turned off. Creating the report enables and starts it, and it stays enabled afterwards. Continue?'))) {
++            return Promise.resolve();
++        }
++        return nikki.debug().then(function (res) {
++            if (res?.success === false) {
++                throw new Error(_('the debug script failed'));
++            }
++            return nikki.downloadFile(nikki.debugLogPath, 'nikki-debug.log');
++        }).catch(function (err) {
++            ui.addNotification(null, E('p', _('Could not create the debug report: %s').format(err?.message ?? err)), 'error');
++        });
++    },
++
++    renderSettings: function () {
+         let m, s, o;
+ 
+         m = new form.Map('nikki');
+ 
+-        s = m.section(form.NamedSection, 'log', 'log', _('Log'));
+-
+-        s.tab('log_config', _('Log Config'));
++        s = m.section(form.NamedSection, 'log', 'log', _('Log settings'),
++            _('Logs are kept in memory (/var/log/nikki), so they are lost at reboot and must be kept small.'));
+ 
+-        o = s.taboption('log_config', form.Flag, 'clear_at_stop', _('Clear At Stop'));
++        o = s.option(form.Flag, 'clear_at_stop', _('Clear At Stop'),
++            _('Empty both logs whenever Nikki stops.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('log_config', form.Flag, 'scheduled_clear', _('Scheduled Clear'));
++        o = s.option(form.Flag, 'scheduled_clear', _('Scheduled Clear'),
++            _('Check the logs on a schedule and empty any that grew past the size limit.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('log_config', form.Value, 'scheduled_clear_cron', _('Scheduled Clear Cron'));
++        o = s.option(form.Value, 'scheduled_clear_cron', _('Check Schedule'),
++            _('Cron format. "*/5 * * * *" checks every five minutes.'));
+         o.retain = true;
+         o.rmempty = false;
++        o.placeholder = '*/5 * * * *';
+         o.depends('scheduled_clear', '1');
+ 
+-        o = s.taboption('log_config', form.Value, 'scheduled_clear_size_limit', _('Scheduled Clear Size Limit'));
++        o = s.option(form.Value, 'scheduled_clear_size_limit', _('Size Limit'));
+         o.retain = true;
+         o.rmempty = false;
+         o.datatype = 'uinteger';
+         o.depends('scheduled_clear', '1');
+ 
+-        o = s.taboption('log_config', form.ListValue, 'scheduled_clear_size_limit_unit', _('Scheduled Clear Size Limit Unit'));
++        o = s.option(form.ListValue, 'scheduled_clear_size_limit_unit', _('Size Limit Unit'));
+         o.retain = true;
+         o.rmempty = false;
+         o.depends('scheduled_clear', '1');
+@@ -51,98 +218,114 @@ return view.extend({
+         o.value('MB', 'MB');
+         o.value('GB', 'GB');
+ 
+-        s.tab('app_log', _('App Log'));
+-
+-        o = s.taboption('app_log', form.Button, 'clear_app_log');
+-        o.inputstyle = 'negative';
+-        o.inputtitle = _('Clear Log');
+-        o.onclick = function (_, section_id) {
+-            m.lookupOption('_app_log', section_id)[0].getUIElement(section_id).setValue('');
+-            return nikki.clearAppLog();
+-        };
+-
+-        o = s.taboption('app_log', form.TextValue, '_app_log');
+-        o.rows = 25;
+-        o.wrap = false;
+-        o.load = function (section_id) {
+-            return appLog;
+-        };
+-        o.write = function (section_id, formvalue) {
+-            return true;
+-        };
+-        poll.add(L.bind(function () {
+-            const option = this;
+-            return L.resolveDefault(nikki.getAppLog()).then(function (log) {
+-                option.getUIElement('log').setValue(log);
+-            });
+-        }, o));
+-
+-        o = s.taboption('app_log', form.Button, 'scroll_app_log_to_bottom');
+-        o.inputtitle = _('Scroll To Bottom');
+-        o.onclick = function (_, section_id) {
+-            const element = m.lookupOption('_app_log', section_id)[0].getUIElement(section_id).node.firstChild;
+-            element.scrollTop = element.scrollHeight;
+-        };
+-
+-        s.tab('core_log', _('Core Log'));
+-
+-        o = s.taboption('core_log', form.Button, 'clear_core_log');
+-        o.inputstyle = 'negative';
+-        o.inputtitle = _('Clear Log');
+-        o.onclick = function (_, section_id) {
+-            m.lookupOption('_core_log', section_id)[0].getUIElement(section_id).setValue('');
+-            return nikki.clearCoreLog();
+-        };
+-
+-        o = s.taboption('core_log', form.TextValue, '_core_log');
+-        o.rows = 25;
+-        o.wrap = false;
+-        o.load = function (section_id) {
+-            return coreLog;
+-        };
+-        o.write = function (section_id, formvalue) {
+-            return true;
+-        };
+-        poll.add(L.bind(function () {
+-            const option = this;
+-            return L.resolveDefault(nikki.getCoreLog()).then(function (log) {
+-                option.getUIElement('log').setValue(log);
+-            });
+-        }, o));
+-
+-        o = s.taboption('core_log', form.Button, 'scroll_core_log_to_bottom');
+-        o.inputtitle = _('Scroll To Bottom');
+-        o.onclick = function (_, section_id) {
+-            const element = m.lookupOption('_core_log', section_id)[0].getUIElement(section_id).node.firstChild;
+-            element.scrollTop = element.scrollHeight;
+-        };
+-
+-        s.tab('debug_log', _('Debug Log'));
+-
+-        o = s.taboption('debug_log', form.Button, '_generate_download_debug_log');
+-        o.inputstyle = 'negative';
+-        o.inputtitle = _('Generate & Download');
+-        o.onclick = function () {
+-            return nikki.debug().then(function () {
+-                fs.read_direct(nikki.debugLogPath, 'blob').then(function (data) {
+-                    // create url
+-                    const url = window.URL.createObjectURL(data, { type: 'text/markdown' });
+-                    // create link
+-                    const link = document.createElement('a');
+-                    link.href = url;
+-                    link.download = 'debug.log';
+-                    // append to body
+-                    document.body.appendChild(link);
+-                    // download
+-                    link.click();
+-                    // remove from body
+-                    document.body.removeChild(link);
+-                    // revoke url
+-                    window.URL.revokeObjectURL(url);
+-                });
++        return m.render();
++    },
++
++    render: function (data) {
++        const self = this;
++        const running = data[3];
++
++        nikki.loadStyle();
++
++        this.text = { app: data[1] ?? '', core: data[2] ?? '' };
++        this.source = 'app';
++
++        this.segButtons = ['app', 'core'].map(function (key) {
++            return E('button', {
++                'type': 'button',
++                'data-source': key,
++                'aria-pressed': key === self.source ? 'true' : 'false',
++                'click': function () { self.selectSource(key); }
++            }, [self.sources[key].label]);
++        });
++
++        this.filterInput = E('input', {
++            'type': 'search',
++            'class': 'cbi-input-text',
++            'placeholder': _('Filter lines…'),
++            'aria-label': _('Filter lines'),
++            'input': function () { self.renderLog(false); }
++        });
++
++        this.levelSelect = E('select', {
++            'class': 'cbi-input-select nk-select-auto',
++            'aria-label': _('Level'),
++            'change': function () { self.renderLog(false); }
++        }, [
++            E('option', { 'value': 'all' }, [_('All lines')]),
++            E('option', { 'value': 'warn' }, [_('Warnings and errors')]),
++            E('option', { 'value': 'err' }, [_('Errors only')])
++        ]);
++
++        this.follow = E('input', { 'type': 'checkbox', 'checked': '' });
++        this.autoRefresh = E('input', { 'type': 'checkbox', 'checked': '' });
++
++        this.logNode = E('div', {
++            'class': 'nk-code nk-log',
++            'role': 'log',
++            'tabindex': '0',
++            'scroll': function () {
++                // scrolling up stops following the tail; back at the bottom resumes it
++                const atBottom = this.scrollHeight - this.scrollTop - this.clientHeight < 24;
++                self.follow.checked = atBottom;
++            }
++        });
++        this.summaryNode = E('span');
++        this.updatedNode = E('span');
++        this.noteNode = E('p', { 'class': 'nk-card-sub' }, [this.sources[this.source].note]);
++
++        poll.add(function () {
++            if (!self.autoRefresh.checked || document.hidden) {
++                return Promise.resolve();
++            }
++            return self.refresh();
++        });
++
++        const header = nikki.renderHeader(_('Logs'),
++            _('When Nikki does not start or a site does not load, the reason is usually here. Start with the App log, then the Core log.'),
++            running);
++
++        return this.renderSettings().then(function (settingsNode) {
++            const page = E('div', { 'class': 'nk-page' }, [
++                header,
++                E('div', { 'class': 'nk-card' }, [
++                    E('div', { 'class': 'nk-card-head' }, [
++                        E('div', {}, [
++                            E('div', { 'class': 'nk-seg', 'role': 'group', 'aria-label': _('Log') }, self.segButtons),
++                            self.noteNode
++                        ]),
++                        E('div', { 'class': 'nk-actions' }, [
++                            E('button', { 'class': 'btn cbi-button', 'click': ui.createHandlerFn(self, 'handleDownload') }, [_('Download')]),
++                            E('button', { 'class': 'btn cbi-button cbi-button-negative', 'click': ui.createHandlerFn(self, 'handleClear') }, [_('Clear')])
++                        ])
++                    ]),
++                    E('div', { 'class': 'nk-toolbar' }, [
++                        E('div', { 'class': 'nk-grow' }, [self.filterInput]),
++                        self.levelSelect,
++                        E('label', { 'class': 'nk-check' }, [self.follow, _('Follow')]),
++                        E('label', { 'class': 'nk-check' }, [self.autoRefresh, _('Auto refresh')])
++                    ]),
++                    self.logNode,
++                    E('div', { 'class': 'nk-log-foot' }, [self.summaryNode, self.updatedNode])
++                ]),
++                settingsNode,
++                E('div', { 'class': 'nk-card' }, [
++                    E('div', { 'class': 'nk-card-head' }, [
++                        E('div', {}, [
++                            E('h3', { 'class': 'nk-card-title' }, [_('Debug report')]),
++                            E('p', { 'class': 'nk-card-sub' }, [_('Collects versions, the configuration, the running profile and the routing state into one file to attach to a bug report. Server addresses, passwords and subscription URLs are masked; read it before sharing all the same.')])
++                        ]),
++                        E('button', { 'class': 'btn cbi-button', 'click': ui.createHandlerFn(self, 'handleDebug') }, [_('Generate & Download')])
++                    ])
++                ])
++            ]);
++
++            self.renderLog(true);
++            window.requestAnimationFrame(function () {
++                self.logNode.scrollTop = self.logNode.scrollHeight;
+             });
+-        };
+ 
+-        return m.render();
++            return page;
++        });
+     }
+-});
+\ No newline at end of file
++});
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js
+index b30010f..0b7a02b 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js
+@@ -13,20 +13,24 @@ return view.extend({
+         return Promise.all([
+             uci.load('nikki'),
+             network.getNetworks(),
++            L.resolveDefault(nikki.status(), false)
+         ]);
+     },
+     render: function (data) {
+         const networks = data[1];
++        const running = data[2];
++
++        nikki.loadStyle();
+ 
+         let m, s, o, so;
+ 
+         m = new form.Map('nikki');
+ 
+-        s = m.section(form.NamedSection, 'mixin', 'mixin', _('Mixin Option'));
++        s = m.section(form.NamedSection, 'mixin', 'mixin', _('Overrides'));
+ 
+-        s.tab('general', _('General Config'));
++        s.tab('general', _('General'));
+ 
+-        o = s.taboption('general', form.ListValue, 'log_level', _('Log Level'));
++        o = s.taboption('general', form.ListValue, 'log_level', _('Log Level'), _('How much mihomo writes to the core log. "warning" is a good default; "debug" only while troubleshooting.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('silent');
+@@ -35,21 +39,21 @@ return view.extend({
+         o.value('info');
+         o.value('debug');
+ 
+-        o = s.taboption('general', form.ListValue, 'mode', _('Mode'));
++        o = s.taboption('general', form.ListValue, 'mode', _('Mode'), _('Rule: follow the profile\'s rules (normal). Global: send everything through the proxy selected in the GLOBAL group. Direct: send nothing through a proxy.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('global', _('Global Mode'));
+         o.value('rule', _('Rule Mode'));
+         o.value('direct', _('Direct Mode'));
+ 
+-        o = s.taboption('general', form.ListValue, 'match_process', _('Match Process'));
++        o = s.taboption('general', form.ListValue, 'match_process', _('Match Process'), _('Match rules by the process that opened the connection. Only useful for traffic from the router itself.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('off');
+         o.value('strict');
+         o.value('always');
+ 
+-        o = s.taboption('general', form.ListValue, 'outbound_interface', _('Outbound Interface'));
++        o = s.taboption('general', form.ListValue, 'outbound_interface', _('Outbound Interface'), _('Bind outgoing proxy connections to this interface, for example the mobile WAN.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+ 
+@@ -66,13 +70,13 @@ return view.extend({
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('general', form.ListValue, 'unify_delay', _('Unify Delay'));
++        o = s.taboption('general', form.ListValue, 'unify_delay', _('Unify Delay'), _('Report latency tests without the connection handshake, so results from different protocols compare fairly.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('general', form.ListValue, 'tcp_concurrent', _('TCP Concurrent'));
++        o = s.taboption('general', form.ListValue, 'tcp_concurrent', _('TCP Concurrent'), _('Connect to all resolved addresses at once and use the fastest.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -92,7 +96,7 @@ return view.extend({
+         o.datatype = 'uinteger';
+         o.placeholder = _('Unmodified');
+ 
+-        s.tab('external_control', _('External Control Config'));
++        s.tab('external_control', _('Dashboard & API'));
+ 
+         o = s.taboption('external_control', form.Value, 'ui_path', _('UI Path'));
+         o.placeholder = _('Unmodified');
+@@ -100,7 +104,7 @@ return view.extend({
+         o = s.taboption('external_control', form.Value, 'ui_name', _('UI Name'));
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('external_control', form.Value, 'ui_url', _('UI Url'));
++        o = s.taboption('external_control', form.Value, 'ui_url', _('UI Url'), _('Where "Update Dashboard" downloads the dashboard from. CleanWRT ships Zashboard preinstalled.'));
+         o.placeholder = _('Unmodified');
+         o.value('https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip', 'Zashboard (CDN Fonts)');
+         o.value('https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip', 'Zashboard');
+@@ -108,7 +112,7 @@ return view.extend({
+         o.value('https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip', 'YACD');
+         o.value('https://github.com/MetaCubeX/Razord-meta/archive/refs/heads/gh-pages.zip', 'Razord');
+ 
+-        o = s.taboption('external_control', form.Value, 'api_listen', _('API Listen'));
++        o = s.taboption('external_control', form.Value, 'api_listen', _('API Listen'), _('Address the dashboard and API listen on, such as 0.0.0.0:9090.'));
+         o.datatype = 'ipaddrport(1)';
+         o.placeholder = _('Unmodified');
+ 
+@@ -125,19 +129,19 @@ return view.extend({
+         o = s.taboption('external_control', form.Value, 'api_tls_ech_key', _('API TLS ECH Key'));
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('external_control', form.Value, 'api_secret', _('API Secret'));
++        o = s.taboption('external_control', form.Value, 'api_secret', _('API Secret'), _('The password for the dashboard and API. "Open Dashboard" fills it in for you.'));
+         o.password = true;
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('external_control', form.ListValue, 'selection_cache', _('Save Proxy Selection'));
++        o = s.taboption('external_control', form.ListValue, 'selection_cache', _('Save Proxy Selection'), _('Remember the proxies chosen in the dashboard across restarts.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        s.tab('inbound', _('Inbound Config'));
++        s.tab('inbound', _('Proxy Ports'));
+ 
+-        o = s.taboption('inbound', form.ListValue, 'allow_lan', _('Allow Lan'));
++        o = s.taboption('inbound', form.ListValue, 'allow_lan', _('Allow Lan'), _('Let devices on your network use the proxy ports below directly.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -151,19 +155,19 @@ return view.extend({
+         o.datatype = 'port';
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('inbound', form.Value, 'mixed_port', _('Mixed Port'));
++        o = s.taboption('inbound', form.Value, 'mixed_port', _('Mixed Port'), _('One port that speaks both HTTP and SOCKS5. Point an app\'s proxy setting here.'));
+         o.datatype = 'port';
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('inbound', form.Value, 'redir_port', _('Redirect Port'));
++        o = s.taboption('inbound', form.Value, 'redir_port', _('Redirect Port'), _('Used by Redirect mode on the Proxy page.'));
+         o.datatype = 'port';
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('inbound', form.Value, 'tproxy_port', _('TPROXY Port'));
++        o = s.taboption('inbound', form.Value, 'tproxy_port', _('TPROXY Port'), _('Used by TPROXY mode on the Proxy page.'));
+         o.datatype = 'port';
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('inbound', form.Flag, 'authentication', _('Overwrite Authentication'));
++        o = s.taboption('inbound', form.Flag, 'authentication', _('Overwrite Authentication'), _('Replace the profile\'s proxy users with the list below. Applies to the HTTP, SOCKS and mixed ports.'));
+         o.rmempty = false;
+ 
+         o = s.taboption('inbound', form.SectionValue, '_authentications', form.TableSection, 'authentication', _('Edit Authentications'));
+@@ -184,9 +188,9 @@ return view.extend({
+         so.password = true;
+         so.rmempty = false;
+ 
+-        s.tab('tun', _('TUN Config'));
++        s.tab('tun', _('TUN'));
+ 
+-        o = s.taboption('tun', form.ListValue, 'tun_enabled', _('Enable'));
++        o = s.taboption('tun', form.ListValue, 'tun_enabled', _('Enable'), _('The profile\'s own TUN interface. TUN mode on the Proxy page adds its own, so this can stay Unmodified.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -195,7 +199,7 @@ return view.extend({
+         o = s.taboption('tun', form.Value, 'tun_device', _('Device Name'));
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('tun', form.ListValue, 'tun_stack', _('Stack'));
++        o = s.taboption('tun', form.ListValue, 'tun_stack', _('Stack'), _('System is fastest; gVisor is the most compatible; Mixed uses System for TCP and gVisor for UDP.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('system', 'System');
+@@ -226,9 +230,9 @@ return view.extend({
+         o.value('tcp://any:53');
+         o.value('udp://any:53');
+ 
+-        s.tab('dns', _('DNS Config'));
++        s.tab('dns', _('DNS'));
+ 
+-        o = s.taboption('dns', form.ListValue, 'dns_enabled', _('Enable'));
++        o = s.taboption('dns', form.ListValue, 'dns_enabled', _('Enable'), _('Let mihomo answer DNS. Needed for domain rules and Fake-IP.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -250,7 +254,7 @@ return view.extend({
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('dns', form.ListValue, 'dns_mode', _('DNS Mode'));
++        o = s.taboption('dns', form.ListValue, 'dns_mode', _('DNS Mode'), _('Fake-IP answers instantly with placeholder addresses and resolves on the proxy side: faster, and no DNS leaks. Redir-Host returns real addresses: more compatible with apps that check them.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('redir-host', 'Redir-Host');
+@@ -268,7 +272,7 @@ return view.extend({
+         o.datatype = 'uinteger';
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('dns', form.Flag, 'fake_ip_filter', _('Overwrite Fake-IP Filter'));
++        o = s.taboption('dns', form.Flag, 'fake_ip_filter', _('Overwrite Fake-IP Filter'), _('Replace the profile\'s list of domains that always get a real address (for example NTP servers or game consoles).'));
+         o.rmempty = false;
+ 
+         o = s.taboption('dns', form.DynamicList, 'fake_ip_filters', _('Edit Fake-IP Filters'));
+@@ -288,7 +292,7 @@ return view.extend({
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('dns', form.ListValue, 'dns_respect_rules', _('Respect Rules'));
++        o = s.taboption('dns', form.ListValue, 'dns_respect_rules', _('Respect Rules'), _('Resolve each domain through the proxy its rule picks, so lookups follow the same path as the traffic.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -300,22 +304,24 @@ return view.extend({
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('dns', form.ListValue, 'dns_system_hosts', _('Use System Hosts'));
++        s.tab('dns_servers', _('Hosts & Nameservers'));
++
++        o = s.taboption('dns_servers', form.ListValue, 'dns_system_hosts', _('Use System Hosts'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('dns', form.ListValue, 'dns_hosts', _('Use Hosts'));
++        o = s.taboption('dns_servers', form.ListValue, 'dns_hosts', _('Use Hosts'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('dns', form.Flag, 'hosts', _('Overwrite Hosts'));
++        o = s.taboption('dns_servers', form.Flag, 'hosts', _('Overwrite Hosts'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('dns', form.SectionValue, '_hosts', form.TableSection, 'hosts', _('Edit Hosts'));
++        o = s.taboption('dns_servers', form.SectionValue, '_hosts', form.TableSection, 'hosts', _('Edit Hosts'));
+         o.retain = true;
+         o.depends('hosts', '1');
+ 
+@@ -331,10 +337,10 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'ip', 'IP');
+ 
+-        o = s.taboption('dns', form.Flag, 'dns_nameserver', _('Overwrite Nameserver'));
++        o = s.taboption('dns_servers', form.Flag, 'dns_nameserver', _('Overwrite Nameserver'), _('Replace the profile\'s upstream DNS servers with the list below.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('dns', form.SectionValue, '_dns_nameservers', form.TableSection, 'nameserver', _('Edit Nameservers'));
++        o = s.taboption('dns_servers', form.SectionValue, '_dns_nameservers', form.TableSection, 'nameserver', _('Edit Nameservers'));
+         o.retain = true;
+         o.depends('dns_nameserver', '1');
+ 
+@@ -354,10 +360,10 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'nameserver', _('Nameserver'));
+ 
+-        o = s.taboption('dns', form.Flag, 'dns_proxy_server_nameserver_policy', _('Overwrite Proxy Server Nameserver Policy'));
++        o = s.taboption('dns_servers', form.Flag, 'dns_proxy_server_nameserver_policy', _('Overwrite Proxy Server Nameserver Policy'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('dns', form.SectionValue, '_dns_proxy_server_nameserver_policies', form.TableSection, 'proxy_server_nameserver_policy', _('Edit Proxy Server Nameserver Policies'));
++        o = s.taboption('dns_servers', form.SectionValue, '_dns_proxy_server_nameserver_policies', form.TableSection, 'proxy_server_nameserver_policy', _('Edit Proxy Server Nameserver Policies'));
+         o.retain = true;
+         o.depends('dns_proxy_server_nameserver_policy', '1');
+ 
+@@ -373,16 +379,16 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'nameserver', _('Nameserver'));
+ 
+-        o = s.taboption('dns', form.ListValue, 'dns_direct_nameserver_follow_policy', _('Direct Nameserver Follow Policy'));
++        o = s.taboption('dns_servers', form.ListValue, 'dns_direct_nameserver_follow_policy', _('Direct Nameserver Follow Policy'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+         o.value('1', _('Enable'));
+ 
+-        o = s.taboption('dns', form.Flag, 'dns_nameserver_policy', _('Overwrite Nameserver Policy'));
++        o = s.taboption('dns_servers', form.Flag, 'dns_nameserver_policy', _('Overwrite Nameserver Policy'), _('Use specific DNS servers for matching domains, for example a local resolver for your own domain.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('dns', form.SectionValue, '_dns_nameserver_policies', form.TableSection, 'nameserver_policy', _('Edit Nameserver Policies'));
++        o = s.taboption('dns_servers', form.SectionValue, '_dns_nameserver_policies', form.TableSection, 'nameserver_policy', _('Edit Nameserver Policies'));
+         o.retain = true;
+         o.depends('dns_nameserver_policy', '1');
+ 
+@@ -398,9 +404,9 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'nameserver', _('Nameserver'));
+ 
+-        s.tab('sniffer', _('Sniffer Config'));
++        s.tab('sniffer', _('Sniffer'));
+ 
+-        o = s.taboption('sniffer', form.ListValue, 'sniffer', _('Enable'));
++        o = s.taboption('sniffer', form.ListValue, 'sniffer', _('Enable'), _('Read the domain name from the start of a connection (TLS SNI, HTTP Host), so domain rules work even when a device connects by IP address.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -457,9 +463,9 @@ return view.extend({
+         so = o.subsection.option(form.Flag, 'overwrite_destination', _('Overwrite Destination'));
+         so.rmempty = false;
+ 
+-        s.tab('rule', _('Rule Config'));
++        s.tab('rule', _('Rules'));
+ 
+-        o = s.taboption('rule', form.Flag, 'rule_provider', _('Append Rule Provider'));
++        o = s.taboption('rule', form.Flag, 'rule_provider', _('Append Rule Provider'), _('Add the rule providers below to the profile\'s own.'));
+         o.rmempty = false;
+ 
+         o = s.taboption('rule', form.SectionValue, '_rule_providers', form.GridSection, 'rule_provider', _('Edit Rule Providers'));
+@@ -528,7 +534,7 @@ return view.extend({
+         so.modalonly = true;
+         so.depends('type', 'http');
+ 
+-        o = s.taboption('rule', form.Flag, 'rule', _('Append Rule'));
++        o = s.taboption('rule', form.Flag, 'rule', _('Append Rule'), _('Add the rules below in front of the profile\'s own rules, so they win.'));
+         o.rmempty = false;
+ 
+         o = s.taboption('rule', form.SectionValue, '_rules', form.TableSection, 'rule', _('Edit Rules'));
+@@ -574,7 +580,7 @@ return view.extend({
+         so.depends('type', /IP-ASN/i);
+         so.depends('type', /GEOIP/i);
+ 
+-        s.tab('geox', _('GeoX Config'));
++        s.tab('geox', _('GeoX'));
+ 
+         o = s.taboption('geox', form.ListValue, 'geoip_format', _('GeoIP Format'));
+         o.optional = true;
+@@ -582,7 +588,7 @@ return view.extend({
+         o.value('dat', 'DAT');
+         o.value('mmdb', 'MMDB');
+ 
+-        o = s.taboption('geox', form.ListValue, 'geodata_loader', _('GeoData Loader'));
++        o = s.taboption('geox', form.ListValue, 'geodata_loader', _('GeoData Loader'), _('Memory Conservative uses less RAM, which suits routers, at a small speed cost.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('standard', _('Standard Loader'));
+@@ -600,7 +606,7 @@ return view.extend({
+         o = s.taboption('geox', form.Value, 'geoip_asn_url', _('GeoIP(ASN) Url'));
+         o.placeholder = _('Unmodified');
+ 
+-        o = s.taboption('geox', form.ListValue, 'geox_auto_update', _('GeoX Auto Update'));
++        o = s.taboption('geox', form.ListValue, 'geox_auto_update', _('GeoX Auto Update'), _('Download fresh GeoIP and GeoSite databases on a schedule.'));
+         o.optional = true;
+         o.placeholder = _('Unmodified');
+         o.value('0', _('Disable'));
+@@ -610,11 +616,17 @@ return view.extend({
+         o.datatype = 'uinteger';
+         o.placeholder = _('Unmodified');
+ 
+-        s.tab('mixin_file_content', _('Mixin File Content'));
++        s.tab('mixin_file_content', _('Mixin File'));
+ 
+-        o = s.taboption('mixin_file_content', form.Flag, 'mixin_file_content', _('Enable'), _('Please go to the editor tab to edit the file for mixin'));
++        o = s.taboption('mixin_file_content', form.Flag, 'mixin_file_content', _('Enable'), _('Merge the YAML in %s over the profile. Settings on the other tabs still win over it. Edit the file on the Editor page (File for Mixin).').format('/etc/nikki/mixin.yaml'));
+         o.rmempty = false;
+ 
+-        return m.render();
++        const header = nikki.renderHeader(_('Mixin'),
++            _('Override settings of your profile without editing it. Each setting left at "Unmodified" keeps the value from the profile; anything you set here wins, and survives subscription updates.'),
++            running);
++
++        return m.render().then(function (formNode) {
++            return E('div', { 'class': 'nk-page' }, [header, formNode]);
++        });
+     }
+ });
+\ No newline at end of file
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js
+index cf277e0..a9dde8a 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js
+@@ -2,75 +2,346 @@
+ 'require form';
+ 'require view';
+ 'require uci';
++'require ui';
++'require dom';
+ 'require tools.nikki as nikki';
+ 
++const nameRe = /^[A-Za-z0-9][A-Za-z0-9._ -]*\.(ya?ml)$/i;
++
+ return view.extend({
+     load: function () {
+         return Promise.all([
+-            uci.load('nikki')
++            uci.load('nikki'),
++            L.resolveDefault(nikki.status(), false),
++            nikki.listProfiles()
++        ]);
++    },
++
++    activeProfile: function () {
++        return uci.get('nikki', 'config', 'profile');
++    },
++
++    // Choose a profile and apply at once: the same path as Save & Apply, so
++    // any other edit on the page is saved with it.
++    useProfile: function (value) {
++        uci.set('nikki', 'config', 'profile', value);
++        return this.handleSaveApply(null, '0');
++    },
++
++    /* ------------------------------------------------------- profile files */
++
++    refreshFiles: function () {
++        return nikki.listProfiles().then(L.bind(function (files) {
++            this.files = files;
++            dom.content(this.filesNode, this.renderFileList());
++        }, this));
++    },
++
++    renderFileList: function () {
++        const files = (this.files ?? [])
++            .filter(function (f) { return f.type === 'file'; })
++            .sort(function (a, b) { return a.name.localeCompare(b.name); });
++        const active = this.activeProfile();
++
++        if (!files.length) {
++            return E('p', { 'class': 'nk-empty' }, [_('No profile files yet. Upload one above, or use a subscription below.')]);
++        }
++
++        return E('ul', { 'class': 'nk-files' }, files.map(L.bind(function (f) {
++            const value = 'file:' + f.name;
++            const isActive = value === active;
++            const path = nikki.profilesDir + '/' + f.name;
++
++            return E('li', { 'class': 'nk-file' }, [
++                E('div', {}, [
++                    E('div', { 'class': 'nk-file-name' }, [
++                        f.name,
++                        isActive ? E('span', { 'class': 'nk-badge is-accent' }, [_('In use')]) : ''
++                    ]),
++                    E('p', { 'class': 'nk-file-meta' }, [
++                        '%s · %s %s'.format(nikki.formatSize(f.size), _('changed'), nikki.formatTime(f.mtime))
++                    ])
++                ]),
++                E('div', { 'class': 'nk-actions' }, [
++                    isActive ? '' : E('button', {
++                        'class': 'btn cbi-button cbi-button-action',
++                        'title': _('Run Nikki with this profile'),
++                        'click': ui.createHandlerFn(this, 'useProfile', value)
++                    }, [_('Use')]),
++                    E('a', {
++                        'class': 'btn cbi-button',
++                        'href': L.url('admin/services/nikki/editor') + '?file=' + encodeURIComponent(path)
++                    }, [_('Edit')]),
++                    E('button', {
++                        'class': 'btn cbi-button',
++                        'click': ui.createHandlerFn(nikki, 'downloadFile', path, f.name)
++                    }, [_('Download')]),
++                    E('button', {
++                        'class': 'btn cbi-button cbi-button-negative',
++                        'click': ui.createHandlerFn(this, 'confirmDelete', f.name, isActive)
++                    }, [_('Delete')])
++                ])
++            ]);
++        }, this)));
++    },
++
++    confirmDelete: function (name, isActive) {
++        const self = this;
++        ui.showModal(_('Delete profile'), [
++            E('p', [_('Delete "%s" from the router? This cannot be undone.').format(name)]),
++            isActive ? E('p', { 'class': 'nk-note is-warn' }, [
++                _('This profile is in use. Nikki will not start again until you choose another one.')
++            ]) : '',
++            E('div', { 'class': 'right' }, [
++                E('button', { 'class': 'btn cbi-button', 'click': ui.hideModal }, [_('Cancel')]),
++                ' ',
++                E('button', {
++                    'class': 'btn cbi-button cbi-button-negative important',
++                    'click': ui.createHandlerFn(this, function () {
++                        return nikki.removeFile(nikki.profilesDir + '/' + name).then(function () {
++                            ui.hideModal();
++                            ui.addTimeLimitedNotification(null, E('p', _('Deleted %s.').format(name)), 4000, 'info');
++                            return self.refreshFiles();
++                        }).catch(function (err) {
++                            ui.hideModal();
++                            ui.addNotification(null, E('p', _('Could not delete %s: %s').format(name, err?.message ?? err)), 'error');
++                        });
++                    })
++                }, [_('Delete')])
++            ])
++        ]);
++    },
++
++    handleFiles: function (fileList) {
++        const self = this;
++        const files = Array.from(fileList ?? []);
++        if (!files.length) {
++            return Promise.resolve();
++        }
++
++        const bad = files.filter(function (f) { return !nameRe.test(f.name); });
++        if (bad.length) {
++            ui.addNotification(null, E('p', [
++                _('Only .yaml and .yml files can be uploaded, with a name of letters, digits, spaces, dots, dashes and underscores. Skipped: %s').format(bad.map(function (f) { return f.name; }).join(', '))
++            ]), 'warning');
++        }
++
++        const existing = (this.files ?? []).map(function (f) { return f.name; });
++        const good = files.filter(function (f) { return nameRe.test(f.name); });
++        const clash = good.filter(function (f) { return existing.indexOf(f.name) >= 0; });
++
++        if (clash.length && !window.confirm(_('Replace the existing %s?').format(clash.map(function (f) { return f.name; }).join(', ')))) {
++            return Promise.resolve();
++        }
++
++        let chain = Promise.resolve();
++        good.forEach(function (f) {
++            chain = chain.then(function () {
++                self.dropNode.classList.add('spinning');
++                return nikki.uploadProfile(f, f.name).then(function () {
++                    ui.addTimeLimitedNotification(null, E('p', _('Uploaded %s.').format(f.name)), 4000, 'info');
++                }).catch(function (err) {
++                    ui.addNotification(null, E('p', _('Upload of %s failed: %s').format(f.name, err?.message ?? err)), 'error');
++                });
++            });
++        });
++
++        return chain.finally(function () {
++            self.dropNode.classList.remove('spinning');
++            return self.refreshFiles();
++        });
++    },
++
++    renderFilesCard: function () {
++        const self = this;
++        const input = E('input', {
++            'type': 'file',
++            'accept': '.yaml,.yml',
++            'multiple': '',
++            'change': function (ev) {
++                self.handleFiles(ev.target.files).finally(function () { ev.target.value = ''; });
++            }
++        });
++
++        this.dropNode = E('div', {
++            'class': 'nk-drop',
++            'dragover': function (ev) { ev.preventDefault(); this.classList.add('is-over'); },
++            'dragleave': function () { this.classList.remove('is-over'); },
++            'drop': function (ev) {
++                ev.preventDefault();
++                this.classList.remove('is-over');
++                self.handleFiles(ev.dataTransfer?.files);
++            }
++        }, [
++            E('div', {}, [
++                E('strong', [_('Drop a profile here')]),
++                E('br'),
++                _('A Clash / mihomo YAML file (.yaml or .yml). It is saved to %s.').format(nikki.profilesDir)
++            ]),
++            input,
++            E('button', { 'class': 'btn cbi-button cbi-button-action', 'click': function () { input.click(); } }, [_('Choose file…')])
++        ]);
++
++        this.filesNode = E('div', {}, this.renderFileList());
++
++        return E('div', { 'class': 'nk-card' }, [
++            E('div', { 'class': 'nk-card-head' }, [
++                E('div', {}, [
++                    E('h3', { 'class': 'nk-card-title' }, [_('Profile files')]),
++                    E('p', { 'class': 'nk-card-sub' }, [_('Configuration files stored on the router. Choose one with "Use", or on the Overview page.')])
++                ])
++            ]),
++            this.dropNode,
++            this.filesNode
+         ]);
+     },
++
++    /* ------------------------------------------------------- subscriptions */
++
+     render: function (data) {
+-        let m, s, o, so;
++        const self = this;
++        const running = data[1];
++        this.files = data[2];
+ 
+-        m = new form.Map('nikki');
++        nikki.loadStyle();
+ 
+-        s = m.section(form.NamedSection, 'config', 'config', _('Profile'));
++        let m, s, o;
+ 
+-        o = s.option(form.FileUpload, '_upload_profile', _('Upload Profile'));
+-        o.browser = true;
+-        o.enable_download = true;
+-        o.root_directory = nikki.profilesDir;
+-        o.write = function (section_id, formvalue) {
+-            return true;
+-        };
++        m = new form.Map('nikki');
++        this.map = m;
+ 
+-        s = m.section(form.GridSection, 'subscription', _('Subscription'));
++        s = m.section(form.GridSection, 'subscription', _('Subscriptions'),
++            _('A subscription is a profile Nikki downloads from your provider\'s URL. "Update" downloads it now; with "Prefer: Remote" it is downloaded again at every start.'));
+         s.addremove = true;
+         s.anonymous = true;
+         s.sortable = true;
+-        s.modaltitle = _('Edit Subscription');
++        s.addbtntitle = _('Add subscription');
++        s.modaltitle = function (section_id) {
++            const name = uci.get('nikki', section_id, 'name');
++            return name ? _('Subscription: %s').format(name) : _('New subscription');
++        };
+ 
+-        o = s.option(form.Value, 'name', _('Subscription Name'));
++        o = s.option(form.Value, 'name', _('Name'),
++            _('A label for this subscription, shown in the profile list.'));
+         o.rmempty = false;
++        o.textvalue = function (section_id) {
++            const name = this.cfgvalue(section_id) ?? section_id;
++            const url = uci.get('nikki', section_id, 'url');
++            const active = self.activeProfile() === 'subscription:' + section_id;
++            return E('div', { 'class': 'nk-sub-name' }, [
++                name,
++                active ? E('span', { 'class': 'nk-badge is-accent' }, [_('In use')]) : '',
++                nikki.isPlaceholderUrl(url) ? E('span', { 'class': 'nk-badge is-warn', 'title': _('Edit this subscription and enter your provider\'s URL.') }, [_('No URL set')]) : ''
++            ]);
++        };
+ 
+-        o = s.option(form.Value, 'used', _('Used'));
++        o = s.option(form.DummyValue, '_usage', _('Data used'));
+         o.modalonly = false;
+-        o.optional = true;
+-        o.readonly = true;
++        o.textvalue = function (section_id) {
++            const usedText = uci.get('nikki', section_id, 'used');
++            const totalText = uci.get('nikki', section_id, 'total');
++            if (!usedText && !totalText) {
++                return E('span', { 'class': 'nk-dim' }, [_('Not reported')]);
++            }
++            const used = nikki.parseSize(usedText);
++            const total = nikki.parseSize(totalText);
++            const pct = (used != null && total) ? Math.min(100, used / total * 100) : null;
++            return E('div', { 'class': 'nk-meter' + (pct >= 90 ? ' is-err' : pct >= 75 ? ' is-warn' : '') }, [
++                pct != null ? E('div', { 'class': 'nk-meter-bar' }, [E('span', { 'style': 'width:%.1f%%'.format(pct) })]) : '',
++                E('div', { 'class': 'nk-meter-text' }, [
++                    totalText ? '%s / %s'.format(usedText ?? '?', totalText) : usedText
++                ])
++            ]);
++        };
+ 
+-        o = s.option(form.Value, 'total', _('Total'));
++        o = s.option(form.DummyValue, 'expire', _('Expires'));
+         o.modalonly = false;
+-        o.optional = true;
+-        o.readonly = true;
++        o.textvalue = function (section_id) {
++            const v = this.cfgvalue(section_id);
++            if (!v) {
++                return E('span', { 'class': 'nk-dim' }, ['—']);
++            }
++            const date = new Date(v.replace(' ', 'T'));
++            const days = Math.floor((date - new Date()) / 86400000);
++            let badge = '';
++            if (!isNaN(days) && days < 0) {
++                badge = E('span', { 'class': 'nk-badge is-err' }, [_('Expired')]);
++            } else if (!isNaN(days) && days <= 7) {
++                badge = E('span', { 'class': 'nk-badge is-warn' }, [_('%d days left').format(days)]);
++            }
++            return E('div', { 'class': 'nk-sub-name' }, [E('span', { 'class': 'nk-dim' }, [v.substring(0, 10)]), badge]);
++        };
+ 
+-        o = s.option(form.Value, 'expire', _('Expire At'));
++        o = s.option(form.DummyValue, 'update', _('Last update'));
+         o.modalonly = false;
+-        o.optional = true;
+-        o.readonly = true;
++        o.textvalue = function (section_id) {
++            const v = this.cfgvalue(section_id);
++            const success = uci.get('nikki', section_id, 'success');
++            if (success === '0') {
++                return E('span', { 'class': 'nk-badge is-err', 'title': _('The last update failed. The Logs page shows why.') }, [_('Failed')]);
++            }
++            return v ? E('span', { 'class': 'nk-dim' }, [v.substring(0, 16)]) : E('span', { 'class': 'nk-dim' }, [_('Never')]);
++        };
+ 
+-        o = s.option(form.Value, 'update', _('Update At'));
++        o = s.option(form.Button, '_update_subscription');
++        o.editable = true;
++        o.inputstyle = 'action';
++        o.inputtitle = _('Update');
+         o.modalonly = false;
+-        o.optional = true;
+-        o.readonly = true;
++        o.write = o.remove = function () { };
++        o.onclick = function (ev, section_id) {
++            if (nikki.isPlaceholderUrl(uci.get('nikki', section_id, 'url'))) {
++                ui.addTimeLimitedNotification(null, E('p', _('Set the subscription URL first: press Edit on this row.')), 6000, 'warning');
++                return;
++            }
++            return nikki.updateSubscription(section_id).then(function (res) {
++                const name = uci.get('nikki', section_id, 'name') ?? section_id;
++                if (res?.success) {
++                    ui.addTimeLimitedNotification(null, E('p', _('Subscription "%s" updated.').format(name)), 5000, 'info');
++                } else {
++                    ui.addNotification(null, E('p', _('Subscription "%s" could not be updated. Check the URL; the Logs page (App log) shows the reason.').format(name)), 'error');
++                }
++                // the backend wrote usage and dates straight to the config
++                uci.unload('nikki');
++                return m.load().then(function () { return m.reset(); });
++            });
++        };
+ 
+-        o = s.option(form.Button, 'update_subscription');
++        o = s.option(form.Button, '_use_subscription');
+         o.editable = true;
+-        o.inputstyle = 'positive';
+-        o.inputtitle = _('Update');
++        o.inputtitle = _('Use');
+         o.modalonly = false;
+-        o.onclick = function (_, section_id) {
+-            return nikki.updateSubscription(section_id);
++        o.write = o.remove = function () { };
++        o.onclick = function (ev, section_id) {
++            if (nikki.isPlaceholderUrl(uci.get('nikki', section_id, 'url'))) {
++                ui.addTimeLimitedNotification(null, E('p', _('Set the subscription URL first: press Edit on this row.')), 6000, 'warning');
++                return;
++            }
++            if (self.activeProfile() === 'subscription:' + section_id) {
++                ui.addTimeLimitedNotification(null, E('p', _('This subscription is already in use.')), 4000, 'info');
++                return;
++            }
++            return self.useProfile('subscription:' + section_id);
+         };
+ 
+-        o = s.option(form.Value, 'info_url', _('Subscription Info Url'));
++        o = s.option(form.Value, 'url', _('Subscription URL'),
++            _('The link from your provider. It must return a Clash / mihomo YAML profile.'));
+         o.modalonly = true;
++        o.rmempty = false;
++        o.placeholder = 'https://';
++        o.validate = function (section_id, value) {
++            if (nikki.isPlaceholderUrl(value)) {
++                return _('Enter your provider\'s subscription URL.');
++            }
++            return /^https?:\/\/\S+$/i.test(value) ? true : _('Expecting an http:// or https:// URL');
++        };
+ 
+-        o = s.option(form.Value, 'url', _('Subscription Url'));
++        o = s.option(form.Value, 'info_url', _('Usage Info URL'),
++            _('Optional. Some providers report traffic and expiry from a separate URL; leave empty to read them from the subscription itself.'));
+         o.modalonly = true;
+-        o.rmempty = false;
+ 
+-        o = s.option(form.Value, 'user_agent', _('User Agent'));
++        o = s.option(form.Value, 'user_agent', _('User Agent'),
++            _('Some providers send a different format depending on the client name. "clash.meta" or "mihomo" usually gets the full mihomo profile.'));
+         o.default = 'clash';
+         o.modalonly = true;
+         o.rmempty = false;
+@@ -78,13 +349,24 @@ return view.extend({
+         o.value('clash.meta');
+         o.value('mihomo');
+ 
+-        o = s.option(form.ListValue, 'prefer', _('Prefer'));
++        o = s.option(form.ListValue, 'prefer', _('Prefer'),
++            _('Remote: download the subscription at every start. Local: start from the saved copy, and download only with Update or when there is no copy.'));
+         o.default = 'remote';
+         o.modalonly = true;
+         o.rmempty = false;
+         o.value('remote', _('Remote'));
+         o.value('local', _('Local'));
+ 
+-        return m.render();
++        const header = nikki.renderHeader(_('Profiles'),
++            _('Your Clash / mihomo configurations: files you upload and subscriptions Nikki downloads. The one marked "In use" is what Nikki runs.'),
++            running);
++
++        return m.render().then(L.bind(function (formNode) {
++            return E('div', { 'class': 'nk-page' }, [
++                header,
++                this.renderFilesCard(),
++                formNode
++            ]);
++        }, this));
+     }
+ });
+diff --git a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/proxy.js b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/proxy.js
+index bba0b95..a5a599c 100644
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/proxy.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/proxy.js
+@@ -13,6 +13,7 @@ return view.extend({
+             network.getHostHints(),
+             network.getNetworks(),
+             nikki.getIdentifiers(),
++            L.resolveDefault(nikki.status(), false)
+         ]);
+     },
+     render: function (data) {
+@@ -21,32 +22,39 @@ return view.extend({
+         const users = data[3]?.users ?? [];
+         const groups = data[3]?.groups ?? [];
+         const cgroups = data[3]?.cgroups ?? [];
++        const running = data[4];
++
++        nikki.loadStyle();
+ 
+         let m, s, o, so;
+ 
+         m = new form.Map('nikki');
+ 
+-        s = m.section(form.NamedSection, 'proxy', 'proxy', _('Proxy Config'));
++        s = m.section(form.NamedSection, 'proxy', 'proxy', _('Transparent Proxy'));
+ 
+-        s.tab('proxy', _('Proxy Config'));
++        s.tab('proxy', _('General'));
+ 
+-        o = s.taboption('proxy', form.Flag, 'enabled', _('Enable'));
++        o = s.taboption('proxy', form.Flag, 'enabled', _('Enable'),
++            _('Send traffic through mihomo with firewall rules, so devices need no proxy settings of their own. Off: mihomo only listens on its proxy ports.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('proxy', form.ListValue, 'tcp_mode', _('TCP Mode'));
++        o = s.taboption('proxy', form.ListValue, 'tcp_mode', _('TCP Mode'),
++            _('Redirect is the lightest and works almost everywhere. TPROXY keeps the original destination for every protocol. TUN routes through a virtual interface and is the most compatible, at some CPU cost.'));
+         o.optional = true;
+         o.placeholder = _('Disable');
+         o.value('redirect', _('Redirect Mode'));
+         o.value('tproxy', _('TPROXY Mode'));
+         o.value('tun', _('TUN Mode'));
+ 
+-        o = s.taboption('proxy', form.ListValue, 'udp_mode', _('UDP Mode'));
++        o = s.taboption('proxy', form.ListValue, 'udp_mode', _('UDP Mode'),
++            _('UDP cannot be redirected: choose TPROXY or TUN to proxy it (games, QUIC, voice), or leave it off to send UDP directly.'));
+         o.optional = true;
+         o.placeholder = _('Disable');
+         o.value('tproxy', _('TPROXY Mode'));
+         o.value('tun', _('TUN Mode'));
+ 
+-        o = s.taboption('proxy', form.Flag, 'ipv4_dns_hijack', _('IPv4 DNS Hijack'));
++        o = s.taboption('proxy', form.Flag, 'ipv4_dns_hijack', _('IPv4 DNS Hijack'),
++            _('Answer DNS queries on port 53 with mihomo, so domain rules and Fake-IP work.'));
+         o.rmempty = false;
+ 
+         o = s.taboption('proxy', form.Flag, 'ipv6_dns_hijack', _('IPv6 DNS Hijack'));
+@@ -55,59 +63,22 @@ return view.extend({
+         o = s.taboption('proxy', form.Flag, 'ipv4_proxy', _('IPv4 Proxy'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('proxy', form.Flag, 'ipv6_proxy', _('IPv6 Proxy'));
+-        o.rmempty = false;
+-
+-        o = s.taboption('proxy', form.Flag, 'fake_ip_ping_hijack', _('Fake-IP Ping Hijack'));
++        o = s.taboption('proxy', form.Flag, 'ipv6_proxy', _('IPv6 Proxy'),
++            _('Turn off if your proxies do not carry IPv6; IPv6 traffic then goes out directly.'));
+         o.rmempty = false;
+ 
+-        s.tab('router', _('Router Proxy'));
+-
+-        o = s.taboption('router', form.Flag, 'router_proxy', _('Enable'));
++        o = s.taboption('proxy', form.Flag, 'fake_ip_ping_hijack', _('Fake-IP Ping Hijack'),
++            _('Reply to pings sent to Fake-IP addresses, so "ping example.com" works in Fake-IP mode.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('router', form.SectionValue, '_router_access_control', form.TableSection, 'router_access_control', _('Access Control'));
+-        o.retain = true;
+-        o.depends('router_proxy', '1');
+-
+-        o.subsection.addremove = true;
+-        o.subsection.anonymous = true;
+-        o.subsection.sortable = true;
+-
+-        so = o.subsection.option(form.Flag, 'enabled', _('Enable'));
+-        so.default = '1';
+-        so.rmempty = false;
+-
+-        so = o.subsection.option(form.DynamicList, 'user', _('User'));
+-
+-        for (const user of users) {
+-            so.value(user);
+-        };
+-
+-        so = o.subsection.option(form.DynamicList, 'group', _('Group'));
+-
+-        for (const group of groups) {
+-            so.value(group);
+-        };
+-
+-        so = o.subsection.option(form.DynamicList, 'cgroup', _('CGroup'));
+-
+-        for (const cgroup of cgroups) {
+-            so.value(cgroup);
+-        };
++        s.tab('lan', _('LAN Devices'));
+ 
+-        so = o.subsection.option(form.Flag, 'dns', _('DNS'));
+-        so.rmempty = false;
+-
+-        so = o.subsection.option(form.Flag, 'proxy', _('Proxy'));
+-        so.rmempty = false;
+-
+-        s.tab('lan', _('LAN Proxy'));
+-
+-        o = s.taboption('lan', form.Flag, 'lan_proxy', _('Enable'));
++        o = s.taboption('lan', form.Flag, 'lan_proxy', _('Enable'),
++            _('Proxy the traffic of devices on your network.'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('lan', form.DynamicList, 'lan_inbound_interface', _('Inbound Interface'));
++        o = s.taboption('lan', form.DynamicList, 'lan_inbound_interface', _('Inbound Interface'),
++            _('The networks whose devices are proxied. Normally just "lan".'));
+         o.retain = true;
+         o.rmempty = false;
+         o.depends('lan_proxy', '1');
+@@ -119,13 +90,15 @@ return view.extend({
+             o.value(network.getName());
+         }
+ 
+-        o = s.taboption('lan', form.SectionValue, '_lan_access_control', form.TableSection, 'lan_access_control', _('Access Control'));
++        o = s.taboption('lan', form.SectionValue, '_lan_access_control', form.TableSection, 'lan_access_control', _('Access Control'),
++            _('Rules are checked from the top; the first enabled rule that matches a device decides. A rule with no IP, IP6 or MAC matches every device. Untick DNS or Proxy to let matching devices bypass Nikki.'));
+         o.retain = true;
+         o.depends('lan_proxy', '1');
+ 
+         o.subsection.addremove = true;
+         o.subsection.anonymous = true;
+         o.subsection.sortable = true;
++        o.subsection.addbtntitle = _('Add rule');
+ 
+         so = o.subsection.option(form.Flag, 'enabled', _('Enable'));
+         so.default = '1';
+@@ -133,6 +106,7 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'ip', 'IP');
+         so.datatype = 'ip4addr';
++        so.placeholder = _('Any');
+ 
+         for (const mac in hosts) {
+             const host = hosts[mac];
+@@ -144,6 +118,7 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'ip6', 'IP6');
+         so.datatype = 'ip6addr';
++        so.placeholder = _('Any');
+ 
+         for (const mac in hosts) {
+             const host = hosts[mac];
+@@ -155,6 +130,7 @@ return view.extend({
+ 
+         so = o.subsection.option(form.DynamicList, 'mac', 'MAC');
+         so.datatype = 'macaddr';
++        so.placeholder = _('Any');
+ 
+         for (const mac in hosts) {
+             const host = hosts[mac];
+@@ -168,15 +144,57 @@ return view.extend({
+         so = o.subsection.option(form.Flag, 'proxy', _('Proxy'));
+         so.rmempty = false;
+ 
+-        s.tab('bypass', _('Bypass'));
++        s.tab('router', _('Router Itself'));
+ 
+-        o = s.taboption('bypass', form.Flag, 'bypass_china_mainland_ip', _('Bypass China Mainland IP'));
++        o = s.taboption('router', form.Flag, 'router_proxy', _('Enable'),
++            _('Also proxy traffic that starts on the router (package downloads, update checks, other services).'));
+         o.rmempty = false;
+ 
+-        o = s.taboption('bypass', form.Flag, 'bypass_china_mainland_ip6', _('Bypass China Mainland IP6'));
+-        o.rmempty = false;
++        o = s.taboption('router', form.SectionValue, '_router_access_control', form.TableSection, 'router_access_control', _('Access Control'),
++            _('Rules are checked from the top; the first enabled rule that matches a process decides, by its user, group or cgroup. The default first rule keeps system services such as dnsmasq and NTP direct.'));
++        o.retain = true;
++        o.depends('router_proxy', '1');
++
++        o.subsection.addremove = true;
++        o.subsection.anonymous = true;
++        o.subsection.sortable = true;
++        o.subsection.addbtntitle = _('Add rule');
++
++        so = o.subsection.option(form.Flag, 'enabled', _('Enable'));
++        so.default = '1';
++        so.rmempty = false;
++
++        so = o.subsection.option(form.DynamicList, 'user', _('User'));
++        so.placeholder = _('Any');
++
++        for (const user of users) {
++            so.value(user);
++        };
++
++        so = o.subsection.option(form.DynamicList, 'group', _('Group'));
++        so.placeholder = _('Any');
++
++        for (const group of groups) {
++            so.value(group);
++        };
++
++        so = o.subsection.option(form.DynamicList, 'cgroup', _('CGroup'));
++        so.placeholder = _('Any');
+ 
+-        o = s.taboption('bypass', form.Value, 'proxy_tcp_dport', _('Destination TCP Port to Proxy'));
++        for (const cgroup of cgroups) {
++            so.value(cgroup);
++        };
++
++        so = o.subsection.option(form.Flag, 'dns', _('DNS'));
++        so.rmempty = false;
++
++        so = o.subsection.option(form.Flag, 'proxy', _('Proxy'));
++        so.rmempty = false;
++
++        s.tab('bypass', _('Bypass'));
++
++        o = s.taboption('bypass', form.Value, 'proxy_tcp_dport', _('Destination TCP Port to Proxy'),
++            _('Only connections to these ports go through Nikki; everything else goes out directly. Space-separated ports or ranges.'));
+         o.rmempty = false;
+         o.value('0-65535', _('All Port'));
+         o.value('21 22 80 110 143 194 443 465 853 993 995 8080 8443', _('Commonly Used Port'));
+@@ -186,27 +204,45 @@ return view.extend({
+         o.value('0-65535', _('All Port'));
+         o.value('123 443 8443', _('Commonly Used Port'));
+ 
+-        o = s.taboption('bypass', form.DynamicList, 'bypass_dscp', _('Bypass DSCP'));
++        o = s.taboption('bypass', form.Flag, 'bypass_china_mainland_ip', _('Bypass China Mainland IP'),
++            _('Send traffic to mainland China addresses directly, without asking mihomo.'));
++        o.rmempty = false;
++
++        o = s.taboption('bypass', form.Flag, 'bypass_china_mainland_ip6', _('Bypass China Mainland IP6'));
++        o.rmempty = false;
++
++        o = s.taboption('bypass', form.DynamicList, 'bypass_dscp', _('Bypass DSCP'),
++            _('Packets carrying these DSCP marks (0-63) skip the proxy.'));
+         o.datatype = 'range(0, 63)';
+ 
+-        o = s.taboption('bypass', form.DynamicList, 'bypass_fwmark', _('Bypass FWMark'));
++        o = s.taboption('bypass', form.DynamicList, 'bypass_fwmark', _('Bypass FWMark'),
++            _('Packets carrying these firewall marks skip the proxy, for example traffic of another VPN.'));
+ 
+-        s.tab('misc', _('Misc'));
++        s.tab('misc', _('Advanced'));
+ 
+-        o = s.taboption('misc', form.DynamicList, 'reserved_ip', _('Reserved IP'));
++        o = s.taboption('misc', form.DynamicList, 'reserved_ip', _('Reserved IP'),
++            _('Private and special-purpose ranges that are never proxied. The defaults cover them; add your own local subnets if they are not in the list.'));
+         o.datatype = 'ip4addr';
+ 
+         o = s.taboption('misc', form.DynamicList, 'reserved_ip6', _('Reserved IP6'));
+         o.datatype = 'ip6addr';
+ 
+-        o = s.taboption('misc', form.Value, 'tun_timeout', _('TUN Timeout'));
++        o = s.taboption('misc', form.Value, 'tun_timeout', _('TUN Timeout'),
++            _('Seconds to wait for the TUN interface to appear at start.'));
+         o.datatype = 'uinteger';
+         o.rmempty = false;
+ 
+-        o = s.taboption('misc', form.Value, 'tun_interval', _('TUN Interval'));
++        o = s.taboption('misc', form.Value, 'tun_interval', _('TUN Interval'),
++            _('Seconds between checks while waiting for the TUN interface.'));
+         o.datatype = 'uinteger';
+         o.rmempty = false;
+ 
+-        return m.render();
++        const header = nikki.renderHeader(_('Proxy'),
++            _('Which traffic goes through Nikki: your devices, the router itself, and what is always sent directly. Changes take effect with Save & Apply.'),
++            running);
++
++        return m.render().then(function (formNode) {
++            return E('div', { 'class': 'nk-page' }, [header, formNode]);
++        });
+     }
+ });
+diff --git a/luci-app-nikki/root/usr/share/luci/menu.d/luci-app-nikki.json b/luci-app-nikki/root/usr/share/luci/menu.d/luci-app-nikki.json
+index 35aa9db..0204e02 100644
+--- a/luci-app-nikki/root/usr/share/luci/menu.d/luci-app-nikki.json
++++ b/luci-app-nikki/root/usr/share/luci/menu.d/luci-app-nikki.json
+@@ -10,7 +10,7 @@
+         }
+     },
+     "admin/services/nikki/config": {
+-        "title": "App Config",
++        "title": "Overview",
+         "order": 10,
+         "action": {
+             "type": "view",
+@@ -18,7 +18,7 @@
+         }
+     },
+     "admin/services/nikki/profile": {
+-        "title": "Profile",
++        "title": "Profiles",
+         "order": 20,
+         "action": {
+             "type": "view",
+@@ -26,16 +26,16 @@
+         }
+     },
+     "admin/services/nikki/mixin": {
+-        "title": "Mixin Config",
+-        "order": 30,
++        "title": "Mixin",
++        "order": 40,
+         "action": {
+             "type": "view",
+             "path": "nikki/mixin"
+         }
+     },
+     "admin/services/nikki/proxy": {
+-        "title": "Proxy Config",
+-        "order": 40,
++        "title": "Proxy",
++        "order": 30,
+         "action": {
+             "type": "view",
+             "path": "nikki/proxy"
+@@ -50,7 +50,7 @@
+         }
+     },
+     "admin/services/nikki/log": {
+-        "title": "Log",
++        "title": "Logs",
+         "order": 60,
+         "action": {
+             "type": "view",

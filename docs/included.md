@@ -87,5 +87,5 @@ The official OpenWrt package repositories and this project's `cw-opt` feed are e
 ## IPv6 and proxies
 
 The 5G connection is dual-stack when your carrier offers IPv6. If you send traffic through
-Nikki, keep its IPv6 option on (*Mixin Config*, on by default), or IPv6 traffic goes out directly. To use IPv4 only, set the
+Nikki, keep its IPv6 option on (*Mixin*, on by default), or IPv6 traffic goes out directly. To use IPv4 only, set the
 modem's PDP type to IPv4 in *Modem → QModem*.
