@@ -74,7 +74,7 @@ after its [patch](../building.md#what-this-build-changes-upstream):
 | `direction.inbound.enabled` | `1` | a phone on your LAN may call in |
 | `direction.inbound.interface` / `listen_port` / `transport` | `lan` / `5060` / `udp_tcp` | where it listens |
 | `direction.inbound.username` | `awvoice` | the account name a soft phone signs in with |
-| `direction.inbound.password` | `CleanWRT#40` | the same secret as the default Wi-Fi key, so a router has one pair to remember. Change it on the AWvoice page |
+| `direction.inbound.password` | `CleanWRT#40` | a shipped default; change it on the AWvoice page |
 | `direction.inbound.voip_enabled` | `0` | the vendor VoIP engine is not used; the phone daemon carries the front end |
 | `direction.inbound.sms_enabled` | `0` | SMS stays with QModem |
 | `direction.outbound.realm` / `password` | unset | the outbound direction, which reaches a server outside the house, ships no secret |
@@ -96,9 +96,8 @@ starts it, and no SIP port is open until then.
 
 | option | shipped | note |
 |---|---|---|
-| `wireless.<radio>.ssid` | `CleanWRT-2.4G`, `CleanWRT-5G`, `CleanWRT-6G` | by band |
-| `wireless.<iface>.encryption` / `key` | `psk2` / `CleanWRT#40` | the key is written only when none is set |
-| `system.@system[0].hostname` | `CleanWRT` | |
+| `wireless.*` | stock OpenWrt | not changed by this image: SSID `OpenWrt`, no key, radios off |
+| `system.@system[0].hostname` | `OpenWrt` | stock, not changed by this image |
 | `system.@system[0].timezone` | `UTC` | set yours; alarm calls and quiet hours trust the clock |
 | `system.@system[0].log_size` | `64` | the log buffer in KiB |
 | `network.globals.packet_steering` | `1` | receive work spread over the four cores |

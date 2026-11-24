@@ -13,10 +13,10 @@ CleanWRT follows the stock OpenWrt first-login model.
 | | |
 |---|---|
 | Address | `192.168.1.1` |
-| Hostname | `CleanWRT` |
+| Hostname | `OpenWrt` (stock, not changed by this image) |
 | Root password | **none** (set it on first login) |
-| Wi-Fi | on, WPA2-PSK, networks `CleanWRT-2.4G`, `CleanWRT-5G` (and `CleanWRT-6G` on a 6 GHz radio) |
-| Default Wi-Fi key | `CleanWRT#40` |
+| Wi-Fi | stock OpenWrt default: SSID `OpenWrt`, no key, **off** until you enable it (set a key first) |
+| Ethernet ports | stock names: `lan1`–`lan4`, `wan` |
 | Time zone | UTC (set yours in LuCI) |
 | Admin UI | LuCI over HTTPS (self-signed certificate) |
 | The phone line | **on**. `awvoice.main.enabled` ships as `1`, so a desk phone works the first time you plug one in |
@@ -25,9 +25,9 @@ CleanWRT follows the stock OpenWrt first-login model.
 | The TTL rewrite for tethering | on, at 64 |
 | Opt-in apps | installed and off, with one exception: the Samba daemon starts, but its share allows no guest access, so nothing is reachable until you add users |
 
-!!! warning "Change both on the first login"
-    Anyone who knows the default Wi-Fi key can join your network, and with no root password
-    anyone on the LAN can log in. Do the steps below before you connect the router to
+!!! warning "Set a password on the first login"
+    With no root password anyone on the LAN can log in, and Wi-Fi ships with no key, so set
+    one before you enable it. Do the steps below before you connect the router to
     anything you do not trust.
 
 ## Steps
@@ -36,11 +36,15 @@ CleanWRT follows the stock OpenWrt first-login model.
 2. Open `http://192.168.1.1`. The browser is moved to HTTPS and shows a certificate warning.
    That is expected, see [Security](features/security.md#why-the-browser-says-not-secure).
 3. LuCI asks you to set a root password. Set a strong one. It applies to LuCI and SSH.
-4. Change the Wi-Fi key: *Network → Wireless*, edit each interface, *Wireless Security*.
+4. Set a Wi-Fi key, then enable Wi-Fi: *Network → Wireless*, edit each interface, *Wireless Security*.
 
     ```sh
-    uci set wireless.default_radio0.key='your-strong-key'
-    uci set wireless.default_radio1.key='your-strong-key'
+    for i in 0 1; do
+      uci set wireless.default_radio$i.encryption='psk2'
+      uci set wireless.default_radio$i.key='your-strong-key'
+      uci set wireless.default_radio$i.disabled='0'
+      uci set wireless.radio$i.disabled='0'
+    done
     uci commit wireless && wifi reload
     ```
 
@@ -79,7 +83,7 @@ Every opt-in app has the same single switch: open its LuCI page, tick **Enable**
 
 ## What the image did before you got here
 
-Thirteen first-boot scripts wrote the defaults above — the hostname, the SSIDs and the key, the
+Thirteen first-boot scripts wrote the defaults above — the time zone, the
 HTTPS redirect, the theme's look, the LED ownership, the AT port handed to the phone service, the
 vendor VoIP engine taken off the boot path, and the package pins that keep `apk upgrade` from
 replacing patched LuCI packages. All of it, script by script and option by option, is in

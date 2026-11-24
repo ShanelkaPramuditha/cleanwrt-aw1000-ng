@@ -71,7 +71,7 @@ change them without a shell. The values this image ships are in
 | *Network* | `lan` | which interface it listens on |
 | *SIP port* | `5060` | UDP and TCP together, shown as fixed text |
 | *Account name* | `awvoice` | the name a soft phone signs in with. It is named for this router's phone service |
-| *Password* | `CleanWRT#40` | the same secret as the default Wi-Fi key, so a router has one pair to remember |
+| *Password* | `CleanWRT#40` | a shipped default; change it here |
 
 ### Calls going out through a provider
 

@@ -114,11 +114,12 @@ If the router already runs OpenWrt, and `cat /proc/mtd` is fine:
 |---|---|
 | Address | `http://192.168.1.1` (over Ethernet) |
 | Root password | none: LuCI asks you to set one |
-| Wi-Fi | `CleanWRT-5G`, `CleanWRT-2.4G`, WPA2-PSK, default key `CleanWRT#40` |
-| Hostname, time zone | `CleanWRT`, UTC |
+| Wi-Fi | stock OpenWrt default: SSID `OpenWrt`, no key, off until you enable it |
+| Hostname, time zone | `OpenWrt` (stock), UTC |
+| Ethernet ports | stock names: `lan1`–`lan4`, `wan` |
 
 > [!WARNING]
-> Change the root password and the Wi-Fi key on the first login.
+> Set a root password on the first login, and set a Wi-Fi key before you enable Wi-Fi.
 
 ## Documentation
 

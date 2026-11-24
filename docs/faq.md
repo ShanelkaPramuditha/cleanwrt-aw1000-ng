@@ -120,7 +120,7 @@ updated: 2026-11-06
     stock firmware before you flash.
 
 ??? question "What is the default IP address and login of CleanWRT on the AW1000?"
-    The router answers at `http://192.168.1.1` over Ethernet, with no root password at first. LuCI asks you to set one. Wi-Fi starts as `CleanWRT-5G` and `CleanWRT-2.4G` with the default key `CleanWRT#40`, so change it on the first login.
+    The router answers at `http://192.168.1.1` over Ethernet, with no root password at first. LuCI asks you to set one. Hostname, Wi-Fi and Ethernet port names are the stock OpenWrt defaults: Wi-Fi is off, SSID `OpenWrt`, no key, so set a key before you enable it.
 
 ??? question "Do I need a serial cable to install OpenWrt on the AW1000?"
     For the first install from the stock firmware, yes: a 3.3 V USB-UART adapter and a TFTP server. If the router already runs OpenWrt, you can update with `sysupgrade` or from LuCI with no cable. See [Installation](installation.md).
