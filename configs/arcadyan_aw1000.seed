@@ -430,6 +430,10 @@ CONFIG_PACKAGE_kmod-tcp-bbr=y
 # ── Data-usage history (metered 5G) ──────────────────────────────────────────
 CONFIG_PACKAGE_vnstat2=y
 CONFIG_PACKAGE_luci-app-vnstat2=y
+# vnstati draws PNG charts; the Graphs page draws its own from vnstat's JSON
+# (patches/feeds/luci/0011-vnstat2-graphs-drawn-in-the-page.patch), so it stays out, and with
+# it libgd, libpng and libwebp.
+# CONFIG_PACKAGE_vnstati2 is not set
 
 # ── CGNAT-busting remote access (5G hands out a CGNAT IP - no port-forward) ───
 # Tailscale (mesh VPN: reach the router and the LAN from anywhere) is in the image, about

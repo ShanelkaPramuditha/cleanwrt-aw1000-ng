@@ -1,0 +1,630 @@
+vnStat: graphs drawn in the page from vnstat's JSON, instead of vnstati pictures
+
+Status -> Traffic Monitor -> Graphs showed every chart as a PNG that vnstati drew on the
+router: a white box in its own grey and green, whatever the theme or dark mode, fixed in size,
+its text not selectable, its values readable only by eye. vnstati also brings libgd, libpng and
+libwebp into the image, and nothing else uses them.
+
+The page now reads `vnstat --json a -i <interface>` (one call per interface, every 60 seconds
+as before) and draws everything itself:
+
+- Summary: tiles for today, yesterday, this month (with the month's estimate at the rate so
+  far), last month and all time, each split into RX and TX, and the last 24 hours as a chart.
+- Top: the busiest days as a table, with the average rate and a bar for each day's share.
+- 5 Minute (last 6 hours), Hourly (last 48 hours), Daily (last 30 days), Monthly (last 12
+  months), Yearly (every year on record): a stacked RX/TX bar chart. Hovering or tapping a
+  bar shows its time, RX, TX, total and average rate; the newest slot's rate is over the time
+  so far. Each chart has its numbers as a table under "Show as a table".
+
+Slots with no traffic, which vnstat keeps no entry for, show as zero rather than closing up,
+and nothing is drawn for the time before the interface was added. Times are the router's own,
+as vnstat reports them. The colours come from the theme's chart tokens (--v-chart-1 for RX,
+--v-chart-2 for TX) and the borders and text from the Bootstrap tokens every theme in the image
+publishes, with plain fallbacks for any other theme.
+
+The ACL swaps the vnstati command for that one vnstat command, the menu entry no longer asks
+for /usr/bin/vnstati, and the package no longer depends on vnstati2, so the image drops it and
+its image libraries. "Clear data for all interfaces" works as before.
+
+Applies to: the luci feed pin, applications/luci-app-vnstat2.
+Upstream status: local to CleanWRT.
+
+diff --git a/applications/luci-app-vnstat2/Makefile b/applications/luci-app-vnstat2/Makefile
+index e611a98a..05f077c4 100644
+--- a/applications/luci-app-vnstat2/Makefile
++++ b/applications/luci-app-vnstat2/Makefile
+@@ -3,7 +3,7 @@
+ include $(TOPDIR)/rules.mk
+ 
+ LUCI_TITLE:=LuCI Support for vnStat 2
+-LUCI_DEPENDS:=+luci-base +luci-lib-jsonc +vnstat2 +vnstati2
++LUCI_DEPENDS:=+luci-base +luci-lib-jsonc +vnstat2
+ 
+ PKG_LICENSE:=Apache-2.0
+ PKG_MAINTAINER:=Jan Hoffmann <jan@3e8.eu>
+diff --git a/applications/luci-app-vnstat2/htdocs/luci-static/resources/view/vnstat2/graphs.js b/applications/luci-app-vnstat2/htdocs/luci-static/resources/view/vnstat2/graphs.js
+index d546309f..0ac4b361 100644
+--- a/applications/luci-app-vnstat2/htdocs/luci-static/resources/view/vnstat2/graphs.js
++++ b/applications/luci-app-vnstat2/htdocs/luci-static/resources/view/vnstat2/graphs.js
+@@ -3,13 +3,16 @@
+ 'use strict';
+ 'require poll';
+ 'require view';
++'require dom';
+ 'require fs';
+ 'require ui';
+ 'require uci';
+ 'require rpc';
+ 
+-var RefreshIfaces = "";
+-var RefreshTabs = ['s', 't', '5', 'h', 'd', 'm', 'y'];
++// CleanWRT: the graphs are drawn in the page from `vnstat --json`, instead of
++// PNG pictures from vnstati. They follow the theme (colours, light and dark
++// mode), resize with the window, show each value on hover or tap, and the
++// router no longer needs vnstati and its image libraries.
+ 
+ const callServiceList = rpc.declare({
+ 	object: 'service',
+@@ -18,123 +21,453 @@ const callServiceList = rpc.declare({
+ 	expect: { '': {} }
+ });
+ 
+-var isReadonlyView = !L.hasViewPermission() || null;
++const isReadonlyView = !L.hasViewPermission() || null;
+ 
+-function RefreshGraphs() {
+-	RefreshTabs.forEach(function (id) {
+-		RefreshIfaces.forEach(function (iface) {
+-			fs.exec_direct('/usr/bin/vnstati', [ '-' + id, '-i', iface, '-o', '-' ], 'blob').then(function(res) {
+-				document.getElementById('graph_' + id + '_' + iface).src = URL.createObjectURL(res);
+-			});
++// vnstat's tables, and how many of the newest entries each tab shows.
++// slots 0: every entry on record.
++const PERIODS = {
++	'5': { key: 'fiveminute', unit: 'minute', step: 5, slots: 72 },
++	'h': { key: 'hour', unit: 'hour', step: 1, slots: 48 },
++	'd': { key: 'day', unit: 'day', step: 1, slots: 30 },
++	'm': { key: 'month', unit: 'month', step: 1, slots: 12 },
++	'y': { key: 'year', unit: 'year', step: 1, slots: 0 }
++};
++
++const CSS = `
++.vn-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 4px 0 20px; }
++.vn-tile { padding: 12px 14px; border: 1px solid var(--border-color-medium, rgba(128,128,128,.25)); border-radius: var(--v-r, 6px); min-width: 0; }
++.vn-tile-label { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-color-low, #888); }
++.vn-tile-value { margin: 4px 0 6px; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
++.vn-tile-sub, .vn-readout { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; font-size: 12px; color: var(--text-color-medium, #666); font-variant-numeric: tabular-nums; }
++.vn-tile-note { margin-top: 4px; font-size: 12px; color: var(--text-color-low, #888); }
++.vn-readout { min-height: 20px; margin-bottom: 8px; font-size: 13px; }
++.vn-readout strong { color: var(--text-color-high, inherit); font-weight: 600; }
++.vn-dot { display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 2px; }
++.vn-rx { background: var(--v-chart-1, #7cb342); }
++.vn-tx { background: var(--v-chart-2, #1e88e5); }
++.vn-chart-title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
++.vn-wrap { display: flex; gap: 8px; }
++.vn-y { position: relative; flex: none; width: 64px; height: 180px; font-size: 11px; color: var(--v-chart-axis, var(--text-color-low, #888)); }
++.vn-y > span { position: absolute; right: 0; transform: translateY(50%); white-space: nowrap; }
++.vn-main { flex: 1 1 auto; min-width: 0; }
++.vn-plot { position: relative; display: flex; align-items: flex-end; gap: 1px; height: 180px; border-bottom: 1px solid var(--border-color-high, rgba(128,128,128,.45)); }
++.vn-grid { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--v-chart-grid, rgba(128,128,128,.2)); pointer-events: none; }
++.vn-slot { position: relative; display: flex; align-items: flex-end; flex: 1 1 0; min-width: 0; height: 100%; cursor: crosshair; border-radius: 2px 2px 0 0; }
++.vn-slot.active { background: var(--v-hover, rgba(128,128,128,.14)); }
++.vn-bar { display: flex; flex-direction: column; width: 100%; max-width: 48px; margin: 0 auto; overflow: hidden; border-radius: 2px 2px 0 0; }
++.vn-bar.nz { min-height: 1px; }
++.vn-bar > div { width: 100%; }
++.vn-x { display: flex; gap: 1px; height: 20px; font-size: 11px; color: var(--v-chart-axis, var(--text-color-low, #888)); }
++.vn-x > div { position: relative; flex: 1 1 0; min-width: 0; }
++.vn-x span { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
++.vn-x > div:first-child span { left: 0; transform: none; }
++.vn-x > div:last-child span { left: auto; right: 0; transform: none; }
++.vn-details { margin-top: 14px; }
++.vn-details > summary { cursor: pointer; color: var(--text-color-medium, #666); font-size: 13px; }
++.vn-details > .table, .vn-top { margin-top: 8px; }
++.vn-num { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
++.vn-share { display: flex; width: 100%; min-width: 60px; height: 8px; overflow: hidden; border-radius: 2px; background: var(--v-chart-grid, rgba(128,128,128,.15)); }
++.vn-empty { color: var(--text-color-low, #888); }
++@media (max-width: 600px) { .vn-y { width: 52px; } .vn-y, .vn-plot { height: 150px; } .vn-hide-sm { display: none; } }
++`;
++
++/* --- time: vnstat gives each entry's router-local date and time. They are
++   kept as wall-clock values (built with Date.UTC and read back with getUTC*),
++   so the labels are the router's own times and a step is never bent by the
++   browser's time zone or a daylight-saving change. */
++
++function stamp(o) {
++	const d = (o && o.date) || {}, t = (o && o.time) || {};
++	return Date.UTC(d.year || 1970, (d.month || 1) - 1, d.day || 1, t.hour || 0, t.minute || 0);
++}
++
++function floorTo(ms, unit, step) {
++	const d = new Date(ms), Y = d.getUTCFullYear(), M = d.getUTCMonth(), D = d.getUTCDate(), h = d.getUTCHours(), m = d.getUTCMinutes();
++	switch (unit) {
++	case 'minute': return Date.UTC(Y, M, D, h, m - m % step);
++	case 'hour': return Date.UTC(Y, M, D, h);
++	case 'day': return Date.UTC(Y, M, D);
++	case 'month': return Date.UTC(Y, M, 1);
++	default: return Date.UTC(Y, 0, 1);
++	}
++}
++
++function addTo(ms, unit, n) {
++	const d = new Date(ms), Y = d.getUTCFullYear(), M = d.getUTCMonth(), D = d.getUTCDate();
++	switch (unit) {
++	case 'minute': return ms + n * 60000;
++	case 'hour': return ms + n * 3600000;
++	case 'day': return Date.UTC(Y, M, D + n);
++	case 'month': return Date.UTC(Y, M + n, 1);
++	default: return Date.UTC(Y + n, 0, 1);
++	}
++}
++
++function dateText(ms, opts) {
++	return new Date(ms).toLocaleDateString(undefined, Object.assign({ timeZone: 'UTC' }, opts));
++}
++
++function label(ms, unit, long) {
++	const d = new Date(ms), hm = '%02d:%02d'.format(d.getUTCHours(), d.getUTCMinutes());
++	switch (unit) {
++	case 'minute':
++	case 'hour': return long ? dateText(ms, { day: 'numeric', month: 'short' }) + ' ' + hm : hm;
++	case 'day': return long ? dateText(ms, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : dateText(ms, { day: 'numeric', month: 'short' });
++	case 'month': return (long || d.getUTCMonth() == 0) ? dateText(ms, { month: 'short', year: 'numeric' }) : dateText(ms, { month: 'short' });
++	default: return String(d.getUTCFullYear());
++	}
++}
++
++// which slots get a label under the chart
++function ticked(s, i, n, unit) {
++	const d = new Date(s.start);
++	switch (unit) {
++	case 'minute': return d.getUTCMinutes() == 0;
++	case 'hour': return d.getUTCHours() % 6 == 0;
++	case 'day': return (n - 1 - i) % 5 == 0;
++	case 'month': return n <= 12 || (n - 1 - i) % 2 == 0;
++	default: return true;
++	}
++}
++
++/* --- numbers */
++
++function fmtBytes(n) {
++	const u = [ 'B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB' ];
++	let i = 0;
++	while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
++	return (i ? n.toFixed(n >= 100 ? 1 : 2) : n.toFixed(0)) + ' ' + u[i];
++}
++
++function fmtRate(bytes, secs) {
++	const u = [ 'bit/s', 'kbit/s', 'Mbit/s', 'Gbit/s' ];
++	let b = secs > 0 ? bytes * 8 / secs : 0, i = 0;
++	while (b >= 1000 && i < u.length - 1) { b /= 1000; i++; }
++	return b.toFixed(i ? 2 : 0) + ' ' + u[i];
++}
++
++// a round top for the scale, in binary units: 1, 2, 2.5, 5 x 1024^k (and x10, x100)
++function niceMax(v) {
++	let p = 1;
++	while (v / p >= 1024) p *= 1024;
++	const m = v / p;
++	for (const c of [ 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 1024 ])
++		if (m <= c) return c * p;
++	return 1024 * p;
++}
++
++/* --- data */
++
++function fetchIface(iface) {
++	return L.resolveDefault(fs.exec_direct('/usr/bin/vnstat', [ '--json', 'a', '-i', iface ], 'json').then(function(res) {
++		return (res && Array.isArray(res.interfaces) && res.interfaces[0]) || null;
++	}), null);
++}
++
++function fetchAll(ifaces) {
++	return Promise.all(ifaces.map(fetchIface));
++}
++
++// the newest `count` slots of one vnstat table, with the slots vnstat has no
++// entry for (no traffic) as zeros. The newest slot is still running, so its
++// rate is taken over the time so far.
++function series(info, mode, count) {
++	const p = PERIODS[mode], list = (info.traffic && info.traffic[p.key]) || [], byStart = new Map();
++	const updated = stamp(info.updated), created = stamp(info.created);
++	let last = floorTo(updated, p.unit, p.step), first = last;
++
++	list.forEach(function(e) {
++		const t = floorTo(stamp(e), p.unit, p.step);
++		byStart.set(t, e);
++		if (t > last) last = t;
++		if (t < first) first = t;
++	});
++
++	if (count == null) count = p.slots;
++	if (!count) count = new Date(last).getUTCFullYear() - new Date(first).getUTCFullYear() + 1;
++
++	const out = [];
++	for (let i = 0, t = last; i < count; i++, t = addTo(t, p.unit, -p.step)) {
++		const e = byStart.get(t), end = addTo(t, p.unit, p.step);
++		// nothing before the interface was added: no row of empty slots for it
++		if (out.length && end <= created && !e) break;
++		out.unshift({
++			start: t,
++			rx: e ? e.rx : 0,
++			tx: e ? e.tx : 0,
++			secs: (Math.min(end, Math.max(updated, t + 60000)) - t) / 1000
+ 		});
++	}
++	return out;
++}
++
++/* --- drawing */
++
++function legend(s) {
++	return [
++		E('span', {}, [ E('span', { 'class': 'vn-dot vn-rx' }), _('RX') + ' ' + fmtBytes(s.rx) ]),
++		E('span', {}, [ E('span', { 'class': 'vn-dot vn-tx' }), _('TX') + ' ' + fmtBytes(s.tx) ])
++	];
++}
++
++function chart(slots, unit, title) {
++	const n = slots.length,
++	      max = niceMax(Math.max.apply(null, slots.map(function(s) { return s.rx + s.tx; }).concat([ 1 ]))),
++	      readout = E('div', { 'class': 'vn-readout', 'aria-live': 'polite' }),
++	      plot = E('div', { 'class': 'vn-plot' }),
++	      xaxis = E('div', { 'class': 'vn-x', 'aria-hidden': 'true' }),
++	      yaxis = E('div', { 'class': 'vn-y', 'aria-hidden': 'true' });
++	let active = null;
++
++	function show(i) {
++		const s = slots[i];
++		if (active) active.classList.remove('active');
++		active = plot.children[i + 3];   // after the three grid lines
++		if (active) active.classList.add('active');
++		dom.content(readout, [ E('strong', {}, label(s.start, unit, true)) ].concat(legend(s), [
++			E('span', {}, _('Total') + ' ' + fmtBytes(s.rx + s.tx)),
++			E('span', {}, fmtRate(s.rx + s.tx, s.secs))
++		]));
++	}
++
++	[ 0, .5, 1 ].forEach(function(f) {
++		plot.appendChild(E('div', { 'class': 'vn-grid', 'style': 'bottom:%.1f%%'.format(f * 100) }));
++		yaxis.appendChild(E('span', { 'style': 'bottom:%.1f%%'.format(f * 100) }, f ? fmtBytes(max * f) : '0'));
++	});
++
++	slots.forEach(function(s, i) {
++		const tot = s.rx + s.tx;
++		plot.appendChild(E('div', {
++			'class': 'vn-slot',
++			'title': '%s\n%s: %s\n%s: %s\n%s'.format(label(s.start, unit, true), _('RX'), fmtBytes(s.rx), _('TX'), fmtBytes(s.tx), fmtRate(tot, s.secs)),
++			'mouseenter': function() { show(i); },
++			'click': function() { show(i); }
++		}, E('div', { 'class': tot ? 'vn-bar nz' : 'vn-bar', 'style': 'height:%.2f%%'.format(tot / max * 100) }, [
++			E('div', { 'class': 'vn-tx', 'style': 'height:%.2f%%'.format(tot ? s.tx / tot * 100 : 0) }),
++			E('div', { 'class': 'vn-rx', 'style': 'height:%.2f%%'.format(tot ? s.rx / tot * 100 : 0) })
++		])));
++		xaxis.appendChild(E('div', {}, ticked(s, i, n, unit) ? E('span', {}, label(s.start, unit, false)) : []));
+ 	});
++
++	plot.addEventListener('mouseleave', function() { show(n - 1); });
++	show(n - 1);
++
++	return E('div', { 'class': 'vn-chart' }, [
++		title ? E('div', { 'class': 'vn-chart-title' }, title) : '',
++		readout,
++		E('div', { 'class': 'vn-wrap' }, [ yaxis, E('div', { 'class': 'vn-main' }, [ plot, xaxis ]) ])
++	]);
+ }
+ 
+-function IfacesResetData(ev) {
+-	ui.showModal(_('Delete data for ALL interfaces'), [
+-		E('p', _('The data will be removed from the database permanently. This cannot be undone.')),
+-		E('div', { 'class': 'right' }, [
+-			E('div', {
+-				'class': 'btn',
+-				'click': L.hideModal
+-			}, _('Cancel')),
+-			' ',
+-			E('div', {
+-				'class': 'btn cbi-button-negative',
+-				'click': function(ev) {
+-					var if_count = 0;
+-
+-					RefreshIfaces.forEach(function (iface) {
+-						fs.exec_direct('/usr/bin/vnstat', [ '--remove', '-i', iface, '--force' ], 'blob').then(function() {
+-							fs.exec_direct('/usr/bin/vnstat', [ '--add', '-i', iface ], 'blob').then(function() {
+-								if_count++;
+-								if (if_count == RefreshIfaces.length) {
+-									RefreshGraphs();
+-								}
+-							});
+-						});
+-					});
+-					ui.hideModal();
+-				}
+-			}, _('Delete'))
+-		])
++function table(slots, unit, first) {
++	const head = [ first, _('RX'), _('TX'), _('Total'), _('Avg. rate') ];
++	return E('table', { 'class': 'table' }, [
++		E('tr', { 'class': 'tr table-titles' }, head.map(function(h, i) {
++			return E('th', { 'class': i ? 'th vn-num' : 'th' }, h);
++		}))
++	].concat(slots.slice().reverse().map(function(s) {
++		return E('tr', { 'class': 'tr' }, [
++			E('td', { 'class': 'td' }, label(s.start, unit, true)),
++			E('td', { 'class': 'td vn-num' }, fmtBytes(s.rx)),
++			E('td', { 'class': 'td vn-num' }, fmtBytes(s.tx)),
++			E('td', { 'class': 'td vn-num' }, fmtBytes(s.rx + s.tx)),
++			E('td', { 'class': 'td vn-num' }, fmtRate(s.rx + s.tx, s.secs))
++		]);
++	})));
++}
++
++function tile(title, s, note) {
++	return E('div', { 'class': 'vn-tile' }, [
++		E('div', { 'class': 'vn-tile-label' }, title),
++		E('div', { 'class': 'vn-tile-value' }, fmtBytes(s.rx + s.tx)),
++		E('div', { 'class': 'vn-tile-sub' }, legend(s)),
++		note ? E('div', { 'class': 'vn-tile-note' }, note) : ''
+ 	]);
+-}	
++}
+ 
+-return view.extend({
+-	renderTab: function(ifaces, style, title) {
+-		var tab = E('div', {
+-			'class': 'cbi-section',
+-			'data-tab': style,
+-			'data-tab-title': title
+-		}, [
+-			E('p', {}, E('em', { 'class': 'spinning' }, [ _('Loading graphs…') ]))
++function summary(info) {
++	const days = series(info, 'd', 2), months = series(info, 'm', 2),
++	      today = days[days.length - 1], month = months[months.length - 1],
++	      zero = { rx: 0, tx: 0 },
++	      monthLen = (addTo(month.start, 'month', 1) - month.start) / 1000,
++	      total = (info.traffic && info.traffic.total) || zero;
++	let estimate = '';
++
++	// the month's total at the rate so far, as vnstat estimates it
++	if (month.secs >= 3600 && month.secs < monthLen)
++		estimate = _('About %s by the end of the month').format(fmtBytes((month.rx + month.tx) * monthLen / month.secs));
++
++	return [
++		E('div', { 'class': 'vn-tiles' }, [
++			tile(_('Today'), today),
++			tile(_('Yesterday'), days.length > 1 ? days[0] : zero),
++			tile(_('This month'), month, estimate),
++			tile(_('Last month'), months.length > 1 ? months[0] : zero),
++			tile(_('All time'), total, _('Since %s').format(dateText(stamp(info.created), { day: 'numeric', month: 'short', year: 'numeric' })))
++		]),
++		chart(series(info, 'h', 24), 'hour', _('Last 24 hours'))
++	];
++}
++
++function top(info) {
++	const list = ((info.traffic && info.traffic.top) || []).slice().sort(function(a, b) {
++		return (b.rx + b.tx) - (a.rx + a.tx);
++	});
++	if (!list.length)
++		return E('p', { 'class': 'vn-empty' }, _('No days on record yet.'));
++
++	const updated = stamp(info.updated), most = list[0].rx + list[0].tx || 1;
++	return E('table', { 'class': 'table vn-top' }, [
++		E('tr', { 'class': 'tr table-titles' }, [
++			E('th', { 'class': 'th vn-num' }, '#'),
++			E('th', { 'class': 'th' }, _('Day')),
++			E('th', { 'class': 'th vn-num' }, _('RX')),
++			E('th', { 'class': 'th vn-num' }, _('TX')),
++			E('th', { 'class': 'th vn-num' }, _('Total')),
++			E('th', { 'class': 'th vn-num vn-hide-sm' }, _('Avg. rate')),
++			E('th', { 'class': 'th vn-hide-sm' }, '')
++		])
++	].concat(list.map(function(e, i) {
++		const start = floorTo(stamp(e), 'day'), tot = e.rx + e.tx,
++		      secs = (Math.min(addTo(start, 'day', 1), Math.max(updated, start + 60000)) - start) / 1000;
++		return E('tr', { 'class': 'tr' }, [
++			E('td', { 'class': 'td vn-num' }, String(i + 1)),
++			E('td', { 'class': 'td' }, label(start, 'day', true)),
++			E('td', { 'class': 'td vn-num' }, fmtBytes(e.rx)),
++			E('td', { 'class': 'td vn-num' }, fmtBytes(e.tx)),
++			E('td', { 'class': 'td vn-num' }, fmtBytes(tot)),
++			E('td', { 'class': 'td vn-num vn-hide-sm' }, fmtRate(tot, secs)),
++			E('td', { 'class': 'td vn-hide-sm' }, E('div', { 'class': 'vn-share', 'style': 'width:%.1f%%'.format(tot / most * 100) }, [
++				E('div', { 'class': 'vn-rx', 'style': 'width:%.2f%%'.format(tot ? e.rx / tot * 100 : 0) }),
++				E('div', { 'class': 'vn-tx', 'style': 'width:%.2f%%'.format(tot ? e.tx / tot * 100 : 0) })
++			]))
+ 		]);
++	})));
++}
+ 
+-		ifaces.forEach(function(iface) {
+-			fs.exec_direct('/usr/bin/vnstati', [ '-'+style, '-i', iface, '-o', '-' ], 'blob').then(function(res) {
+-				var img = tab.querySelector('img[data-iface="%s"]'.format(iface));
+-				img.src = URL.createObjectURL(res);
+-				img.alt = _('Could not load graph, no data available: ') + iface;
+-				img.align = 'middle';
+-				img.style.visibility = 'visible';
+-				img.id = 'graph_' + style + '_' + iface;
+-				tab.firstElementChild.style.display = 'none';
+-			});
+-			tab.appendChild(E('span', {}, E('img', { 'data-iface': iface, 'style': 'visibility:hidden; margin:5px 10px' })));
+-		});
++function period(info, mode) {
++	const p = PERIODS[mode], slots = series(info, mode),
++	      first = { 'minute': _('Time'), 'hour': _('Hour'), 'day': _('Day'), 'month': _('Month'), 'year': _('Year') }[p.unit];
++	return [
++		chart(slots, p.unit),
++		E('details', { 'class': 'vn-details' }, [
++			E('summary', {}, _('Show as a table')),
++			table(slots, p.unit, first)
++		])
++	];
++}
+ 
+-		return tab;
+-	},
++function section(iface, info, mode) {
++	let body;
++	if (!info)
++		body = E('p', { 'class': 'vn-empty' }, _('No data for this interface yet. vnStat starts counting a few minutes after an interface is added.'));
++	else if (mode == 's')
++		body = summary(info);
++	else if (mode == 't')
++		body = top(info);
++	else
++		body = period(info, mode);
++
++	const name = (info && info.alias) ? '%s (%s)'.format(iface, info.alias) : iface;
++	return E('div', { 'class': 'cbi-section' }, [ E('h3', {}, name) ].concat(body));
++}
++
++const TABS = [ 's', 't', '5', 'h', 'd', 'm', 'y' ];
++
++return view.extend({
++	ifaces: [],
++	panes: {},
+ 
+ 	load: function() {
+ 		return Promise.all([
+ 			L.resolveDefault(callServiceList('vnstat'), {}),
+-			uci.load('vnstat'),
++			uci.load('vnstat')
++		]).then(function(res) {
++			const ifaces = L.toArray(uci.get_first('vnstat', 'vnstat', 'interface'));
++			return fetchAll(ifaces).then(function(data) {
++				return [ res[0], ifaces, data ];
++			});
++		});
++	},
++
++	fill: function(data) {
++		TABS.forEach(L.bind(function(mode) {
++			dom.content(this.panes[mode], this.ifaces.map(function(iface, i) {
++				return section(iface, data[i], mode);
++			}));
++		}, this));
++	},
++
++	refresh: function() {
++		return fetchAll(this.ifaces).then(L.bind(this.fill, this));
++	},
++
++	clearData: function(ev) {
++		const self = this;
++		ui.showModal(_('Delete data for ALL interfaces'), [
++			E('p', _('The data will be removed from the database permanently. This cannot be undone.')),
++			E('div', { 'class': 'right' }, [
++				E('div', {
++					'class': 'btn',
++					'click': ui.hideModal
++				}, _('Cancel')),
++				' ',
++				E('div', {
++					'class': 'btn cbi-button-negative',
++					'click': function() {
++						ui.hideModal();
++						Promise.all(self.ifaces.map(function(iface) {
++							return fs.exec_direct('/usr/bin/vnstat', [ '--remove', '-i', iface, '--force' ], 'blob').then(function() {
++								return fs.exec_direct('/usr/bin/vnstat', [ '--add', '-i', iface ], 'blob');
++							});
++						})).then(function() { return self.refresh(); });
++					}
++				}, _('Delete'))
++			])
+ 		]);
+ 	},
+ 
+ 	render: function(data) {
+-		var ifaces = uci.get_first('vnstat', 'vnstat', 'interface') || [];
+-		var isRunning = false;
+-
++		let isRunning = false;
+ 		try {
+ 			isRunning = data[0]['vnstat']['instances']['instance1']['running'];
+ 		} catch (e) { }
+ 
+-		var view = E([], [
+-			E('h2', [_('vnStat Graphs')]),
++		this.ifaces = data[1];
++
++		const titles = {
++			's': _('Summary'), 't': _('Top'), '5': _('5 Minute'), 'h': _('Hourly'),
++			'd': _('Daily'), 'm': _('Monthly'), 'y': _('Yearly')
++		};
+ 
+-			(isRunning == false) ? E('p', { 'class': 'alert-message warning' }, _('Warning: The service is not running, graphs will not be updated!')):E('p'),
++		TABS.forEach(L.bind(function(mode) {
++			this.panes[mode] = E('div', { 'data-tab': mode, 'data-tab-title': titles[mode] });
++		}, this));
+ 
+-			E('div', ifaces.length ? [
+-				this.renderTab(ifaces, 's', _('Summary')),
+-				this.renderTab(ifaces, 't', _('Top')),
+-				this.renderTab(ifaces, '5', _('5 Minute')),
+-				this.renderTab(ifaces, 'h', _('Hourly')),
+-				this.renderTab(ifaces, 'd', _('Daily')),
+-				this.renderTab(ifaces, 'm', _('Monthly')),
+-				this.renderTab(ifaces, 'y', _('Yearly')),
+-			] : [ E('em', [_('No monitored interfaces have been found. Go to the configuration to enable monitoring for one or more interfaces.')]) ]),
++		const view = E([], [
++			E('style', {}, CSS),
++			E('h2', [ _('vnStat Graphs') ]),
++
++			(isRunning == false) ? E('p', { 'class': 'alert-message warning' }, _('Warning: The service is not running, graphs will not be updated!')) : E('p'),
++
++			E('div', this.ifaces.length ? TABS.map(L.bind(function(mode) { return this.panes[mode]; }, this))
++				: [ E('em', [ _('No monitored interfaces have been found. Go to the configuration to enable monitoring for one or more interfaces.') ]) ])
+ 		]);
+ 
+-		if (ifaces.length) {
++		if (this.ifaces.length) {
++			this.fill(data[2]);
+ 			ui.tabs.initTabGroup(view.lastElementChild.childNodes);
+ 
+ 			view.appendChild(E('div', { 'class': 'right' }, [
+-				E('br'),
+ 				E('button', {
+ 					'class': 'cbi-button cbi-button-neutral',
+-					'click': IfacesResetData,
++					'click': L.bind(this.clearData, this),
+ 					'disabled': isReadonlyView
+ 				}, [ _('Clear data for all interfaces') ])
+ 			]));
+-		}
+ 
+-		// Preserve the interfaces for the poll/refresh function
+-		RefreshIfaces = ifaces;
+-
+-		poll.add(RefreshGraphs, 60);
++			poll.add(L.bind(this.refresh, this), 60);
++		}
+ 
+ 		return view;
+ 	},
+diff --git a/applications/luci-app-vnstat2/root/usr/share/luci/menu.d/luci-app-vnstat2.json b/applications/luci-app-vnstat2/root/usr/share/luci/menu.d/luci-app-vnstat2.json
+index eed7b0a2..a81904a2 100644
+--- a/applications/luci-app-vnstat2/root/usr/share/luci/menu.d/luci-app-vnstat2.json
++++ b/applications/luci-app-vnstat2/root/usr/share/luci/menu.d/luci-app-vnstat2.json
+@@ -8,8 +8,7 @@
+ 		"depends": {
+ 			"acl": [ "luci-app-vnstat2" ],
+ 			"fs": {
+-				"/usr/bin/vnstat": "executable",
+-				"/usr/bin/vnstati": "executable"
++				"/usr/bin/vnstat": "executable"
+ 			}
+ 		}
+ 	},
+diff --git a/applications/luci-app-vnstat2/root/usr/share/rpcd/acl.d/luci-app-vnstat2.json b/applications/luci-app-vnstat2/root/usr/share/rpcd/acl.d/luci-app-vnstat2.json
+index 5be965a9..a8c64cd1 100644
+--- a/applications/luci-app-vnstat2/root/usr/share/rpcd/acl.d/luci-app-vnstat2.json
++++ b/applications/luci-app-vnstat2/root/usr/share/rpcd/acl.d/luci-app-vnstat2.json
+@@ -5,7 +5,7 @@
+ 			"cgi-io": [ "exec" ],
+ 			"file": {
+ 				"/usr/bin/vnstat --json f 1": [ "exec" ],
+-				"/usr/bin/vnstati -[5dhmsty] -i * -o -": [ "exec" ]
++				"/usr/bin/vnstat --json a -i *": [ "exec" ]
+ 			},
+ 			"ubus": {
+ 				"service": [ "list" ]

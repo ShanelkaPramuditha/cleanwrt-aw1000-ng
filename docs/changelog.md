@@ -35,6 +35,13 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   *Select All* and *Scan* buttons no longer lie on top of the band list, and radio and checkbox
   labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
   status card no longer touches the Save bar.
+- **Traffic Monitor graphs follow the theme.** *Status → Traffic Monitor → Graphs* now draws its
+  charts in the page instead of showing white pictures: tiles for today, yesterday, this month
+  (with an estimate for the whole month), last month and all time, and bar charts for every
+  5 minutes, hour, day, month and year. Hover over or tap a bar to see its numbers, or open
+  them as a table. The charts follow light and dark mode and fit a phone screen. The image is
+  also about half a MB smaller, because the picture renderer (`vnstati`) and its image
+  libraries are gone.
 - **Buttons stand on their own.** *Reset*, *Save* and *Save & Apply* at the bottom of a page no
   longer sit inside a card of their own, and they still stay at the bottom right while you
   scroll. The buttons at the foot of a dialog no longer sit on a shaded strip.

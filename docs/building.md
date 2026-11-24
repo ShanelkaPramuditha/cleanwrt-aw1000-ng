@@ -229,6 +229,7 @@ than shipping a half-applied change.
 | `0007-upgrade-check-cdn-no-asu` | the newer-version notice: the wording says CleanWRT, the links point at this project's releases rather than the OpenWrt CDN, and the version feed is `shanelkapramuditha.github.io/cleanwrt-aw1000-ng/.versions.json`, and the comparison counts every number of the label (`-R2.2`, `-SP1`), not only the OpenWrt base |
 | `0009-filemanager-default-width` | the file manager's default width, 400 to 800 |
 | `0010-tailscale-service-switch` | the Tailscale page gets a Service row with one button, *Enable and start* or *Stop and disable*, so turning Tailscale on no longer needs *System → Startup* first; the ACL gains `luci` `getInitList` / `setInitAction`, the calls that page makes |
+| `0011-vnstat2-graphs-drawn-in-the-page` | *Status → Traffic Monitor → Graphs* draws its charts in the page from `vnstat --json` instead of showing vnstati's PNG pictures: summary tiles (today, yesterday, this month with its estimate, last month, all time), the top days as a table, and stacked RX/TX bar charts for 5 minutes, hours, days, months and years, with values on hover or tap and a table under each. They follow the theme and its dark mode. The ACL and the menu no longer need `vnstati`, and the package no longer depends on `vnstati2`, so the image drops it with libgd, libpng and libwebp |
 
 ### Other feeds, and the OpenWrt tree itself
 
