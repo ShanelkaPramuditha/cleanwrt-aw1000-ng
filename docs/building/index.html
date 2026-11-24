@@ -3029,6 +3029,10 @@ than shipping a half-applied change.</p>
 <td><code>0010-tailscale-service-switch</code></td>
 <td>the Tailscale page gets a Service row with one button, <em>Enable and start</em> or <em>Stop and disable</em>, so turning Tailscale on no longer needs <em>System → Startup</em> first; the ACL gains <code>luci</code> <code>getInitList</code> / <code>setInitAction</code>, the calls that page makes</td>
 </tr>
+<tr>
+<td><code>0011-vnstat2-graphs-drawn-in-the-page</code></td>
+<td><em>Status → Traffic Monitor → Graphs</em> draws its charts in the page from <code>vnstat --json</code> instead of showing vnstati's PNG pictures: summary tiles (today, yesterday, this month with its estimate, last month, all time), the top days as a table, and stacked RX/TX bar charts for 5 minutes, hours, days, months and years, with values on hover or tap and a table under each. They follow the theme and its dark mode. The ACL and the menu no longer need <code>vnstati</code>, and the package no longer depends on <code>vnstati2</code>, so the image drops it with libgd, libpng and libwebp</td>
+</tr>
 </tbody>
 </table>
 <h3 id="other-feeds-and-the-openwrt-tree-itself">Other feeds, and the OpenWrt tree itself<a class="headerlink" href="#other-feeds-and-the-openwrt-tree-itself" title="Permanent link">&para;</a></h3>
