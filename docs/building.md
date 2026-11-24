@@ -249,6 +249,7 @@ than shipping a half-applied change.
 |---|---|
 | `packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages` | Vantage publishes LuCI Bootstrap's colour tokens (`--background-color-high`, `--text-color-highest`, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text |
 | `packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards` | pages that build their own markup: tabs made of bare list items (no link) get the tab look and the selected state, and a card headed by a `<legend>` gets the header bar inside the card instead of on its border. QModem's Advance Modem Settings, Information and SMS pages use both |
+| `packages/luci-theme-vantage/0003-page-actions-without-card` | the Reset / Save / Save & Apply bar at the bottom of a page loses the frosted card drawn around it (background, border, blur, shadow); the buttons stay docked at the bottom right, each with a soft shadow of its own so they read over the page scrolling under them |
 
 ### Out-of-feed packages
 

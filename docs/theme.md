@@ -28,7 +28,7 @@ companion package `luci-app-vantage` adds the **Dashboard**, the first page afte
 traffic, the network path, clients and radios. The Appearance settings under the gear button are
 saved on the router in `/etc/config/vantage_theme`, so every browser sees the same look.
 
-CleanWRT changes two things in it:
+CleanWRT changes three things in it:
 
 - `patches/packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages.patch` makes Vantage
   publish the colour tokens LuCI's Bootstrap theme publishes (`--background-color-high`,
@@ -39,6 +39,9 @@ CleanWRT changes two things in it:
 - `patches/packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards.patch` covers two patterns
   of pages that build their own markup: tabs made of bare list items, and cards headed by a
   `<legend>`. QModem's pages use both.
+- `patches/packages/luci-theme-vantage/0003-page-actions-without-card.patch` takes the card away
+  from behind the *Reset* / *Save* / *Save & Apply* buttons at the bottom of a page. They still
+  stay docked at the bottom right while you scroll, each with a soft shadow of its own.
 
 `patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch` makes the lamps on
 the LED page follow Vantage's light/dark switch rather than the browser's preference.
