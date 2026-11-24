@@ -25,7 +25,7 @@ on:
         type: string
         default: ""
       ssid:
-        description: "Own settings - Wi-Fi name, both bands (empty: OpenWrt; needs the Wi-Fi box below)"
+        description: "Own settings - Wi-Fi name, both bands (empty: OpenWrt)"
         type: string
         default: ""
       ssid_5g:
@@ -33,7 +33,7 @@ on:
         type: string
         default: ""
       wifi:
-        description: "Own settings - turn Wi-Fi on with the password in the CW_WIFI_KEY repository secret"
+        description: "Own settings - Wi-Fi password from the CW_WIFI_KEY repository secret (unticked: the stock password123)"
         type: boolean
         default: false
   # The feed workflow runs this same build with opt_artifacts on and publishes the feed it makes.
@@ -136,7 +136,7 @@ jobs:
           exit "$bad"
 
       # The first-boot script with your values, checked by the same tool and rules as a local build
-      # (a bad value or a Wi-Fi name without the password stops here, before two hours of build).
+      # (a bad value, or the password box ticked without the secret, stops here, before two hours of build).
       # It lands in the workspace, which the build container sees as /cleanwrt, readable by this
       # job only, and is deleted when the job ends. The password never appears in the log.
       - name: Own settings
@@ -153,17 +153,19 @@ jobs:
           set --
           [ -z "$CW_HOSTNAME" ] || set -- "$@" --hostname "$CW_HOSTNAME"
           [ -z "$CW_LAN_IP" ] || set -- "$@" --lan-ip "$CW_LAN_IP"
-          if [ "$CW_WIFI" = true ]; then
-            [ -n "$CW_WIFI_KEY" ] || { echo "::error::the Wi-Fi box is ticked but there is no CW_WIFI_KEY repository secret (Settings -> Secrets and variables -> Actions)"; exit 1; }
+          # Wi-Fi is on in every image with the stock password (56-cw-wifi-default-key): names
+          # alone keep it, the box puts the secret in its place
+          if [ -n "$CW_SSID$CW_SSID_5G" ]; then
             ssid=${CW_SSID:-OpenWrt}
             if [ -n "$CW_SSID_5G" ] && [ "$CW_SSID_5G" != "$ssid" ]; then
               set -- "$@" --ssid-2g "$ssid" --ssid-5g "$CW_SSID_5G"
             else
               set -- "$@" --ssid "$ssid"
             fi
+          fi
+          if [ "$CW_WIFI" = true ]; then
+            [ -n "$CW_WIFI_KEY" ] || { echo "::error::the Wi-Fi password box is ticked but there is no CW_WIFI_KEY repository secret (Settings -> Secrets and variables -> Actions)"; exit 1; }
             set -- "$@" --key "$CW_WIFI_KEY"
-          elif [ -n "$CW_SSID$CW_SSID_5G" ]; then
-            echo "::error::a Wi-Fi name needs the Wi-Fi box ticked (and the CW_WIFI_KEY secret): Wi-Fi with no password stays off"; exit 1
           fi
           sh tools/cw-settings-pack.sh "$@" --script .cw-own-settings.sh
           {
@@ -172,13 +174,10 @@ jobs:
             echo "|---|---|"
             echo "| hostname | ${CW_HOSTNAME:-OpenWrt (stock)} |"
             echo "| LAN | ${CW_LAN_IP:-192.168.1.1 (stock)} |"
-            if [ "$CW_WIFI" = true ]; then
-              echo "| Wi-Fi | on: 2.4 GHz \`${CW_SSID:-OpenWrt}\`, 5 GHz \`${CW_SSID_5G:-${CW_SSID:-OpenWrt}}\`, password from CW_WIFI_KEY |"
-            else
-              echo "| Wi-Fi | off (stock) |"
-            fi
+            if [ "$CW_WIFI" = true ]; then pw="from CW_WIFI_KEY"; else pw="stock (password123)"; fi
+            echo "| Wi-Fi | 2.4 GHz \`${CW_SSID:-OpenWrt}\`, 5 GHz \`${CW_SSID_5G:-${CW_SSID:-OpenWrt}}\`, password $pw |"
             echo
-            echo "The images go to the private draft **own-v${{ steps.ver.outputs.version }}**. They hold the Wi-Fi password: never publish them."
+            echo "The images go to the private draft **own-v${{ steps.ver.outputs.version }}**. Never publish them: they may hold your Wi-Fi password, and a reset brings these values back."
           } >> "$GITHUB_STEP_SUMMARY"
 
       # The build, its caches and its log all live on /mnt; the root disk only holds the builder
@@ -504,7 +503,7 @@ jobs:
             echo "CleanWRT $VERSION with **your own settings** built in (hostname, LAN, Wi-Fi), from commit $GITHUB_SHA,"
             echo "run [${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) (its summary lists the values, without the password)."
             echo
-            echo "**Keep this draft private and never publish it:** the images hold your Wi-Fi password, and a reset"
+            echo "**Keep this draft private and never publish it:** the images may hold your Wi-Fi password, and a reset"
             echo "brings your values back instead of the stock ones. Download the \`*-squashfs-sysupgrade.bin\` and flash it"
             echo "as usual. The release workflow refuses to publish an own-settings build."
           } > notes.md

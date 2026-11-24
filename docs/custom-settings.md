@@ -6,9 +6,9 @@ updated: 2026-11-24
 
 # Your own settings at flash time
 
-The image ships the stock OpenWrt defaults: hostname `OpenWrt`, LAN `192.168.1.1`, and Wi-Fi
-named `OpenWrt` with no password and the radios **off**. Those are the values a reset always
-brings back, so anyone can reach a reset router the same way.
+The image ships the stock OpenWrt defaults, hostname `OpenWrt` and LAN `192.168.1.1`, and Wi-Fi
+**on**, named `OpenWrt`, with the password `password123`. Those are the values a reset brings
+back, so anyone can reach a reset router the same way.
 
 For your own router you can set your values in the same step as the flash. You don't rebuild
 anything, and the signed image stays as it is. `tools/cw-settings-pack.sh` writes a small
@@ -22,12 +22,12 @@ settings archive, and the router applies it once on its next boot.
 | `--lan-ip ADDR[/PREFIX]` | the LAN address (default prefix `/24`) | `--lan-ip 192.168.50.1` |
 | `--ssid NAME` | the Wi-Fi name on every band | `--ssid MyWiFi` |
 | `--ssid-2g`, `--ssid-5g`, `--ssid-6g` | the Wi-Fi name on one band, instead of `--ssid` there | `--ssid-2g MyWiFi-2.4G` |
-| `--key PASSWORD` | the Wi-Fi password (WPA2, 8 to 63 characters); **turns Wi-Fi on** | `--key 'a strong one'` |
+| `--key PASSWORD` | the Wi-Fi password (WPA2, 8 to 63 characters), in place of `password123` | `--key 'a strong one'` |
 | `-o FILE` | where the archive goes (default `mysettings.tar.gz`) | `-o home.tar.gz` |
 
 Every option is optional. Anything you leave out stays at the image default. A Wi-Fi name
-without `--key` is refused: the tool never turns on an open network, because the root password
-is not set yet on a freshly flashed router.
+without `--key` only renames the networks: they keep the password they have (`password123` on
+a fresh flash). The tool never makes a network open.
 
 ## 1. Make the archive
 
@@ -81,7 +81,8 @@ tar -xzOf mysettings.tar.gz etc/uci-defaults/zz-cw-my-settings
 ```
 
 With `--key`, every Wi-Fi interface gets WPA2-PSK (WPA3 on a 6 GHz radio, which allows nothing
-else), the password, and its radio turned on. The root password is still unset: LuCI asks for
+else), your password in place of `password123`, and its radio on. Without it, only the names
+change. The root password is still unset: LuCI asks for
 one on the first login, as on any fresh flash (see [First boot](first-boot.md)).
 
 ## Build them into your own image
@@ -97,12 +98,11 @@ image.
   LAN address (e.g. 192.168.50.1 or 192.168.50.1/24) [192.168.1.1]: 192.168.50.1
   Wi-Fi name, 2.4 GHz [OpenWrt]: MyWiFi
   Wi-Fi name, 5 GHz [OpenWrt]: MyWiFi-5G
-  Wi-Fi password [Enter for none: Wi-Fi stays off]:
+  Wi-Fi password [Enter keeps the stock password123]:
   Again, to confirm:
 ```
 
-The password is not shown while you type it. A Wi-Fi name needs a password, for the same
-reason as above. The values are checked by the same rules as `cw-settings-pack.sh`, and a wrong
+The password is not shown while you type it. Press Enter there to keep `password123`. The values are checked by the same rules as `cw-settings-pack.sh`, and a wrong
 one is asked again.
 
 These are not a one-time setting like the archive. They become the **image's own defaults**:
@@ -126,7 +126,7 @@ With Docker, or when you run `tools/cw-release-build.sh` directly, make the scri
 `CW_LOCAL_SETTINGS=/path/to/mysettings.sh` (inside the container, for example
 `-e CW_LOCAL_SETTINGS=/cleanwrt/mysettings.sh`).
 
-!!! warning "An image built with your values holds the Wi-Fi password"
+!!! warning "An image built with your own Wi-Fi password holds it"
     Anyone with the image file can read it. Keep the image to yourself, and use the stock image
     or the settings archive for anything you share. The build's `provenance.txt` notes that own
     defaults are built in, without the values. Release builds refuse them.
@@ -136,7 +136,7 @@ With Docker, or when you run `tools/cw-release-build.sh` directly, make the scri
 The `build` workflow takes the same values, if you build on GitHub (see
 [Build from source](building.md#on-github-actions)).
 
-1. Only if you want Wi-Fi on: add the Wi-Fi password as a repository secret named
+1. Only if you want a Wi-Fi password other than `password123`: add it as a repository secret named
    `CW_WIFI_KEY` (*Settings → Secrets and variables → Actions → New repository secret*). It is a
    secret and not a box in the form, because anyone who can see the repository's Actions runs
    can read what was typed into the form.
@@ -149,7 +149,7 @@ The `build` workflow takes the same values, if you build on GitHub (see
     | Own settings - LAN address | the LAN address |
     | Own settings - Wi-Fi name | the Wi-Fi name on both bands |
     | Own settings - 5 GHz Wi-Fi name | the 5 GHz name, when it differs |
-    | Own settings - turn Wi-Fi on | Wi-Fi on, with the `CW_WIFI_KEY` password |
+    | Own settings - Wi-Fi password from CW_WIFI_KEY | the `CW_WIFI_KEY` password in place of `password123` |
 
 3. The values are checked before the build starts, so a mistake costs a minute, not two hours.
    The run's summary lists what was built in (without the password).
@@ -166,5 +166,5 @@ secret.
 
 If you flashed with the settings archive, a reset removes your settings with everything else: *System → Backup / Flash Firmware → Perform
 reset*, `firstboot && reboot`, or `sysupgrade -n`. The router comes back with the stock defaults
-at `192.168.1.1`, and Wi-Fi is off. See [Recovery](recovery.md). An image you built with your
+at `192.168.1.1`, and Wi-Fi `OpenWrt` with the password `password123`. See [Recovery](recovery.md). An image you built with your
 own values comes back with those values instead; flash the stock image to get the stock ones.

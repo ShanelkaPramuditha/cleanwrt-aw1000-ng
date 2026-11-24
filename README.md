@@ -114,12 +114,14 @@ If the router already runs OpenWrt, and `cat /proc/mtd` is fine:
 |---|---|
 | Address | `http://192.168.1.1` (over Ethernet) |
 | Root password | none: LuCI asks you to set one |
-| Wi-Fi | stock OpenWrt default: SSID `OpenWrt`, no key, off until you enable it |
+| Wi-Fi | **on**: SSID `OpenWrt` on both bands, WPA2, password `password123` |
 | Hostname, time zone | `OpenWrt` (stock), UTC |
 | Ethernet ports | stock names: `lan1`–`lan4`, `wan` |
 
 > [!WARNING]
-> Set a root password on the first login, and set a Wi-Fi key before you enable Wi-Fi.
+> The Wi-Fi password `password123` is public, and until you set a root password anyone who joins
+> the Wi-Fi can log in to LuCI. On the first login, set a root password and change the Wi-Fi
+> password (*Network → Wireless → Edit → Wireless Security*).
 
 ## Documentation
 
@@ -264,6 +266,7 @@ More (CI, signing, the optional package feed): the
 | Pages written for the stock themes follow Vantage's dark mode (3gInfo-lite, QModem, AWvoice), and the LED page's lamps follow the theme's switch | `patches/packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages.patch`, `patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch` |
 | The 5G LED shows 4G (red) and 4G+ (yellow) as well as 5G NSA and SA, with the colours chosen on the LED page | `patches/packages/luci-app-cw-led/0003-fiveg-lamp-colours-for-4g-and-4g-plus.patch`, `docs/leds.md` |
 | The 3gInfo-lite radio page takes its spacing from the theme, and QModem's hand-built pages are laid out properly under Vantage (tabs, card titles, buttons, labels) | `patches/feeds/3ginfo/0006-radio-spacing-follows-the-theme.patch`, `patches/feeds/qmodem/0011-luci-button-spacing.patch`, `patches/packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards.patch` |
+| Wi-Fi on from the first boot: `OpenWrt` on both bands, WPA2, password `password123` (OpenWrt ships it open and off) | `files/etc/uci-defaults/56-cw-wifi-default-key`, `tools/tests/cw-wifi-default-key-test.sh`, `docs/` |
 | The Traffic Monitor graphs are drawn in the page from vnstat's JSON, in the theme's colours and dark mode, instead of vnstati pictures; vnstati and its image libraries leave the image | `patches/feeds/luci/0011-vnstat2-graphs-drawn-in-the-page.patch`, `configs/arcadyan_aw1000.seed` |
 | Grouped buttons sit on their own, without a card behind them: the Save / Save & Apply bar at the bottom of a page, and every dialog's footer | `patches/packages/luci-theme-vantage/0003-page-actions-without-card.patch` |
 | OpenVPN and WireGuard removed, and with them the VPN menu and the empty WireGuard status page (both one `apk add` away; Tailscale is the VPN in the image) | `configs/arcadyan_aw1000.seed`, `docs/` |

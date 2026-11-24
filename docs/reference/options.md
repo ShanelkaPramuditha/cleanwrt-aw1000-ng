@@ -96,7 +96,7 @@ starts it, and no SIP port is open until then.
 
 | option | shipped | note |
 |---|---|---|
-| `wireless.*` | stock OpenWrt | not changed by this image: SSID `OpenWrt`, no key, radios off |
+| `wireless.*` | SSID `OpenWrt`, `encryption='psk2'`, `key='password123'`, `disabled='0'` | `56-cw-wifi-default-key` turns OpenWrt's generated network on with a password; a network you configured is left alone |
 | `system.@system[0].hostname` | `OpenWrt` | stock, not changed by this image |
 | `system.@system[0].timezone` | `UTC` | set yours; alarm calls and quiet hours trust the clock |
 | `system.@system[0].log_size` | `64` | the log buffer in KiB |

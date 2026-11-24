@@ -14,7 +14,9 @@ CleanWRT starts the way stock OpenWrt does:
   to set one. Until you do, **SSH refuses root**: stock OpenWrt lets anyone who reaches port 22 in
   as root with no password, this image does not. SSH works as soon as a password is set, with no
   restart. Failsafe mode still opens a shell with no password, for recovery.
-- Wi-Fi is the stock OpenWrt default: SSID `OpenWrt`, no key, and **off**. Set a key before you enable it.
+- Wi-Fi is **on** with WPA2: SSID `OpenWrt`, password `password123`. That password is public, and
+  until a root password is set anyone who joins can log in to LuCI, so change both on the first
+  login.
 - Every opt-in service is **disabled**. Nothing listens on your network until you enable it.
 - LuCI is served over **HTTPS**; plain HTTP only redirects to it.
 
@@ -88,7 +90,7 @@ details and ask for a private channel.
     LuCI uses a self-signed certificate that your router creates at first boot. The connection is still encrypted, but no public authority signed the certificate. Click *Advanced → Proceed*, or install a trusted certificate with ACME if you own a domain.
 
 ??? question "What are the default passwords on CleanWRT?"
-    There is no root password at first. The first login happens over Ethernet and LuCI asks you to set one. Wi-Fi is the stock OpenWrt default: off, SSID `OpenWrt`, no key. Set a key before you enable it.
+    There is no root password at first. The first login happens over Ethernet and LuCI asks you to set one. Wi-Fi is on with SSID `OpenWrt` and the password `password123`. Change it on the first login, together with setting the root password.
 
 ??? question "How do I get a trusted HTTPS certificate on the router?"
     Install `acme-common` and `luci-app-acme`, then issue a Let's Encrypt certificate with a DNS challenge. That works behind CGNAT because it needs no inbound connection.
@@ -99,7 +101,7 @@ details and ask for a private channel.
 |---|---|---|
 | LuCI over HTTPS, HTTP redirected | on | `46-cw-uhttpd-https` |
 | Root password | **none**, until you set one | `99-aw1000-defaults` leaves it unset, as stock OpenWrt does. Unlike stock, SSH refuses root until one is set (`patches/tree/0002-dropbear-no-blank-root-password.patch`) |
-| Wi-Fi | off, SSID `OpenWrt`, no key | OpenWrt's own default; this image does not change it |
+| Wi-Fi | **on**, SSID `OpenWrt`, WPA2, password `password123` | `56-cw-wifi-default-key` (OpenWrt itself ships it open and off) |
 | Firewall | stock zones and defaults, `firewall4` and `nftables` | OpenWrt |
 | Opt-in apps | off, so nothing listens | each package's own default |
 | The provisioning listener | **open on port 8080, LAN only**, private-network filtered, directory listings off, document root holding one directory | `49-cw-awvoice-provision-port` |

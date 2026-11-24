@@ -3,9 +3,9 @@
 #
 #   usage: tools/cw-settings-pack.sh [--hostname NAME] [--lan-ip ADDR[/PREFIX]] [--ssid NAME] [--ssid-2g NAME] [--ssid-5g NAME] [--ssid-6g NAME] [--key PASSWORD] [-o FILE | --script FILE]
 #
-# The image itself ships the stock OpenWrt defaults (hostname OpenWrt, LAN 192.168.1.1, Wi-Fi
-# 'OpenWrt' with no key and the radios off), so a reset always brings a router back to values
-# anyone can look up. This tool is for the other side: your own router, set up the moment it
+# The image itself ships the stock OpenWrt defaults (hostname OpenWrt, LAN 192.168.1.1) and Wi-Fi
+# 'OpenWrt' on with the password 'password123' (files/etc/uci-defaults/56-cw-wifi-default-key),
+# so a reset always brings a router back to values anyone can look up. This tool is for the other side: your own router, set up the moment it
 # is flashed, without rebuilding or touching the signed image.
 #
 # It writes a .tar.gz holding one first-boot script, etc/uci-defaults/zz-cw-my-settings. Use it
@@ -20,15 +20,17 @@
 #   --hostname NAME        system hostname (letters, digits, '-'; up to 63)
 #   --lan-ip ADDR[/PREFIX] LAN address, prefix 8-30, default /24 (e.g. 192.168.50.1)
 #   --ssid NAME            Wi-Fi name on every band
-#   --ssid-2g/-5g/-6g NAME Wi-Fi name on one band (overrides --ssid there)
-#   --key PASSWORD         WPA2 password (8-63 characters, or 64 hex digits); turns Wi-Fi ON
+#   --ssid-2g/-5g/-6g NAME Wi-Fi name on one band (overrides --ssid there); without --key the
+#                          networks keep the image's password ('password123')
+#   --key PASSWORD         WPA2 password (8-63 characters, or 64 hex digits); turns Wi-Fi on
 #   -o FILE                output archive (default: mysettings.tar.gz)
 #   --script FILE          write only the first-boot script, no archive. tools/cw-build.sh uses
 #                          it to build these values into a local image (see docs/custom-settings.md)
 #
-# A Wi-Fi name without --key is refused: it would only name a network that stays off, and
-# enabling it open would give anyone in range the LAN of a router with no root password yet.
-# The archive holds the Wi-Fi password in plain text: keep it like a password.
+# The tool never makes a network open: with --key every network gets that password, without it
+# only the names change and each network keeps the password it has (on a fresh flash the
+# image's 'password123'). The archive holds the Wi-Fi password in plain text: keep it like a
+# password.
 set -eu
 
 usage() { sed -n '4p' "$0" | sed 's/^# *//' >&2; exit 2; }
@@ -88,8 +90,6 @@ if [ -n "$KEY" ]; then
 		[ "${#KEY}" -ge 8 ] && [ "${#KEY}" -le 63 ] || die "--key: a WPA2 password is 8-63 characters (or 64 hex digits)"
 		case "$KEY" in *[![:print:]]*) die "--key: use printable ASCII characters only" ;; esac
 	fi
-elif [ -n "$SSID$SSID2$SSID5$SSID6" ]; then
-	die "a Wi-Fi name needs --key: this tool never turns on an open network"
 fi
 
 [ -n "$HOSTNAME_V$LANIP$SSID$SSID2$SSID5$SSID6$KEY" ] || die "nothing to set: give at least one option"
@@ -121,7 +121,7 @@ S="$WORK/etc/uci-defaults/zz-cw-my-settings"
 		echo "uci add_list network.lan.ipaddr=$(sq "$LANIP")"
 		echo 'uci commit network'
 	fi
-	if [ -n "$KEY" ]; then
+	if [ -n "$KEY$SSID$SSID2$SSID5$SSID6" ]; then
 		echo "SSID_ALL=$(sq "$SSID")"
 		echo "SSID_2G=$(sq "$SSID2")"
 		echo "SSID_5G=$(sq "$SSID5")"
@@ -138,6 +138,8 @@ for radio in $(uci show wireless | sed -n "s/^wireless\.\([^.=]*\)=wifi-device.*
 		*)  ssid=$SSID_ALL ;;
 	esac
 	[ -n "$ssid" ] && uci set "$iface.ssid=$ssid"
+	# no key given: only the names change, each network keeps its password and state
+	[ -n "$KEY" ] || continue
 	if [ "$(uci -q get "wireless.$radio.band")" = 6g ]; then
 		uci set "$iface.encryption=sae"   # 6 GHz allows WPA3 only
 	else
@@ -173,9 +175,10 @@ fi
 echo "wrote $OUT"
 [ -n "$HOSTNAME_V" ] && echo "  hostname   $HOSTNAME_V"
 [ -n "$LANIP" ]      && echo "  LAN        $LANIP  (the router answers there after the reboot)"
-if [ -n "$KEY" ]; then
-	echo "  Wi-Fi      on, password set${SSID:+, name '$SSID'}${SSID2:+, 2.4 GHz '$SSID2'}${SSID5:+, 5 GHz '$SSID5'}${SSID6:+, 6 GHz '$SSID6'}"
+if [ -n "$KEY$SSID$SSID2$SSID5$SSID6" ]; then
+	if [ -n "$KEY" ]; then w='on, password set'; else w="the image's password kept"; fi
+	echo "  Wi-Fi      $w${SSID:+, name '$SSID'}${SSID2:+, 2.4 GHz '$SSID2'}${SSID5:+, 5 GHz '$SSID5'}${SSID6:+, 6 GHz '$SSID6'}"
 fi
 echo "Flash:   sysupgrade -v -f $(basename "$OUT") <image>-sysupgrade.bin   (not with -n)"
 echo "Or:      LuCI -> System -> Backup / Flash Firmware -> Restore backup"
-echo "The archive holds the Wi-Fi password in plain text."
+[ -z "$KEY" ] || echo "The archive holds the Wi-Fi password in plain text."

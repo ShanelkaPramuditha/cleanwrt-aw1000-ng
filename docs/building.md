@@ -47,9 +47,9 @@ The inputs of a manual build:
 | `draft` | on | put the images in the private draft release `v<CW_VERSION>`. Needs the signing secrets and a live `cw-opt` feed. Untick it for a test build that publishes nothing |
 | `hostname` | empty | own settings: the router's name (empty: `OpenWrt`) |
 | `lan_ip` | empty | own settings: the LAN address, such as `192.168.50.1` or `192.168.50.1/24` (empty: `192.168.1.1`) |
-| `ssid` | empty | own settings: the Wi-Fi name on both bands (empty: `OpenWrt`). Needs `wifi` |
+| `ssid` | empty | own settings: the Wi-Fi name on both bands (empty: `OpenWrt`) |
 | `ssid_5g` | empty | own settings: the 5 GHz name, when it differs |
-| `wifi` | off | own settings: turn Wi-Fi on with the password in the `CW_WIFI_KEY` repository secret |
+| `wifi` | off | own settings: the Wi-Fi password from the `CW_WIFI_KEY` repository secret, in place of the stock `password123` |
 
 Any own setting makes the build put **your values into the image**, like the questions of a local
 build ([Your own settings](custom-settings.md#on-github-actions)). Such a build never fills the

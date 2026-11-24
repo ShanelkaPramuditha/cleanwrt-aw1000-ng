@@ -9,10 +9,13 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 
 - **The defaults are stock OpenWrt's again**, so a reset router is reachable with values anyone
   can look up: hostname `OpenWrt`, LAN `192.168.1.1`, Ethernet ports `lan1`-`lan4` and `wan`,
-  and Wi-Fi named `OpenWrt` with no password and the radios off until you set a password. The
-  image no longer sets the `CleanWRT` hostname, the `CleanWRT-2.4G` / `CleanWRT-5G` names or the
+  and Wi-Fi named `OpenWrt`. The image no longer sets the `CleanWRT` hostname, the `CleanWRT-2.4G` / `CleanWRT-5G` names or the
   `CleanWRT#40` Wi-Fi password. A router upgraded with its settings kept keeps its own. See
   [First boot](first-boot.md).
+- **Wi-Fi is on from the first boot**, named `OpenWrt` on both bands, with WPA2 and the password
+  `password123`, so a phone can reach a fresh router without a cable. OpenWrt itself ships it
+  open and off. The password is public: set a root password and change the Wi-Fi password on
+  the first login. A Wi-Fi network you have configured is left alone. See [First boot](first-boot.md).
 - **Flash with your own settings.** `tools/cw-settings-pack.sh` makes a small settings archive
   with your hostname, LAN address, Wi-Fi names and password. Pass it to `sysupgrade -f`, or
   restore it in LuCI after a first install, and the router comes up with them. A reset still

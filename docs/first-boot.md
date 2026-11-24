@@ -15,7 +15,7 @@ CleanWRT follows the stock OpenWrt first-login model.
 | Address | `192.168.1.1` |
 | Hostname | `OpenWrt` (stock, not changed by this image) |
 | Root password | **none** (set it on first login) |
-| Wi-Fi | stock OpenWrt default: SSID `OpenWrt`, no key, **off** until you enable it (set a key first) |
+| Wi-Fi | **on**: SSID `OpenWrt` on both bands, WPA2, password `password123` (`56-cw-wifi-default-key`). Change the password on the first login |
 | Ethernet ports | stock names: `lan1`–`lan4`, `wan` |
 | Time zone | UTC (set yours in LuCI) |
 | Admin UI | LuCI over HTTPS (self-signed certificate) |
@@ -26,9 +26,10 @@ CleanWRT follows the stock OpenWrt first-login model.
 | Opt-in apps | installed and off, with one exception: the Samba daemon starts, but its share allows no guest access, so nothing is reachable until you add users |
 
 !!! warning "Set a password on the first login"
-    With no root password anyone on the LAN can log in, and Wi-Fi ships with no key, so set
-    one before you enable it. Do the steps below before you connect the router to
-    anything you do not trust.
+    With no root password anyone on the LAN can log in, and the LAN includes the Wi-Fi, whose
+    password `password123` is printed in this documentation. Set a root password and change the
+    Wi-Fi password (*Network → Wireless → Edit → Wireless Security*) on the first login, before
+    the router is anywhere strangers are in range.
 
 ## Steps
 

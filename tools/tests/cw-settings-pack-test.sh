@@ -6,8 +6,9 @@
 # The guarantee: the archive holds exactly one executable first-boot script that sorts after the
 # image's own; run against a stock config it sets the hostname, the LAN address (as a list entry
 # with a prefix) and, per band, the Wi-Fi name, WPA2 (WPA3 on 6 GHz), the key and the radio on;
-# values with quotes survive intact; anything left out stays untouched; and bad values, or a
-# Wi-Fi name without a key, are refused before any archive is written.
+# values with quotes survive intact; a Wi-Fi name without a key only renames (the network keeps
+# its password and state); anything left out stays untouched; and bad values are refused before
+# any archive is written.
 set -eu
 
 TESTS=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -91,6 +92,15 @@ is "interfaces on" "$(get wireless.default_radio0.disabled)$(get wireless.defaul
 is "radios on" "$(get wireless.radio0.disabled)$(get wireless.radio1.disabled)" 00
 is "each changed config committed" "$(sort -u "$UCI_STATE.commits" | tr '\n' ' ')" "commit network commit system commit wireless "
 
+echo "== only a name: the networks keep their password and state"
+stock
+pack --ssid Home -o "$WORK/n.tar.gz"
+apply "$WORK/n.tar.gz"
+is "both bands renamed" "$(get wireless.default_radio0.ssid)/$(get wireless.default_radio1.ssid)" Home/Home
+is "encryption untouched" "$(get wireless.default_radio0.encryption)" none
+is "no key written" "$(get wireless.default_radio0.key || echo none)" none
+is "state untouched" "$(get wireless.default_radio0.disabled)" 1
+
 echo "== only a key"
 pack --key 12345678 -o "$WORK/b.tar.gz"
 stock; apply "$WORK/b.tar.gz"
@@ -113,7 +123,6 @@ refused() { # <label> <args...>
 	elif [ -e "$WORK/r.tar.gz" ]; then noted "$label" "FAIL: archive written"
 	else noted "$label" ok; fi
 }
-refused "Wi-Fi name without a key" --ssid Open
 refused "short key" --key 1234567
 refused "64 characters, not hex" --key "$(printf 'g%.0s' $(seq 64))"
 refused "hostname with a dot" --hostname my.router

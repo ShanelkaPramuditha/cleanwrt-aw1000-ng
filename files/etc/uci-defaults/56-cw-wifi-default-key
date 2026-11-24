@@ -1,0 +1,43 @@
+#!/bin/sh
+# Wi-Fi on from the first boot, with a password.
+#
+# OpenWrt generates one network per radio named 'OpenWrt', open (no encryption) and switched
+# off, because an open network on a router with no root password would hand its admin page to
+# anyone in range. This image switches it on instead, protected: WPA2-PSK (WPA3 on a 6 GHz
+# radio, which allows nothing else) with the password 'password123', so a phone can reach the
+# router without a cable. That password is public - it is in the documentation - so change it,
+# and set a root password, on the first login (docs/first-boot.md).
+#
+# Only the untouched default is changed: a network still named 'OpenWrt', open and without a
+# key, as `wifi config` writes it. A network someone has configured (another name, a key, any
+# encryption) is left as it is, on a fresh flash and on an upgrade that keeps the settings.
+# Own settings built into an image (zz-cw-my-settings, tools/cw-settings-pack.sh) run after
+# this and replace it.
+#
+# tools/tests/cw-wifi-default-key-test.sh runs this against a stub uci.
+KEY='password123'
+
+changed=0
+for iface in $(uci -q show wireless | sed -n "s/^wireless\.\([^.=]*\)=wifi-iface$/\1/p"); do
+	[ "$(uci -q get "wireless.$iface.ssid")" = OpenWrt ] || continue
+	enc=$(uci -q get "wireless.$iface.encryption")
+	[ -z "$enc" ] || [ "$enc" = none ] || continue
+	[ -z "$(uci -q get "wireless.$iface.key")" ] || continue
+
+	radio=$(uci -q get "wireless.$iface.device")
+	if [ -n "$radio" ] && [ "$(uci -q get "wireless.$radio.band")" = 6g ]; then
+		uci set "wireless.$iface.encryption=sae"
+	else
+		uci set "wireless.$iface.encryption=psk2"
+	fi
+	uci set "wireless.$iface.key=$KEY"
+	uci set "wireless.$iface.disabled=0"
+	[ -z "$radio" ] || uci set "wireless.$radio.disabled=0"
+	changed=1
+done
+
+if [ "$changed" = 1 ]; then
+	uci commit wireless
+	logger -t cw-firstboot "wifi: default network 'OpenWrt' on, WPA2, password 'password123' - change it"
+fi
+exit 0

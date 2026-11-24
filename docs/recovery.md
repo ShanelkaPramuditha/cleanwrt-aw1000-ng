@@ -58,7 +58,7 @@ removing it. That is the real brick wall. It is why you should **double-check th
 | Mode | Result |
 |---|---|
 | default (keep settings) | `/etc/config/*` and the overlay survive: passwords, Wi-Fi keys and enabled services carry across releases |
-| `sysupgrade -n` | clean slate: no root password, hostname, Wi-Fi and port names back to the stock OpenWrt defaults (Wi-Fi off), every opt-in service back to disabled |
+| `sysupgrade -n` | clean slate: no root password, hostname and port names back to the stock OpenWrt defaults, Wi-Fi back to `OpenWrt` / `password123`, every opt-in service back to disabled |
 
 !!! info "Upgrades do not re-run first-boot scripts"
     On a keep-settings upgrade, fixes to defaults apply only to settings that are still at
