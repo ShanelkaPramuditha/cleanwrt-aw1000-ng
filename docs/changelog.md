@@ -7,6 +7,16 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 
 ## 25.12.5-R2.2-SP2 (this fork, not yet released)
 
+- **The defaults are stock OpenWrt's again**, so a reset router is reachable with values anyone
+  can look up: hostname `OpenWrt`, LAN `192.168.1.1`, Ethernet ports `lan1`-`lan4` and `wan`,
+  and Wi-Fi named `OpenWrt` with no password and the radios off until you set a password. The
+  image no longer sets the `CleanWRT` hostname, the `CleanWRT-2.4G` / `CleanWRT-5G` names or the
+  `CleanWRT#40` Wi-Fi password. A router upgraded with its settings kept keeps its own. See
+  [First boot](first-boot.md).
+- **Flash with your own settings.** `tools/cw-settings-pack.sh` makes a small settings archive
+  with your hostname, LAN address, Wi-Fi names and password. Pass it to `sysupgrade -f`, or
+  restore it in LuCI after a first install, and the router comes up with them. A reset still
+  brings back the stock defaults. See [Your own settings at flash time](custom-settings.md).
 - **Vantage is the new default theme**, with its Dashboard as the first page after login: an
   icon rail, a Ctrl+K command palette, light and dark modes. Footstrap stays in the image under
   *System → System → Language and Style*, and a router upgraded with its settings kept stays on the

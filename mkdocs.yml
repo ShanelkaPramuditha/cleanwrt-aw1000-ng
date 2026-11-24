@@ -76,6 +76,7 @@ nav:
       - MTD layout: mtd-layout.md
       - UART guide: uart.md
       - First boot: first-boot.md
+      - Your own settings at flash time: custom-settings.md
       - Recovery: recovery.md
   - The phone port:
       - AWvoice: awvoice.md

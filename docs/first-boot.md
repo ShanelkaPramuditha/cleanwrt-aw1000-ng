@@ -63,6 +63,11 @@ The login page, in dark and light mode:
 |---|---|
 | ![Login, dark](assets/img/login-dark.jpg) | ![Login, light](assets/img/login-light.jpg) |
 
+!!! tip "Set it all at flash time instead"
+    To flash with your own hostname, LAN address, Wi-Fi names and password already set, see
+    [Your own settings at flash time](custom-settings.md). A reset still brings back the
+    defaults above.
+
 ## A short tour of LuCI
 
 | Menu | What is there |
