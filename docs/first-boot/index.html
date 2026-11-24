@@ -2423,7 +2423,7 @@
 </tr>
 <tr>
 <td>Wi-Fi</td>
-<td>stock OpenWrt default: SSID <code>OpenWrt</code>, no key, <strong>off</strong> until you enable it (set a key first)</td>
+<td><strong>on</strong>: SSID <code>OpenWrt</code> on both bands, WPA2, password <code>password123</code> (<code>56-cw-wifi-default-key</code>). Change the password on the first login</td>
 </tr>
 <tr>
 <td>Ethernet ports</td>
@@ -2461,9 +2461,10 @@
 </table>
 <div class="admonition warning">
 <p class="admonition-title">Set a password on the first login</p>
-<p>With no root password anyone on the LAN can log in, and Wi-Fi ships with no key, so set
-one before you enable it. Do the steps below before you connect the router to
-anything you do not trust.</p>
+<p>With no root password anyone on the LAN can log in, and the LAN includes the Wi-Fi, whose
+password <code>password123</code> is printed in this documentation. Set a root password and change the
+Wi-Fi password (<em>Network → Wireless → Edit → Wireless Security</em>) on the first login, before
+the router is anywhere strangers are in range.</p>
 </div>
 <h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
 <ol>
