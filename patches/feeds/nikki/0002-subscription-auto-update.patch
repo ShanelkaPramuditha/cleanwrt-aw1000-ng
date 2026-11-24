@@ -1,0 +1,134 @@
+Nikki: update a subscription on a schedule
+
+A subscription was downloaded only when Nikki started (with "Prefer: Remote") or when the user
+pressed Update, so a provider's new servers or a renewed plan reached the router only after a
+restart someone remembered to do.
+
+Each subscription gets "Update automatically" and "Update every" (1, 3, 6 or 12 hours, or once
+a day at 04:23) in its dialog on the Profiles page, and the Last update column says when it is
+on. nikki.init writes one cron line per such subscription next to its scheduled restart (the
+same #nikki tag, so stopping Nikki removes them with the others), calling a new extra command,
+auto_update_subscription:
+
+- a subscription that is not in use is downloaded, nothing else;
+- the one in use is downloaded and Nikki restarted to run it, only when the download succeeded,
+  so a failed download never takes the working profile away;
+- the one in use with "Prefer: Remote" is not downloaded first, because the restart downloads it.
+
+Applies to: https://github.com/nikkinikki-org/OpenWrt-nikki.git @ 0c56ba5f, after 0001.
+Upstream status: local to CleanWRT.
+
+--- a/nikki/files/nikki.init
++++ b/nikki/files/nikki.init
+@@ -9,6 +9,7 @@
+ . "$IPKG_INSTROOT/etc/nikki/scripts/include.sh"
+ 
+ extra_command 'update_subscription' 'Update subscription by section id'
++extra_command 'auto_update_subscription' 'Update subscription by section id, and restart if it is in use'
+ extra_command 'clear_logs' 'Clear logs if size exceeds the limit'
+ 
+ boot_func() {
+@@ -292,6 +293,8 @@
+ 		log "App" "Set scheduled restart."
+ 		echo "$scheduled_restart_cron /etc/init.d/nikki restart #nikki scheduled restart" >> "/etc/crontabs/root"
+ 	fi
++	## add subscription auto update cron if needed (CleanWRT)
++	config_foreach add_subscription_cron "subscription"
+ 	## add log scheduled clear cron if needed
+ 	if [ "$log_scheduled_clear" = 1 ] && [ -n "$log_scheduled_clear_cron" ]; then
+ 		log "App" "Set log scheduled clear."
+@@ -546,6 +549,48 @@
+ 	fi
+ }
+ 
++# CleanWRT: one cron line per subscription with auto_update=1, every
++# auto_update_interval hours (1, 2, 3, 6, 12; 24 is once a day at 04:23).
++add_subscription_cron() {
++	local section="$1" auto_update interval spec
++	config_get_bool auto_update "$section" "auto_update" 0
++	[ "$auto_update" = 1 ] || return 0
++	config_get interval "$section" "auto_update_interval" "24"
++	case "$interval" in
++		1|2|3|6|12) spec="23 */$interval * * *" ;;
++		*) spec="23 4 * * *" ;;
++	esac
++	log "App" "Set subscription auto update: $section, every $interval hour(s)."
++	echo "$spec /etc/init.d/nikki auto_update_subscription $section #nikki subscription auto update" >> "/etc/crontabs/root"
++}
++
++# CleanWRT: the cron job's update. A subscription that is not in use is only
++# downloaded. The one in use is downloaded and Nikki restarted to run it, but
++# only when the download succeeded; with "Prefer: Remote" the restart itself
++# downloads it, so it is not downloaded twice.
++auto_update_subscription() {
++	local section="$1" profile enabled prefer in_use
++	[ -n "$section" ] || return 0
++	config_load nikki
++	config_get profile "config" "profile"
++	config_get_bool enabled "config" "enabled" 0
++	config_get prefer "$section" "prefer" "remote"
++	in_use=0
++	if [ "$profile" = "subscription:$section" ] && [ "$enabled" = 1 ] && [ -f "$STARTED_FLAG_PATH" ]; then
++		in_use=1
++	fi
++	if [ "$in_use" = 1 ] && [ "$prefer" = "remote" ]; then
++		log "Profile" "Scheduled update of the subscription in use: restart."
++		/etc/init.d/nikki restart
++		return 0
++	fi
++	update_subscription "$section"
++	if [ "$in_use" = 1 ] && [ "$(uci -q get "nikki.$section.success")" = 1 ]; then
++		log "Profile" "Scheduled update of the subscription in use: restart to use it."
++		/etc/init.d/nikki restart
++	fi
++}
++
+ update_subscription() {
+ 	local subscription_section; subscription_section="$1"
+ 	if [ -z "$subscription_section" ]; then
+--- a/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js
++++ b/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js
+@@ -277,10 +277,18 @@
+         o.textvalue = function (section_id) {
+             const v = this.cfgvalue(section_id);
+             const success = uci.get('nikki', section_id, 'success');
+-            if (success === '0') {
+-                return E('span', { 'class': 'nk-badge is-err', 'title': _('The last update failed. The Logs page shows why.') }, [_('Failed')]);
++            const auto = uci.get('nikki', section_id, 'auto_update') === '1';
++            const hours = uci.get('nikki', section_id, 'auto_update_interval') || '24';
++            const state = success === '0'
++                ? E('span', { 'class': 'nk-badge is-err', 'title': _('The last update failed. The Logs page shows why.') }, [_('Failed')])
++                : (v ? E('span', { 'class': 'nk-dim' }, [v.substring(0, 16)]) : E('span', { 'class': 'nk-dim' }, [_('Never')]));
++            if (!auto) {
++                return state;
+             }
+-            return v ? E('span', { 'class': 'nk-dim' }, [v.substring(0, 16)]) : E('span', { 'class': 'nk-dim' }, [_('Never')]);
++            return E('div', {}, [
++                state,
++                E('div', { 'class': 'nk-dim' }, [hours === '24' ? _('Auto: daily') : _('Auto: every %s h').format(hours)])
++            ]);
+         };
+ 
+         o = s.option(form.Button, '_update_subscription');
+@@ -357,6 +365,21 @@
+         o.value('remote', _('Remote'));
+         o.value('local', _('Local'));
+ 
++        o = s.option(form.Flag, 'auto_update', _('Update automatically'),
++            _('Download this subscription again on a schedule while Nikki runs. When it is the one in use, Nikki restarts to use the new copy, so connections drop for a moment.'));
++        o.modalonly = true;
++        o.default = '0';
++
++        o = s.option(form.ListValue, 'auto_update_interval', _('Update every'));
++        o.modalonly = true;
++        o.depends('auto_update', '1');
++        o.default = '24';
++        o.value('1', _('1 hour'));
++        o.value('3', _('3 hours'));
++        o.value('6', _('6 hours'));
++        o.value('12', _('12 hours'));
++        o.value('24', _('Day (at 04:23)'));
++
+         const header = nikki.renderHeader(_('Profiles'),
+             _('Your Clash / mihomo configurations: files you upload and subscriptions Nikki downloads. The one marked "In use" is what Nikki runs.'),
+             running);

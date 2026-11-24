@@ -43,6 +43,21 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   frequency, and the signal. Press **Lock** on a row, or click it to fill in the form. **Unlock**
   and **Keep after reboot** are new. Neighbour signal values were swapped before (RSRP showed as
   RSRQ); they are now correct.
+- **The cell lock can undo itself.** Tick **Unlock automatically** when locking, and the router
+  unlocks the modem if the locked cell is lost for the minutes you choose, so a dead tower no
+  longer leaves you offline.
+- **Watch and save cells.** The Neighbor Cell tab can refresh on its own and draws each cell's
+  signal over the last scans; **Save cell** keeps a named cell to lock to later; every neighbour on
+  *Modem → 3gInfo-lite* has a **Lock…** link. The operator's name shows even when the modem reports
+  only its number.
+- **Safer QModem pages.** Values typed on QModem's pages (an AT command, for example) are passed to
+  the router's shell quoted, so input with spaces works and cannot run commands.
+- **Nikki subscriptions update on their own.** Each subscription can be set to update every 1 to
+  12 hours or once a day; Nikki restarts only when the subscription in use downloaded successfully.
+- **Nikki and Advance Modem Settings in Chinese and Russian.** The new and reworded text has
+  zh_Hans, zh_Hant (Nikki) and ru translations.
+- **Faster rebuilds.** A build on a kept tree rebuilds only the packages a patch changes, so the
+  Nikki page patch no longer recompiles mihomo each time.
 - **Tidier Advance Modem Settings.** Buttons no longer sit on the edge of their card, and no field
   shows "undefined".
 - **Table row buttons are spaced like the rest.** On *Network → Interfaces* and other tables,

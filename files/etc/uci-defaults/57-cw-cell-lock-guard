@@ -1,0 +1,5 @@
+#!/bin/sh
+# Enable the cell-lock guard service on first boot. It does nothing until a modem has
+# lockcell_guard_enabled=1 (the "Unlock automatically" switch on the Neighbor Cell tab).
+/etc/init.d/cw-cell-lock-guard enable 2>/dev/null
+exit 0

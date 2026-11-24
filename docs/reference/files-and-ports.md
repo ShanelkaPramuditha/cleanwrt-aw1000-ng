@@ -1,7 +1,7 @@
 ---
 title: "Files, ports and paths on CleanWRT"
 description: "Where everything lives on the AW1000: config files, recordings and messages, what survives an upgrade, which process owns each port, and every listener."
-updated: 2026-11-06
+updated: 2026-11-24
 ---
 
 # Files, ports and paths
@@ -104,6 +104,7 @@ Nothing below is open unless the row says it is on by default.
 | `awvoice` | starts at 95 | the phone daemon. The line is on as installed (`main.enabled=1`) |
 | `cw-led` | starts at 50 | the LED daemon, deliberately early so the panel shows the search state while the modem dials |
 | `cw-modem-fix` | enabled at first boot | the modem registration fix |
+| `cw-cell-lock-guard` | starts at 99, enabled at first boot | checks a cell-locked modem once a minute and unlocks it when its cell is lost ([Unlock automatically](../modem.md#unlock-automatically)). Idle unless switched on |
 | `qmodem_voip_sipd` | 100, **not enabled by the image** | the SIP service. The AWvoice page's switch starts and stops it |
 | `qmodem_voip` | 99, **taken off the boot path by `51-cw-awvoice-voipd-off`** | the vendor VoIP engine. It claims the same front-end name the phone daemon answers, which is why it is off |
 | `qmodem-smsd` | 92 | the SMS daemon |

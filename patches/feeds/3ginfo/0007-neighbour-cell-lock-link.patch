@@ -1,0 +1,194 @@
+Radio page: a Lock link on every neighbour cell
+
+The radio page lists the cells around the router, and the place to lock the modem to one of
+them is two pages away: Modem -> QModem -> Advance Modem Settings -> Neighbor Cell, where the
+PCI and channel had to be typed again. Each neighbour, in the table and in the card layout,
+now has a "Lock…" link that opens that tab with the RAT, PCI and channel filled in
+(qmodem patch 0012 reads ?tab=NeighborCell&rat=&pci=&arfcn=). Nothing is locked until the user
+presses Lock there. A cell without a PCI or channel gets no link.
+
+The new strings are translated in the de, it, pl, ru and zh_Hans catalogs.
+
+Applies to: the 3ginfo feed pin, after 0006.
+Upstream status: local to CleanWRT, like 0004.
+
+--- a/luci-app-3ginfo-lite/htdocs/luci-static/resources/3ginfo/radio.css
++++ b/luci-app-3ginfo-lite/htdocs/luci-static/resources/3ginfo/radio.css
+@@ -591,6 +591,34 @@
+ 	font-variant-numeric: tabular-nums;
+ }
+ 
++/* CleanWRT: the link from a neighbour cell to QModem's cell lock */
++.tg-lock-link {
++	color: var(--tg-accent);
++	font-weight: 600;
++	white-space: nowrap;
++	text-decoration: none;
++}
++
++.tg-lock-link:hover,
++.tg-lock-link:focus-visible {
++	text-decoration: underline;
++}
++
++.tg-neighbour-lock {
++	margin-top: 8px;
++	font-size: .75rem;
++	text-align: right;
++}
++
++.tg-visually-hidden {
++	position: absolute;
++	width: 1px;
++	height: 1px;
++	overflow: hidden;
++	clip: rect(0 0 0 0);
++	white-space: nowrap;
++}
++
+ .tg-table-wrap {
+ 	display: none;
+ 	width: 100%;
+--- a/luci-app-3ginfo-lite/htdocs/luci-static/resources/view/modem/3gdetail.js
++++ b/luci-app-3ginfo-lite/htdocs/luci-static/resources/view/modem/3gdetail.js
+@@ -516,6 +516,21 @@
+ 	});
+ }
+ 
++// CleanWRT: a link to QModem's Neighbor Cell tab with this cell filled in, to lock to it
++function lockLink(cell) {
++	if (num(cell.pci) === null || num(cell.channel) === null)
++		return el('span', { 'class': 'tg-muted' }, '—');
++
++	var url = L.url('admin/modem/qmodem/modem_debug') + '?tab=NeighborCell&rat=%s&pci=%s&arfcn=%s'
++		.format(cell.rat === 'nr' ? 'NR' : 'LTE', encodeURIComponent(cell.pci), encodeURIComponent(cell.channel));
++
++	return el('a', {
++		'class': 'tg-lock-link',
++		'href': url,
++		'title': _('Open Advance Modem Settings with this cell filled in, to lock the modem to it')
++	}, _('Lock…'));
++}
++
+ function neighbourCard(cell) {
+ 	var q = quality('rsrp', cell.rsrp);
+ 	var channel = cell.rat === 'nr' ? _('NR-ARFCN') : _('EARFCN');
+@@ -530,7 +545,8 @@
+ 			el('div', {}, [ el('dt', {}, _('RSRP')), el('dd', {}, num(cell.rsrp) !== null ? shown(cell.rsrp) + ' dBm' : '—') ]),
+ 			el('div', {}, [ el('dt', {}, _('RSRQ')), el('dd', {}, num(cell.rsrq) !== null ? shown(cell.rsrq) + ' dB' : '—') ]),
+ 			el('div', {}, [ el('dt', {}, _('Type')), el('dd', {}, neighbourType(cell.type)) ])
+-		])
++		]),
++		el('div', { 'class': 'tg-neighbour-lock' }, [ lockLink(cell) ])
+ 	]);
+ }
+ 
+@@ -545,7 +561,8 @@
+ 		el('td', {}, num(cell.rsrq) !== null ? shown(cell.rsrq) + ' dB' : '—'),
+ 		el('td', {}, num(cell.sinr) !== null ? shown(cell.sinr) + ' dB' : '—'),
+ 		el('td', {}, cell.cell_id != null ? String(cell.cell_id) : _('Not reported')),
+-		el('td', {}, neighbourType(cell.type))
++		el('td', {}, neighbourType(cell.type)),
++		el('td', {}, lockLink(cell))
+ 	]);
+ }
+ 
+@@ -717,7 +734,8 @@
+ 								el('th', {}, sortButton('rsrq', _('RSRQ'), this)),
+ 								el('th', {}, sortButton('sinr', _('SINR'), this)),
+ 								el('th', {}, _('Cell ID')),
+-								el('th', {}, sortButton('type', _('Type'), this))
++								el('th', {}, sortButton('type', _('Type'), this)),
++								el('th', {}, el('span', { 'class': 'tg-visually-hidden' }, _('Lock')))
+ 							])
+ 						]),
+ 						el('tbody', { 'id': 'tg-neighbour-body' })
+--- a/luci-app-3ginfo-lite/po/de/3ginfo.po
++++ b/luci-app-3ginfo-lite/po/de/3ginfo.po
+@@ -152,3 +152,15 @@
+ 
+ msgid "SIM Slot"
+ msgstr "SIM-Slot"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock…"
++msgstr "Sperren…"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock"
++msgstr "Sperren"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Open Advance Modem Settings with this cell filled in, to lock the modem to it"
++msgstr "Erweiterte Modemeinstellungen mit dieser Zelle öffnen, um das Modem darauf zu sperren"
+--- a/luci-app-3ginfo-lite/po/it/3ginfo.po
++++ b/luci-app-3ginfo-lite/po/it/3ginfo.po
+@@ -165,3 +165,14 @@
+ msgid "Select the width of the progress bars."
+ msgstr "Seleziona la larghezza delle barre di avanzamento."
+ 
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock…"
++msgstr "Blocca…"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock"
++msgstr "Blocca"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Open Advance Modem Settings with this cell filled in, to lock the modem to it"
++msgstr "Apri le impostazioni avanzate del modem con questa cella già inserita, per bloccare il modem su di essa"
+--- a/luci-app-3ginfo-lite/po/pl/3ginfo.po
++++ b/luci-app-3ginfo-lite/po/pl/3ginfo.po
+@@ -221,3 +221,15 @@
+ 
+ msgid "CLICK ME TO SEE NEW MENU"
+ msgstr "KLIKNIJ MNIE, ABY ZOBACZYĆ NOWE MENU"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock…"
++msgstr "Zablokuj…"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock"
++msgstr "Zablokuj"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Open Advance Modem Settings with this cell filled in, to lock the modem to it"
++msgstr "Otwórz zaawansowane ustawienia modemu z tą komórką, aby zablokować na niej modem"
+--- a/luci-app-3ginfo-lite/po/ru/3ginfo.po
++++ b/luci-app-3ginfo-lite/po/ru/3ginfo.po
+@@ -221,3 +221,15 @@
+ 
+ msgid "CLICK ME TO SEE NEW MENU"
+ msgstr "НАЖМИ МЕНЯ ЧТОБЫ УВИДЕТЬ НОВОЕ МЕНЮ"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock…"
++msgstr "Заблокировать…"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock"
++msgstr "Заблокировать"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Open Advance Modem Settings with this cell filled in, to lock the modem to it"
++msgstr "Открыть расширенные настройки модема с этой сотой, чтобы заблокировать на ней модем"
+--- a/luci-app-3ginfo-lite/po/zh_Hans/3ginfo.po
++++ b/luci-app-3ginfo-lite/po/zh_Hans/3ginfo.po
+@@ -185,3 +185,15 @@
+ 
+ msgid "Show devices"
+ msgstr "显示设备"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock…"
++msgstr "锁定…"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Lock"
++msgstr "锁定"
++
++#: CleanWRT patches/feeds/3ginfo (0007)
++msgid "Open Advance Modem Settings with this cell filled in, to lock the modem to it"
++msgstr "打开高级模块设置并填入此小区，以将模块锁定到该小区"

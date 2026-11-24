@@ -1,7 +1,7 @@
 ---
 title: "CleanWRT UCI options reference"
 description: "The configuration options CleanWRT sets out of the box, package by package: the shipped value, what it changes, and the page that explains the feature."
-updated: 2026-11-06
+updated: 2026-11-24
 ---
 
 # UCI options
@@ -83,6 +83,24 @@ after its [patch](../building.md#what-this-build-changes-upstream):
 
 Nothing in this file is *started* by the image. The service runs when the AWvoice page's switch
 starts it, and no SIP port is open until then.
+
+## `qmodem` — cell lock options this image adds
+
+Set from *Modem → QModem → Advance Modem Settings → Neighbor Cell*, on the modem's
+`modem-device` section (for example `qmodem.modem1`). None is set on a fresh router.
+
+| option | set by | what it means |
+|---|---|---|
+| `lockcell_guard_enabled` | *Unlock automatically* | `1`: `cw-cell-lock-guard` unlocks the modem when its locked cell is lost |
+| `lockcell_guard_minutes` | the minutes next to it | how long the cell must be lost first, 1 to 120 (default 5) |
+| `lockcell_boot_hook_enabled`, `lockcell_boot_hook_at_cmds`, `lockcell_boot_hook_delay` | *Keep after reboot* | QModem's own: the lock command sent again after the modem starts |
+
+## `nikki` — subscription options this image adds
+
+| option | set by | what it means |
+|---|---|---|
+| `<subscription>.auto_update` | *Update automatically* in a subscription's dialog | `1`: download it on a schedule while Nikki runs |
+| `<subscription>.auto_update_interval` | *Update every* | hours between downloads: `1`, `3`, `6`, `12`, or `24` (once a day at 04:23) |
 
 ## `uhttpd` — the web server
 

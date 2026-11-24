@@ -1,0 +1,13 @@
+#!/bin/sh /etc/rc.common
+# CleanWRT: unlock a cell-locked modem that has lost its cell (/usr/sbin/cw-cell-lock-guard).
+# The service always runs; it acts only for a modem with lockcell_guard_enabled=1 in
+# /etc/config/qmodem, set from Advance Modem Settings -> Neighbor Cell.
+START=99
+USE_PROCD=1
+
+start_service() {
+	procd_open_instance
+	procd_set_param command /usr/sbin/cw-cell-lock-guard
+	procd_set_param respawn 3600 5 0
+	procd_close_instance
+}

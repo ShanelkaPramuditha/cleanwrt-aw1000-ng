@@ -177,6 +177,27 @@ your operator's name for them. For a 5G neighbour the band and subcarrier spacin
 from the ARFCN; when the page is not sure, **Lock** fills in the form and asks you to check the
 band first.
 
+### Unlock automatically
+
+Tick **Unlock automatically** in the lock form and choose the minutes (5 by default) before
+pressing **Lock**. The router then checks once a minute; when the modem has had no usable cell
+for that long (it reports no serving cell, or is searching, or has only limited service), it is
+unlocked so it can find another cell, and the event goes to the system log (`logread -e
+cw-cell-lock-guard`). The check is done by the `cw-cell-lock-guard` service, which does nothing
+for a modem without this switch.
+
+### Watching and saving cells
+
+- **Auto-refresh** next to **Scan** scans again every 15, 30 or 60 seconds while the tab is open.
+  Each row's signal column then draws a small line of its RSRP over the last scans, so you can
+  see which cell holds steady before you lock to it. The history lasts while the browser tab is
+  open.
+- **Save cell**, under the form, stores the cell in the form under a name you choose. Saved cells
+  show above the form (a click fills the form in) and with a star on their row. They are kept in
+  your browser, not on the router.
+- On *Modem → 3gInfo-lite*, every neighbour cell has a **Lock…** link that opens this tab with the
+  cell filled in. Nothing is locked until you press **Lock** there.
+
 ## What the image fixes around the modem
 
 | change | why |

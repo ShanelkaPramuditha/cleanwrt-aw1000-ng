@@ -1,0 +1,94 @@
+#!/bin/sh
+# cw-cell-lock-guard - unlock a cell-locked modem that has lost its cell.
+#
+# A modem locked to one cell (Modem -> QModem -> Advance Modem Settings -> Neighbor Cell)
+# never moves to another, so when that cell goes off the air or out of reach the router
+# stays offline until someone unlocks it by hand. This guard checks once a minute, for
+# every modem with lockcell_guard_enabled=1 in /etc/config/qmodem:
+#   - the modem is locked (LTE or NR), and
+#   - it reports no serving cell, or the state SEARCH or LIMSRV (no usable service)
+# for lockcell_guard_minutes checks in a row (default 5), it unlocks the modem the way the
+# page's Unlock button does, which also drops the re-lock-at-boot command, and logs it.
+# A modem that does not answer is not counted: an unknown reading never unlocks.
+#
+# usage: cw-cell-lock-guard          run forever (the init script's service)
+#        cw-cell-lock-guard --once   one check of every modem, then exit
+#
+# Overridable for tests: CW_GUARD_MODEM_CTRL, CW_GUARD_STATE_DIR, CW_GUARD_INTERVAL.
+
+MODEM_CTRL=${CW_GUARD_MODEM_CTRL:-/usr/share/qmodem/modem_ctrl.sh}
+STATE_DIR=${CW_GUARD_STATE_DIR:-/var/run/cw-cell-lock-guard}
+INTERVAL=${CW_GUARD_INTERVAL:-60}
+UNLOCK='{"rat":0,"pci":"","arfcn":"","band":"","scs":0,"en_boot_hook":"0"}'
+
+log() { logger -t cw-cell-lock-guard "$*"; }
+
+sections() {
+	uci -q show qmodem | sed -n 's/^qmodem\.\([^.=]*\)=modem-device$/\1/p'
+}
+
+check_section() {
+	s=$1
+	miss_file="$STATE_DIR/$s.miss"
+
+	[ "$(uci -q get "qmodem.$s.lockcell_guard_enabled")" = 1 ] || { rm -f "$miss_file"; return 0; }
+	[ "$(uci -q get "qmodem.$s.state")" = disabled ] && { rm -f "$miss_file"; return 0; }
+
+	minutes=$(uci -q get "qmodem.$s.lockcell_guard_minutes")
+	case "$minutes" in ''|*[!0-9]*) minutes=5 ;; esac
+	[ "$minutes" -ge 1 ] || minutes=1
+	[ "$minutes" -le 120 ] || minutes=120
+
+	json=$("$MODEM_CTRL" get_neighborcell "$s" 2>/dev/null)
+	lte=$(printf '%s' "$json" | jsonfilter -q -e '@.neighborcell.lockcell_status.LTE' 2>/dev/null)
+	nr=$(printf '%s' "$json" | jsonfilter -q -e '@.neighborcell.lockcell_status.NR' 2>/dev/null)
+	if [ -z "$lte" ] && [ -z "$nr" ]; then
+		return 0    # no answer: do not count it either way
+	fi
+	if [ "$lte" != locked ] && [ "$nr" != locked ]; then
+		rm -f "$miss_file"
+		return 0
+	fi
+
+	serving=$(printf '%s' "$json" | jsonfilter -q -e '@.neighborcell.serving[*].pci' 2>/dev/null | grep -c .)
+	state=$(printf '%s' "$json" | jsonfilter -q -e '@.neighborcell.state' 2>/dev/null)
+	case "$state" in
+		SEARCH|LIMSRV) lost=1 ;;
+		*) [ "$serving" -eq 0 ] && lost=1 || lost=0 ;;
+	esac
+
+	if [ "$lost" = 0 ]; then
+		rm -f "$miss_file"
+		return 0
+	fi
+
+	miss=$(cat "$miss_file" 2>/dev/null)
+	case "$miss" in ''|*[!0-9]*) miss=0 ;; esac
+	miss=$((miss + 1))
+	if [ "$miss" -lt "$minutes" ]; then
+		echo "$miss" > "$miss_file"
+		return 0
+	fi
+
+	rm -f "$miss_file"
+	log "modem $s: locked cell lost for $miss check(s) (state ${state:-none}, $serving serving cell(s)); unlocking"
+	"$MODEM_CTRL" set_neighborcell "$s" "$UNLOCK" >/dev/null 2>&1 ||
+		log "modem $s: unlock request failed"
+}
+
+check_all() {
+	mkdir -p "$STATE_DIR"
+	for s in $(sections); do
+		check_section "$s"
+	done
+}
+
+if [ "${1:-}" = --once ]; then
+	check_all
+	exit 0
+fi
+
+while :; do
+	check_all
+	sleep "$INTERVAL"
+done

@@ -216,49 +216,54 @@ sh "$REPO/tools/cw-apply-feed-patches.sh" --reset "$PWD" "$REPO"
 #     former whole-file 3ginfo.sh overlay.
 sh "$REPO/tools/cw-apply-feed-patches.sh" "$PWD" "$REPO"
 
-# 2a-bis. Invalidate stale prebuilt packages for every patched feed. OpenWrt
-#     does not re-run Build/Prepare when feed CONTENT changes at the same pin,
-#     so an ipk built before a patch transition would be reused verbatim by an
-#     incremental build - shipping the unpatched file while everything prints
-#     success. Remove the built packages and clean the package build dir.
+# 2a-bis. Invalidate the stale prebuilt state of every package a patch touches.
+#     OpenWrt does not re-run Build/Prepare when feed CONTENT changes at the same
+#     pin, so a package built before a patch transition would be reused verbatim
+#     by an incremental build - shipping the unpatched file while everything
+#     prints success. Remove its built packages and clean its build dir.
+#     Only the packages a patch touches are cleaned, not every package of a
+#     patched feed: the Nikki feed's luci-app-nikki patch must not cost a rebuild
+#     of mihomo (Go) on every build. A patch that is removed must still clean the
+#     package it used to touch, so the set cleaned is remembered in
+#     $CW_PATCHED_STATE and the next build cleans the union of that set and its own.
 #     Skipped in config-check mode: that mode never compiles, and CI runs it on
 #     a fresh clone with no build state.
 #     Every clean goal goes to ONE make call. Each call re-scans all package
 #     metadata, and one call per package measured 5 minutes of the build.
+CW_PATCHED_STATE="$PWD/.cw-patched-packages"
 if [ "${CW_CHECK_ONLY:-0}" != "1" ]; then
     cleans=$(mktemp)
+    current=$(mktemp)
 
-    for f in "$REPO"/patches/feeds/*/; do
-        feed=$(basename "$f")
-        for mk in "feeds/$feed"/*/Makefile; do
-            [ -f "$mk" ] || continue
-            pkg=$(dirname "$mk" | xargs basename)
-            rm -f bin/packages/*/*/"$pkg"*.ipk 2>/dev/null || true
-            printf 'package/feeds/%s/%s/clean\n' "$feed" "$pkg" >> "$cleans"
-            echo "== invalidated stale build state for feeds/$feed/$pkg =="
-        done
-    done
-
-    #     The loop above only sees top-level feed dirs. Feeds with nested package dirs
-    #     (qmodem: application/quectel_CM_5G_M, luci/luci-app-qmodem) would keep a stale
-    #     build, so also invalidate every package a patch actually touches: walk up from
-    #     each patched path to the nearest Makefile.
+    #     Walk up from each patched path to the nearest package Makefile. Paths come
+    #     from '+++ b/' lines and from 'diff --git' lines, so a mode-only diff (no
+    #     '+++' line) still names its package. Feeds with nested package dirs
+    #     (qmodem: application/quectel_CM_5G_M, luci/luci-app-qmodem) are covered.
     for pf in "$REPO"/patches/feeds/*/*.patch; do
         [ -f "$pf" ] || continue
         feed=$(basename "$(dirname "$pf")")
-        sed -n 's,^+++ [ab]/\([^[:space:]]*\).*,\1,p' "$pf" | while IFS= read -r rel; do
+        sed -n -e 's,^+++ [ab]/\([^[:space:]]*\).*,\1,p' -e 's,^diff --git a/[^[:space:]]* b/\([^[:space:]]*\).*,\1,p' "$pf" | while IFS= read -r rel; do
             d=$(dirname "feeds/$feed/$rel")
             # the package Makefile includes package.mk (a src/Makefile does not)
             while [ "$d" != "feeds/$feed" ] && [ "$d" != "." ] && ! { [ -f "$d/Makefile" ] && grep -q -e 'package\.mk' -e 'BuildPackage' "$d/Makefile"; }; do d=$(dirname "$d"); done
             [ -f "$d/Makefile" ] && grep -q -e 'package\.mk' -e 'BuildPackage' "$d/Makefile" || continue
             echo "$d"
-        done | sort -u | while IFS= read -r d; do
-            pkg=$(basename "$d")
-            name=$(sed -n 's/^PKG_NAME[[:space:]]*:\{0,1\}=[[:space:]]*//p' "$d/Makefile" | head -1)
-            rm -f bin/packages/*/*/"${name:-$pkg}"[-_]*.apk bin/packages/*/*/"${name:-$pkg}"[-_]*.ipk 2>/dev/null || true
-            printf 'package/feeds/%s/%s/clean\n' "$feed" "$pkg" >> "$cleans"
-            echo "== invalidated (patched path) feeds/$feed/${d#feeds/$feed/} =="
         done
+    done | sort -u > "$current"
+
+    #     The packages patched by the previous build that no patch touches now (a
+    #     patch was removed or narrowed): clean them too, so they rebuild unpatched.
+    if [ -f "$CW_PATCHED_STATE" ]; then
+        while IFS= read -r d; do
+            [ -n "$d" ] && [ -f "$d/Makefile" ] && echo "$d"
+        done < "$CW_PATCHED_STATE"
+    fi | cat - "$current" | sort -u | while IFS= read -r d; do
+        feed=$(echo "$d" | cut -d/ -f2)
+        pkg=$(basename "$d")
+        name=$(sed -n 's/^PKG_NAME[[:space:]]*:\{0,1\}=[[:space:]]*//p' "$d/Makefile" | head -1)
+        rm -f bin/packages/*/*/"${name:-$pkg}"[-_]*.apk bin/packages/*/*/"${name:-$pkg}"[-_]*.ipk 2>/dev/null || true
+        printf 'package/feeds/%s/%s/clean\n' "$feed" "$pkg" >> "$cleans"
+        echo "== invalidated (patched path) ${d} =="
     done
 
     #     Tree patches (patches/tree/*.patch) sit on files of the tree itself,
@@ -288,6 +293,8 @@ if [ "${CW_CHECK_ONLY:-0}" != "1" ]; then
         make $(sort -u "$cleans") >/dev/null 2>&1 || true
     fi
     rm -f "$cleans"
+    # what this build patched, for the next build to clean if a patch goes away
+    mv "$current" "$CW_PATCHED_STATE"
 fi
 
 # 2b. Out-of-feed packages: single-package repos (Makefile at the repo root) that

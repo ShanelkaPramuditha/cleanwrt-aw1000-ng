@@ -64,6 +64,12 @@ upstream's, unchanged.
 | 2026-11-24 | `.github/workflows/build.yml`, `.github/workflows/release.yml`, `docs/building.md`, `docs/custom-settings.md` | added: own settings in the `build` workflow (inputs, Wi-Fi password from the `CW_WIFI_KEY` secret), built into a private `own-v<version>` draft; `release` refuses a draft built with own settings |
 | 2026-11-24 | `tools/cw-build.sh`, `tools/cw-settings-pack.sh`, `tools/cw-release-build.sh`, `docs/custom-settings.md`, `docs/building.md`, `README.md` | added: `cw-build.sh` asks for the hostname, LAN address and Wi-Fi before a local build and builds them in (`CW_LOCAL_SETTINGS`, refused in release builds); `cw-settings-pack.sh --script` |
 | 2026-11-24 | `patches/feeds/luci/0011-vnstat2-graphs-drawn-in-the-page.patch`, `configs/arcadyan_aw1000.seed`, `docs/building.md` | added: the vnStat graphs drawn in the page from `vnstat --json`; `vnstati2` (and libgd, libpng, libwebp) out of the image |
+| 2026-11-24 | `tools/cw-release-build.sh`, `docs/building.md` | modified: an incremental build cleans only the packages a patch touches (and those a removed patch touched), not every package of a patched feed; mode-only patch diffs are recognised |
+| 2026-11-24 | `files/usr/sbin/cw-cell-lock-guard`, `files/etc/init.d/cw-cell-lock-guard`, `files/etc/uci-defaults/57-cw-cell-lock-guard`, `tools/tests/cw-cell-lock-guard-test.sh`, `docs/modem.md`, `docs/reference/` | added: the cell-lock guard, which unlocks a cell-locked modem that has lost its cell for the chosen minutes |
+| 2026-11-24 | `patches/feeds/qmodem/0013-shell-quoting-for-page-requests.patch`, `docs/building.md` | added: QModem page requests reach the shell quoted (modifies luci-app-qmodem and qmodem) |
+| 2026-11-24 | `patches/feeds/qmodem/0014-translations-for-advance-modem-settings.patch`, `patches/feeds/nikki/0003-translations-for-the-new-pages.patch`, `docs/building.md` | added: zh_Hans / zh-cn / zh_Hant / ru translations for the new Advance Modem Settings and Nikki strings |
+| 2026-11-24 | `patches/feeds/nikki/0002-subscription-auto-update.patch`, `docs/features/vpn-proxy.md`, `docs/reference/options.md` | added: scheduled Nikki subscription updates (modifies luci-app-nikki and nikki, GPL-3.0) |
+| 2026-11-24 | `patches/feeds/3ginfo/0007-neighbour-cell-lock-link.patch`, `docs/modem.md`, `docs/building.md` | added: a Lock link on every neighbour cell of the radio page (modifies luci-app-3ginfo-lite, GPL-3.0) |
 | 2026-11-24 | `patches/feeds/qmodem/0012-neighbor-cell-list-and-lock.patch`, `docs/modem.md`, `docs/building.md`, `docs/changelog.md` | added: QModem's Neighbor Cell tab rebuilt as a cell list to lock from (network, band, signal, Unlock, keep after reboot), swapped neighbour RSRP/RSRQ fixed, serving cells and operator in the reply; button rows and empty fields tidied on the other tabs |
 | 2026-11-24 | `patches/packages/luci-theme-vantage/0004-row-actions-gap.patch`, `docs/building.md`, `docs/theme.md`, `docs/changelog.md` | added: table row buttons in Vantage spaced 8px apart, like its other button groups |
 | 2026-11-24 | `patches/packages/luci-theme-vantage/0003-page-actions-without-card.patch`, `docs/building.md`, `docs/theme.md` | added: grouped buttons without a card behind them in Vantage (the page's Reset / Save / Save & Apply bar, and dialog footers) |
@@ -155,6 +161,12 @@ of cells to lock from, the neighbour parser reads RSRQ and RSRP from the right f
 the serving cells and the operator, and the page's button rows and empty fields are tidied. Same terms
 as above: a modification of QModem's code, published here.
 
+**Request quoting and translations.** `patches/feeds/qmodem/0013-shell-quoting-for-page-requests.patch`
+modifies `luci-app-qmodem`'s `luasrc/controller/qmodem.lua` and `qmodem`'s
+`files/usr/share/qmodem/modem_ctrl.sh` so that values from a page request reach the shell quoted.
+`0014-translations-for-advance-modem-settings.patch` adds entries to the package's zh_Hans, zh-cn and
+ru catalogs. Same terms as above: modifications of QModem's code, published here.
+
 ### Theme patches
 
 `patches/packages/luci-theme-vantage/` holds this project's modifications of Vantage (GPL-3.0-or-later): the
@@ -168,15 +180,18 @@ and its two login-page patches are no longer part of the image (2026-11-23).
 `patches/feeds/3ginfo/` modifies the upstream 3ginfo-lite package (© Cezary Jackiewicz,
 © Rafał Wabik / IceG; GPL-3.0) at build time, applied zero-fuzz to the pinned commit (the
 build fails rather than shipping a stale patch): it marks `3ginfo.sh` executable and shortens
-one menu title. The patches modify GPL-3.0 files and stay under **GPL-3.0**.
+one menu title, redesigns the radio page and its collector (0004 to 0006), and gives each
+neighbour cell a link to QModem's cell lock with three translated strings (0007). The patches
+modify GPL-3.0 files and stay under **GPL-3.0**.
 
-### Nikki feed patch
+### Nikki feed patches
 
-`patches/feeds/nikki/` modifies the upstream luci-app-nikki package (© nikkinikki-org; GPL-3.0)
-at build time, applied zero-fuzz to the commit pinned in `feeds.conf.default`. It redesigns the
-LuCI pages: the views, their helper module and menu titles, plus a new stylesheet. The
-configuration, the backend and the core are not touched. The patch modifies GPL-3.0 files and
-stays under **GPL-3.0**.
+`patches/feeds/nikki/` modifies the upstream luci-app-nikki and nikki packages (© nikkinikki-org;
+GPL-3.0) at build time, applied zero-fuzz to the commit pinned in `feeds.conf.default`. 0001
+redesigns the LuCI pages: the views, their helper module and menu titles, plus a new stylesheet.
+0002 adds scheduled subscription updates to the Profiles page and to the nikki package's init
+script (`files/nikki.init`). 0003 adds zh_Hans, zh_Hant and ru translations for the new strings.
+The core is not touched. The patches modify GPL-3.0 files and stay under **GPL-3.0**.
 
 ## Source availability
 

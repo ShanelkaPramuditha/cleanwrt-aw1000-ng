@@ -169,6 +169,10 @@ something stale:
 - every feed and every local package must match its pinned commit;
 - a feed or tree patch that no longer applies cleanly fails the build, because the upstream code
   changed;
+- on a tree kept from an earlier build, every package a patch touches is cleaned so it rebuilds
+  with the patch, and so is a package that a removed patch used to touch (the list is kept in
+  `.cw-patched-packages` in the tree). Packages no patch touches keep their build, so a patch to
+  luci-app-nikki does not recompile mihomo;
 - every package the seed selects must survive `make defconfig`;
 - init scripts must be executable and use procd correctly;
 - the image must fit the flash layout (`UBI_PEBS ...` line) and the size gate;
@@ -232,7 +236,9 @@ than shipping a half-applied change.
 | `0009-sip-voip-default-migration` | a first-boot script that migrates a configuration that still pointed at the vendor engine — and only when the media socket is the phone daemon's, so a hand-configured router is left alone |
 | `0010-qmi-wwan-nss-path-behind-its-own-guard` | restores the vendor-deleted `CONFIG_RMNET_DATA` guard. Without it `modpost` fails on a symbol this tree does not carry and the driver cannot be packaged at all |
 | `0011-luci-button-spacing` | QModem's hand-built pages get their spacing: buttons side by side and under the log boxes no longer touch, Dial Overview's status card keeps clear of the Save bar, and Advance Modem Settings puts its Submit / Select All / Scan buttons in real table rows (they were appended straight into the table and lay over the band rows) and spaces its radio and checkbox labels |
-| `0012-neighbor-cell-list-and-lock` | Advance Modem Settings → Neighbor Cell lists every cell the modem hears (the serving cell first) with network name, band, frequency, PCI, RSRP, RSRQ and SINR; a row click fills in the lock form, Lock on a row locks to it, and Unlock and a "Keep after reboot" switch (QModem's boot hook) are added. The Qualcomm parser reads RSRQ and RSRP from the right fields (they were swapped) and returns the serving cells and the operator. The other tabs' button rows no longer sit on the card edge, and no box shows "undefined" |
+| `0012-neighbor-cell-list-and-lock` | Advance Modem Settings → Neighbor Cell lists every cell the modem hears (the serving cell first) with network name, band, frequency, PCI, RSRP, RSRQ and SINR; a row click fills in the lock form, Lock on a row locks to it, and Unlock, "Keep after reboot" (QModem's boot hook) and "Unlock automatically" (`cw-cell-lock-guard`) are added, with auto-refresh, an RSRP sparkline per cell, saved cells and a `?tab=NeighborCell` link. The Qualcomm parser reads RSRQ and RSRP from the right fields (they were swapped) and returns the serving cells, the state and the operator (from `AT+QSPN` when `AT+COPS?` answers with digits). The other tabs' button rows no longer sit on the card edge, and no box shows "undefined" |
+| `0013-shell-quoting-for-page-requests` | the QModem pages' requests reach the shell single-quoted: the controller pasted the action, the modem name and the parameters into a root shell command (inside double quotes at best, where `$(...)` still runs), and the AT console's port and command unquoted. Malformed names get a 400; `modem_ctrl.sh` quotes `"$3"` where it hands it on, so values keep their spaces |
+| `0014-translations-for-advance-modem-settings` | zh_Hans, zh-cn and ru for the 77 Advance Modem Settings strings `0012` added or never had translated |
 
 ### The LuCI feed
 
@@ -253,7 +259,11 @@ than shipping a half-applied change.
 | `3ginfo/0004-radio-telemetry-and-redesign` | the radio page and the collector behind it: one locked snapshot per request, serving cells per carrier, a neighbour table that scans itself, and five-second defaults |
 | `3ginfo/0005-radio-telemetry-executable` | `radiodata.sh` gains its executable bit, for the same reason `0002` exists: the page runs it through `fs.exec`, and `patch` alone does not carry the mode |
 | `3ginfo/0006-radio-spacing-follows-the-theme` | the radio page takes its card gaps, radii and control height from the theme (Vantage's `--v-*` tokens), so its cards are evenly spaced and its refresh controls stay on one line |
+| `3ginfo/0007-neighbour-cell-lock-link` | every neighbour cell on the radio page gets a *Lock…* link to *Advance Modem Settings → Neighbor Cell* with the cell filled in (qmodem `0012`), translated in its five catalogs |
 | `diskman/0001-disk-manager-menu-rename-services-move` | Disk Manager moves from the System menu to Services, with its title and every internal link |
+| `nikki/0001-luci-pages-redesign` | every Nikki page redesigned: a status header with Restart and Open Dashboard, a setup checklist, a profile list with Use / Edit / Download / Delete and drag-and-drop upload, subscription usage and expiry, an editor that tracks unsaved changes, a log viewer with filters, help text on every option. Option keys are unchanged |
+| `nikki/0002-subscription-auto-update` | a subscription can update on a schedule (1 to 12 hours, or daily): a cron line per subscription while Nikki runs, and a restart only when the one in use downloaded successfully |
+| `nikki/0003-translations-for-the-new-pages` | zh_Hans, zh_Hant and ru for the 254 strings `0001` and `0002` added or reworded |
 | `tree/0001-apk-package-timestamps-zero` | `apk mkpkg` runs with a fixed epoch, so two builds of one commit produce identical images |
 | `tree/0002-dropbear-no-blank-root-password` | OpenWrt's dropbear lets root log in over SSH with no password while none is set; that patch is removed, so SSH refuses root until a password exists. Failsafe's own dropbear gains `-B` and keeps its blank-password recovery shell |
 

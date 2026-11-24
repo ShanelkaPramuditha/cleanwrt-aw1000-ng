@@ -1,7 +1,7 @@
 ---
 title: "CleanWRT first-boot defaults"
 description: "Every first-boot script in the CleanWRT image: what it writes, the exact option and value, when it leaves your settings alone, and how to undo each one."
-updated: 2026-11-06
+updated: 2026-11-24
 ---
 
 # First-boot defaults
@@ -34,6 +34,7 @@ booted can be checked against the source.
 | `54-cw-tailscale-off` | stops `tailscale` and takes it off the boot path, so it ships off; *Services → Tailscale → Enable and start* turns it on | a router already logged in (a non-empty `/etc/tailscale/tailscaled.state`) is left running |
 | `55-cw-wireguard-restore` | leaves `/etc/cw-wireguard-restore` when a WireGuard interface is configured and WireGuard is not installed; `/etc/hotplug.d/iface/95-cw-wireguard-restore` then installs it from the official repositories the first time an interface comes up, brings the tunnels up and removes the marker | no WireGuard interface, or WireGuard installed: nothing |
 | `56-cw-wifi-default-key` | on each Wi-Fi network still as `wifi config` generated it (SSID `OpenWrt`, open, no key): `encryption='psk2'` (`sae` on a 6 GHz radio), `key='password123'`, `disabled='0'`, and its radio on | a network with another name, a key or any encryption: nothing |
+| `57-cw-cell-lock-guard` | `/etc/init.d/cw-cell-lock-guard enable`, which starts the [cell-lock guard](../modem.md#unlock-automatically) at boot | unconditional. The service does nothing until a modem has *Unlock automatically* switched on |
 | `95-cw-drop-removed-apps` | after a keep-settings upgrade from an image that carried them: deletes Footstrap's `/etc/config/footstrap` and `/etc/footstrap/` when the theme is gone; deletes `/etc/config/{passwall,passwall2,homeproxy,adblock}` and the `passwall*` firewall include sections. AdGuard Home's and p910nd's settings are **kept** (both are [optional installs](../install-apps.md)). While AdGuard Home is not installed, it also puts dnsmasq back on port 53 if its setup had moved it, so DNS keeps working after an upgrade | each app only when its init script is absent, so reinstalling one keeps its settings. Nothing to do on a router that never had them |
 | `96-cw-apk-world-pin` | rewrites `/etc/apk/world` from the installed package database: every package that came from the LuCI feed, plus `base-files`, `kernel` and any `kmod-*`, is pinned to its exact version; everything else is written as a bare name and stays upgradable | it runs on **every** boot, so the pins always match the running image. The reason is recorded in the script: one `apk upgrade` once replaced patched LuCI packages with stock ones |
 | `96-cw-default-theme` | `luci.themes.Vantage=/luci-static/vantage` and `luci.main.mediaurlbase=/luci-static/vantage`; removes every `luci.themes` entry whose directory the image does not carry; deletes a dead marker section an older image left | the base is set only if `/www/luci-static/vantage` exists **and** the current base is empty, still the stock bootstrap, or names a directory that no longer exists. A theme you chose that is still installed stays, and so does its entry in the design selector |

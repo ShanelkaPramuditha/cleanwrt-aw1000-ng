@@ -1,0 +1,3083 @@
+Nikki: Chinese and Russian for the redesigned pages
+
+Patches 0001 and 0002 added and reworded 254 strings on the Nikki pages (the status header,
+the setup checklist, the profile list, the editor, the log viewer, the help text of every
+option, subscription auto-update). luci-app-nikki ships zh_Hans, zh_Hant and ru translations,
+and none of them had these strings, so those pages fell back to English half-way through.
+
+Each of the three .po files gains the 254 entries, appended at the end with a "#: CleanWRT"
+source note. Terms follow the files' existing ones (配置文件 / 設定檔 / профиль for Profile,
+混入 / Mixin, 订阅 / 訂閱 / подписка). Every translation keeps exactly the placeholders of its
+msgid (checked by script), and all three files compile with msgfmt --check-format and po2lmo.
+The translations were written for CleanWRT, not by native speakers of each language; fixes
+are welcome.
+
+Applies to: https://github.com/nikkinikki-org/OpenWrt-nikki.git @ 0c56ba5f, after 0002.
+Upstream status: local to CleanWRT.
+
+--- a/luci-app-nikki/po/zh_Hans/nikki.po
++++ b/luci-app-nikki/po/zh_Hans/nikki.po
+@@ -1125,3 +1125,1019 @@
+ #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:128
+ msgid "procd Config"
+ msgstr "procd 配置"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "File"
++msgstr "文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The mihomo core is running."
++msgstr "mihomo 核心正在运行。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Stopped"
++msgstr "已停止"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is enabled but the core is not running. The Logs page shows why."
++msgstr "Nikki 已启用，但核心未运行。原因请查看日志页面。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Disabled"
++msgstr "已禁用"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is turned off. Enable it on the Overview page."
++msgstr "Nikki 已关闭。请在概览页面启用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart the service and reload the profile"
++msgstr "重启服务并重新加载配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart"
++msgstr "重启"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Open the dashboard (Zashboard) in a new tab"
++msgstr "在新标签页中打开面板（Zashboard）"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is restarting."
++msgstr "Nikki 正在重启。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The dashboard cannot be opened: %s"
++msgstr "无法打开面板：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki must be running, and the profile (or Mixin → Dashboard & API) must set an API address."
++msgstr "Nikki 必须正在运行，且配置文件（或 混入 → 面板与 API）必须设置 API 地址。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download failed: %s"
++msgstr "下载失败：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Redirect"
++msgstr "Redirect"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "TPROXY"
++msgstr "TPROXY"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "TUN"
++msgstr "TUN"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Get started"
++msgstr "快速开始"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Three steps to route your traffic through Nikki."
++msgstr "三步让流量经过 Nikki。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add a profile"
++msgstr "添加配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Upload your Clash / mihomo YAML file, or add the subscription URL your provider gave you."
++msgstr "上传你的 Clash / mihomo YAML 文件，或添加服务商提供的订阅链接。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Go to Profiles"
++msgstr "前往配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose it"
++msgstr "选择它"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Pick that profile in \"Profile\" below. Nikki starts mihomo with it."
++msgstr "在下方“配置文件”中选择它。Nikki 将使用它启动 mihomo。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose profile"
++msgstr "选择配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Enable and apply"
++msgstr "启用并应用"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Tick \"Enable\", then press Save & Apply at the bottom of the page."
++msgstr "勾选“启用”，然后点击页面底部的“保存并应用”。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Show the switch"
++msgstr "显示开关"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No URL set"
++msgstr "未设置链接"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Set it up"
++msgstr "去设置"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Manage"
++msgstr "管理"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "None chosen"
++msgstr "未选择"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core only"
++msgstr "仅核心"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No firewall rules; use the proxy ports directly."
++msgstr "不设置防火墙规则；直接使用代理端口。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent proxy off"
++msgstr "透明代理已关闭"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy settings"
++msgstr "代理设置"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "off"
++msgstr "关闭"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Traffic"
++msgstr "流量"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard"
++msgstr "面板"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Port %s"
++msgstr "端口 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "From profile"
++msgstr "来自配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard update requested. It downloads in the background."
++msgstr "已请求更新面板，将在后台下载。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update dashboard"
++msgstr "更新面板"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Versions"
++msgstr "版本"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core %s"
++msgstr "核心 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core unknown"
++msgstr "核心版本未知"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "LuCI app %s"
++msgstr "LuCI 插件 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Service"
++msgstr "服务"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "General"
++msgstr "常规"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Startup & Schedule"
++msgstr "启动与计划任务"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Start Nikki at boot and keep it running."
++msgstr "开机启动 Nikki 并保持运行。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The Clash / mihomo configuration Nikki runs. Add files and subscriptions on the Profiles page."
++msgstr "Nikki 运行的 Clash / mihomo 配置。请在配置文件页面添加文件和订阅。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "no URL set"
++msgstr "未设置链接"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check the profile with mihomo before starting, and refuse to start with a broken one."
++msgstr "启动前用 mihomo 检查配置文件，配置有误时拒绝启动。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Run mihomo without the transparent-proxy firewall rules. Devices then use the proxy ports (7890 mixed, 7893 HTTP) themselves."
++msgstr "运行 mihomo 但不设置透明代理防火墙规则。设备需自行使用代理端口（7890 混合，7893 HTTP）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds to wait at boot before starting, for example until the mobile connection is up."
++msgstr "开机后等待多少秒再启动，例如等待移动网络连接就绪。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Start immediately"
++msgstr "立即启动"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart Nikki on a schedule, which also refreshes subscriptions set to prefer the remote copy."
++msgstr "按计划重启 Nikki，同时刷新设置为优先远程的订阅。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart Schedule"
++msgstr "重启计划"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cron format: minute hour day month weekday. \"0 3 * * *\" is every day at 03:00."
++msgstr "Cron 格式：分 时 日 月 周。“0 3 * * *”表示每天 03:00。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Advanced: Process"
++msgstr "高级：进程"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Limits and environment for the mihomo process. The defaults suit most routers; change them only when you know you need to."
++msgstr "mihomo 进程的资源限制和环境变量。默认值适合大多数路由器，确有需要时再修改。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "On a configuration change, reload mihomo in place instead of restarting it. Faster, but some changes only take effect after a restart."
++msgstr "配置变更时原地重新加载 mihomo，而不是重启。速度更快，但部分更改需要重启后才生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Resource Limits"
++msgstr "资源限制"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Environment"
++msgstr "环境变量"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How many CPU cores mihomo may use at once."
++msgstr "mihomo 可同时使用的 CPU 核心数。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A soft memory limit for mihomo, in bytes. Lower it if the router runs short of memory."
++msgstr "mihomo 的软内存限制，单位为字节。路由器内存不足时可调低。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Extra directories mihomo may read files from."
++msgstr "mihomo 可读取文件的额外目录。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent proxy for the whole network, powered by the mihomo (Clash Meta) core."
++msgstr "基于 mihomo（Clash Meta）核心的全网透明代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How to use"
++msgstr "使用方法"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Apply configuration changes without restarting the core"
++msgstr "应用配置更改，不重启核心"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is reloading its configuration."
++msgstr "Nikki 正在重新加载配置。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Reload"
++msgstr "重新加载"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Profile files"
++msgstr "配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Your own profile. Changes apply at the next start or reload."
++msgstr "你自己的配置文件。更改在下次启动或重新加载时生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscriptions"
++msgstr "订阅"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A downloaded subscription. The next update replaces it; put lasting changes in Mixin instead."
++msgstr "已下载的订阅。下次更新会覆盖它；需要长期保留的修改请放在混入中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Merged over the profile when \"Mixin File\" is enabled on the Mixin page."
++msgstr "在混入页面启用“混入文件”时，合并到配置文件之上。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Generated at every start from the profile and Mixin. Read it to see what mihomo really runs; edits here are lost on the next start."
++msgstr "每次启动时由配置文件和混入生成。可用来查看 mihomo 实际运行的内容；在此所做的修改会在下次启动时丢失。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rule providers"
++msgstr "规则集"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Downloaded by mihomo; it may replace this file on its next update."
++msgstr "由 mihomo 下载；下次更新时可能会覆盖此文件。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy providers"
++msgstr "代理集"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d lines · %s"
++msgstr "%d 行 · %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose a file to view or edit it."
++msgstr "选择一个文件以查看或编辑。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Not created yet"
++msgstr "尚未创建"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Discard the unsaved changes to this file?"
++msgstr "放弃对此文件未保存的更改？"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Saved %s."
++msgstr "已保存 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not save %s: %s"
++msgstr "无法保存 %s：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is applying the change."
++msgstr "Nikki 正在应用更改。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "-- Choose a file --"
++msgstr "-- 选择文件 --"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "File content"
++msgstr "文件内容"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Unsaved changes"
++msgstr "有未保存的更改"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download"
++msgstr "下载"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Load the file from the router again, dropping unsaved changes"
++msgstr "从路由器重新加载文件，放弃未保存的更改"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Revert"
++msgstr "还原"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "View and edit Nikki's YAML files directly. Save writes the file; Save & Apply also reloads Nikki. Ctrl+S saves."
++msgstr "直接查看和编辑 Nikki 的 YAML 文件。“保存”写入文件；“保存并应用”还会重新加载 Nikki。按 Ctrl+S 保存。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "App log"
++msgstr "插件日志"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "What Nikki itself does: starting, stopping, profile and subscription updates, firewall rules."
++msgstr "Nikki 自身的操作：启动、停止、配置文件和订阅更新、防火墙规则。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core log"
++msgstr "核心日志"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "What mihomo reports: connections, rule matches, DNS, errors. Its detail is set by Log Level on the Mixin page."
++msgstr "mihomo 报告的内容：连接、规则匹配、DNS、错误。详细程度由混入页面的日志级别决定。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No lines match the filter."
++msgstr "没有匹配筛选条件的行。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The log is empty."
++msgstr "日志为空。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Showing the last %d of %d lines. Download has them all."
++msgstr "显示最后 %d 行（共 %d 行）。下载可获取全部内容。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d of %d lines"
++msgstr "%d / %d 行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d lines"
++msgstr "%d 行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Updated %s"
++msgstr "更新于 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Clear the %s? This cannot be undone."
++msgstr "清空%s？此操作无法撤销。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is turned off. Creating the report enables and starts it, and it stays enabled afterwards. Continue?"
++msgstr "Nikki 已关闭。生成报告会启用并启动它，之后也会保持启用。是否继续？"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "the debug script failed"
++msgstr "调试脚本执行失败"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not create the debug report: %s"
++msgstr "无法生成调试报告：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Log settings"
++msgstr "日志设置"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Logs are kept in memory (/var/log/nikki), so they are lost at reboot and must be kept small."
++msgstr "日志保存在内存中（/var/log/nikki），重启后会丢失，因此需要保持较小。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Empty both logs whenever Nikki stops."
++msgstr "每次 Nikki 停止时清空两份日志。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check the logs on a schedule and empty any that grew past the size limit."
++msgstr "按计划检查日志，清空超过大小限制的日志。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check Schedule"
++msgstr "检查计划"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cron format. \"*/5 * * * *\" checks every five minutes."
++msgstr "Cron 格式。“*/5 * * * *”表示每五分钟检查一次。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Size Limit"
++msgstr "大小限制"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Size Limit Unit"
++msgstr "大小单位"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Filter lines…"
++msgstr "筛选日志行…"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Filter lines"
++msgstr "筛选日志行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Level"
++msgstr "级别"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "All lines"
++msgstr "所有行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Warnings and errors"
++msgstr "警告和错误"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Errors only"
++msgstr "仅错误"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Logs"
++msgstr "日志"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "When Nikki does not start or a site does not load, the reason is usually here. Start with the App log, then the Core log."
++msgstr "Nikki 无法启动或网站无法打开时，原因通常在这里。先看插件日志，再看核心日志。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Clear"
++msgstr "清空"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Follow"
++msgstr "跟随"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto refresh"
++msgstr "自动刷新"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Debug report"
++msgstr "调试报告"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Collects versions, the configuration, the running profile and the routing state into one file to attach to a bug report. Server addresses, passwords and subscription URLs are masked; read it before sharing all the same."
++msgstr "将版本、配置、运行中的配置文件和路由状态收集到一个文件中，便于附在问题报告里。服务器地址、密码和订阅链接已被隐藏；分享前仍请先检查一遍。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Overrides"
++msgstr "覆盖设置"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How much mihomo writes to the core log. \"warning\" is a good default; \"debug\" only while troubleshooting."
++msgstr "mihomo 写入核心日志的详细程度。“warning”是合适的默认值；仅在排查问题时使用“debug”。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rule: follow the profile's rules (normal). Global: send everything through the proxy selected in the GLOBAL group. Direct: send nothing through a proxy."
++msgstr "规则：按配置文件的规则（常规）。全局：所有流量走 GLOBAL 组中选中的代理。直连：不使用代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Match rules by the process that opened the connection. Only useful for traffic from the router itself."
++msgstr "按发起连接的进程匹配规则。仅对路由器自身的流量有用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Bind outgoing proxy connections to this interface, for example the mobile WAN."
++msgstr "将出站代理连接绑定到此接口，例如移动网络 WAN。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Report latency tests without the connection handshake, so results from different protocols compare fairly."
++msgstr "延迟测试不计入连接握手，使不同协议的结果可以公平比较。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Connect to all resolved addresses at once and use the fastest."
++msgstr "同时连接所有解析出的地址，使用最快的一个。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard & API"
++msgstr "面板与 API"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Where \"Update Dashboard\" downloads the dashboard from. CleanWRT ships Zashboard preinstalled."
++msgstr "“更新面板”从何处下载面板。CleanWRT 已预装 Zashboard。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Address the dashboard and API listen on, such as 0.0.0.0:9090."
++msgstr "面板和 API 的监听地址，例如 0.0.0.0:9090。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The password for the dashboard and API. \"Open Dashboard\" fills it in for you."
++msgstr "面板和 API 的密码。“打开面板”会自动填入。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Remember the proxies chosen in the dashboard across restarts."
++msgstr "重启后记住在面板中选择的代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy Ports"
++msgstr "代理端口"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Let devices on your network use the proxy ports below directly."
++msgstr "允许局域网设备直接使用下方的代理端口。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "One port that speaks both HTTP and SOCKS5. Point an app's proxy setting here."
++msgstr "同时支持 HTTP 和 SOCKS5 的端口。将应用的代理设置指向这里。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Used by Redirect mode on the Proxy page."
++msgstr "供代理页面的 Redirect 模式使用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Used by TPROXY mode on the Proxy page."
++msgstr "供代理页面的 TPROXY 模式使用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's proxy users with the list below. Applies to the HTTP, SOCKS and mixed ports."
++msgstr "用下方列表替换配置文件中的代理用户。适用于 HTTP、SOCKS 和混合端口。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The profile's own TUN interface. TUN mode on the Proxy page adds its own, so this can stay Unmodified."
++msgstr "配置文件自带的 TUN 接口。代理页面的 TUN 模式会添加自己的接口，因此这里可保持“不修改”。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "System is fastest; gVisor is the most compatible; Mixed uses System for TCP and gVisor for UDP."
++msgstr "System 最快；gVisor 兼容性最好；Mixed 对 TCP 使用 System，对 UDP 使用 gVisor。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Let mihomo answer DNS. Needed for domain rules and Fake-IP."
++msgstr "由 mihomo 应答 DNS。域名规则和 Fake-IP 需要此功能。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Fake-IP answers instantly with placeholder addresses and resolves on the proxy side: faster, and no DNS leaks. Redir-Host returns real addresses: more compatible with apps that check them."
++msgstr "Fake-IP 立即返回占位地址，在代理端解析：更快，且无 DNS 泄漏。Redir-Host 返回真实地址：对会检查地址的应用兼容性更好。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's list of domains that always get a real address (for example NTP servers or game consoles)."
++msgstr "替换配置文件中始终返回真实地址的域名列表（例如 NTP 服务器或游戏主机）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Resolve each domain through the proxy its rule picks, so lookups follow the same path as the traffic."
++msgstr "通过各域名规则所选的代理进行解析，使查询与流量走同一路径。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Hosts & Nameservers"
++msgstr "Hosts 与域名服务器"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's upstream DNS servers with the list below."
++msgstr "用下方列表替换配置文件中的上游 DNS 服务器。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Use specific DNS servers for matching domains, for example a local resolver for your own domain."
++msgstr "为匹配的域名使用指定的 DNS 服务器，例如为你自己的域名使用本地解析器。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Sniffer"
++msgstr "嗅探"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Read the domain name from the start of a connection (TLS SNI, HTTP Host), so domain rules work even when a device connects by IP address."
++msgstr "从连接开头读取域名（TLS SNI、HTTP Host），这样设备按 IP 地址连接时域名规则也能生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules"
++msgstr "规则"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add the rule providers below to the profile's own."
++msgstr "将下方的规则集添加到配置文件自带的规则集中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add the rules below in front of the profile's own rules, so they win."
++msgstr "将下方规则添加到配置文件规则之前，使其优先生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "GeoX"
++msgstr "GeoX"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Memory Conservative uses less RAM, which suits routers, at a small speed cost."
++msgstr "“内存保守”占用更少内存，适合路由器，速度略有损失。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download fresh GeoIP and GeoSite databases on a schedule."
++msgstr "按计划下载最新的 GeoIP 和 GeoSite 数据库。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Mixin File"
++msgstr "混入文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Merge the YAML in %s over the profile. Settings on the other tabs still win over it. Edit the file on the Editor page (File for Mixin)."
++msgstr "将 %s 中的 YAML 合并到配置文件之上。其他选项卡中的设置仍优先于它。可在编辑器页面编辑该文件（混入文件）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Mixin"
++msgstr "混入"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Override settings of your profile without editing it. Each setting left at \"Unmodified\" keeps the value from the profile; anything you set here wins, and survives subscription updates."
++msgstr "无需修改配置文件即可覆盖其中的设置。保持“不修改”的设置沿用配置文件中的值；在此设置的值优先生效，并在订阅更新后保留。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No profile files yet. Upload one above, or use a subscription below."
++msgstr "还没有配置文件。请在上方上传，或使用下方的订阅。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "In use"
++msgstr "使用中"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "changed"
++msgstr "修改于"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Run Nikki with this profile"
++msgstr "使用此配置文件运行 Nikki"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Use"
++msgstr "使用"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Edit"
++msgstr "编辑"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete"
++msgstr "删除"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete profile"
++msgstr "删除配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete \"%s\" from the router? This cannot be undone."
++msgstr "从路由器删除“%s”？此操作无法撤销。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "This profile is in use. Nikki will not start again until you choose another one."
++msgstr "此配置文件正在使用中。在你选择其他配置文件之前，Nikki 将无法再次启动。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cancel"
++msgstr "取消"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Deleted %s."
++msgstr "已删除 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not delete %s: %s"
++msgstr "无法删除 %s：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Only .yaml and .yml files can be uploaded, with a name of letters, digits, spaces, dots, dashes and underscores. Skipped: %s"
++msgstr "只能上传 .yaml 和 .yml 文件，文件名只能包含字母、数字、空格、点、短横线和下划线。已跳过：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the existing %s?"
++msgstr "替换已有的 %s？"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Uploaded %s."
++msgstr "已上传 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Upload of %s failed: %s"
++msgstr "上传 %s 失败：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Drop a profile here"
++msgstr "将配置文件拖放到此处"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A Clash / mihomo YAML file (.yaml or .yml). It is saved to %s."
++msgstr "Clash / mihomo YAML 文件（.yaml 或 .yml），将保存到 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose file…"
++msgstr "选择文件…"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Configuration files stored on the router. Choose one with \"Use\", or on the Overview page."
++msgstr "保存在路由器上的配置文件。点击“使用”选择，或在概览页面中选择。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A subscription is a profile Nikki downloads from your provider's URL. \"Update\" downloads it now; with \"Prefer: Remote\" it is downloaded again at every start."
++msgstr "订阅是 Nikki 从服务商链接下载的配置文件。“更新”立即下载；选择“优先：远程”时每次启动都会重新下载。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add subscription"
++msgstr "添加订阅"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription: %s"
++msgstr "订阅：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "New subscription"
++msgstr "新订阅"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A label for this subscription, shown in the profile list."
++msgstr "此订阅的名称，显示在配置文件列表中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Edit this subscription and enter your provider's URL."
++msgstr "编辑此订阅并填入服务商的链接。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Data used"
++msgstr "已用流量"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Not reported"
++msgstr "未提供"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expires"
++msgstr "到期时间"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expired"
++msgstr "已到期"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d days left"
++msgstr "剩余 %d 天"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Last update"
++msgstr "最后更新"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The last update failed. The Logs page shows why."
++msgstr "上次更新失败。原因请查看日志页面。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Failed"
++msgstr "失败"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Never"
++msgstr "从未"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto: daily"
++msgstr "自动：每天"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto: every %s h"
++msgstr "自动：每 %s 小时"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Set the subscription URL first: press Edit on this row."
++msgstr "请先设置订阅链接：点击此行的“编辑”。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription \"%s\" updated."
++msgstr "订阅“%s”已更新。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription \"%s\" could not be updated. Check the URL; the Logs page (App log) shows the reason."
++msgstr "订阅“%s”更新失败。请检查链接；日志页面（插件日志）会显示原因。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "This subscription is already in use."
++msgstr "此订阅已在使用中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription URL"
++msgstr "订阅链接"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The link from your provider. It must return a Clash / mihomo YAML profile."
++msgstr "服务商提供的链接，必须返回 Clash / mihomo YAML 配置文件。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Enter your provider's subscription URL."
++msgstr "请输入服务商的订阅链接。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expecting an http:// or https:// URL"
++msgstr "需要 http:// 或 https:// 链接"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Usage Info URL"
++msgstr "用量信息链接"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Optional. Some providers report traffic and expiry from a separate URL; leave empty to read them from the subscription itself."
++msgstr "可选。部分服务商通过单独的链接提供流量和到期信息；留空则从订阅本身读取。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Some providers send a different format depending on the client name. \"clash.meta\" or \"mihomo\" usually gets the full mihomo profile."
++msgstr "部分服务商会根据客户端名称返回不同格式。“clash.meta”或“mihomo”通常能获得完整的 mihomo 配置。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Remote: download the subscription at every start. Local: start from the saved copy, and download only with Update or when there is no copy."
++msgstr "远程：每次启动都下载订阅。本地：从已保存的副本启动，仅在点击“更新”或没有副本时下载。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update automatically"
++msgstr "自动更新"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download this subscription again on a schedule while Nikki runs. When it is the one in use, Nikki restarts to use the new copy, so connections drop for a moment."
++msgstr "Nikki 运行期间按计划重新下载此订阅。如果它正在使用中，Nikki 会重启以使用新副本，连接会短暂中断。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update every"
++msgstr "更新间隔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "1 hour"
++msgstr "1 小时"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "3 hours"
++msgstr "3 小时"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "6 hours"
++msgstr "6 小时"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "12 hours"
++msgstr "12 小时"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Day (at 04:23)"
++msgstr "每天（04:23）"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Profiles"
++msgstr "配置文件"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Your Clash / mihomo configurations: files you upload and subscriptions Nikki downloads. The one marked \"In use\" is what Nikki runs."
++msgstr "你的 Clash / mihomo 配置：你上传的文件和 Nikki 下载的订阅。标记为“使用中”的就是 Nikki 正在运行的配置。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent Proxy"
++msgstr "透明代理"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Send traffic through mihomo with firewall rules, so devices need no proxy settings of their own. Off: mihomo only listens on its proxy ports."
++msgstr "通过防火墙规则让流量经过 mihomo，设备无需自行设置代理。关闭时：mihomo 只在其代理端口上监听。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Redirect is the lightest and works almost everywhere. TPROXY keeps the original destination for every protocol. TUN routes through a virtual interface and is the most compatible, at some CPU cost."
++msgstr "Redirect 最轻量，几乎处处可用。TPROXY 对所有协议保留原始目标地址。TUN 通过虚拟接口路由，兼容性最好，但占用一些 CPU。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "UDP cannot be redirected: choose TPROXY or TUN to proxy it (games, QUIC, voice), or leave it off to send UDP directly."
++msgstr "UDP 无法使用 Redirect：选择 TPROXY 或 TUN 来代理 UDP（游戏、QUIC、语音），或保持关闭让 UDP 直连。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Answer DNS queries on port 53 with mihomo, so domain rules and Fake-IP work."
++msgstr "由 mihomo 应答 53 端口的 DNS 查询，使域名规则和 Fake-IP 生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Turn off if your proxies do not carry IPv6; IPv6 traffic then goes out directly."
++msgstr "如果你的代理不支持 IPv6，请关闭；IPv6 流量将直接发出。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Reply to pings sent to Fake-IP addresses, so \"ping example.com\" works in Fake-IP mode."
++msgstr "响应发往 Fake-IP 地址的 ping，使“ping example.com”在 Fake-IP 模式下可用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "LAN Devices"
++msgstr "局域网设备"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy the traffic of devices on your network."
++msgstr "代理局域网中设备的流量。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The networks whose devices are proxied. Normally just \"lan\"."
++msgstr "需要代理其设备的网络。通常只有“lan”。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules are checked from the top; the first enabled rule that matches a device decides. A rule with no IP, IP6 or MAC matches every device. Untick DNS or Proxy to let matching devices bypass Nikki."
++msgstr "规则从上到下检查；第一条匹配设备的已启用规则生效。未填写 IP、IP6 或 MAC 的规则匹配所有设备。取消勾选 DNS 或代理可让匹配的设备绕过 Nikki。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add rule"
++msgstr "添加规则"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Any"
++msgstr "任意"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Router Itself"
++msgstr "路由器自身"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Also proxy traffic that starts on the router (package downloads, update checks, other services)."
++msgstr "同时代理路由器自身发起的流量（软件包下载、更新检查、其他服务）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules are checked from the top; the first enabled rule that matches a process decides, by its user, group or cgroup. The default first rule keeps system services such as dnsmasq and NTP direct."
++msgstr "规则从上到下检查；第一条按用户、组或 cgroup 匹配进程的已启用规则生效。默认的第一条规则让 dnsmasq 和 NTP 等系统服务直连。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Only connections to these ports go through Nikki; everything else goes out directly. Space-separated ports or ranges."
++msgstr "只有连接到这些端口的流量经过 Nikki，其余直连。多个端口或范围用空格分隔。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Send traffic to mainland China addresses directly, without asking mihomo."
++msgstr "发往中国大陆地址的流量直连，不经过 mihomo。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Packets carrying these DSCP marks (0-63) skip the proxy."
++msgstr "带有这些 DSCP 标记（0-63）的数据包不走代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Packets carrying these firewall marks skip the proxy, for example traffic of another VPN."
++msgstr "带有这些防火墙标记的数据包不走代理，例如其他 VPN 的流量。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Advanced"
++msgstr "高级"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Private and special-purpose ranges that are never proxied. The defaults cover them; add your own local subnets if they are not in the list."
++msgstr "永不代理的私有和特殊用途地址段。默认值已涵盖它们；如果你的本地子网不在列表中，请自行添加。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds to wait for the TUN interface to appear at start."
++msgstr "启动时等待 TUN 接口出现的秒数。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds between checks while waiting for the TUN interface."
++msgstr "等待 TUN 接口期间每次检查的间隔秒数。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Which traffic goes through Nikki: your devices, the router itself, and what is always sent directly. Changes take effect with Save & Apply."
++msgstr "哪些流量经过 Nikki：你的设备、路由器自身，以及哪些始终直连。点击“保存并应用”后生效。"
+--- a/luci-app-nikki/po/zh_Hant/nikki.po
++++ b/luci-app-nikki/po/zh_Hant/nikki.po
+@@ -1125,3 +1125,1019 @@
+ #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:128
+ msgid "procd Config"
+ msgstr "procd 設定"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "File"
++msgstr "檔案"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The mihomo core is running."
++msgstr "mihomo 核心正在執行。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Stopped"
++msgstr "已停止"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is enabled but the core is not running. The Logs page shows why."
++msgstr "Nikki 已啟用，但核心未執行。原因請查看日誌頁面。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Disabled"
++msgstr "已停用"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is turned off. Enable it on the Overview page."
++msgstr "Nikki 已關閉。請在概覽頁面啟用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart the service and reload the profile"
++msgstr "重新啟動服務並重新載入設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart"
++msgstr "重新啟動"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Open the dashboard (Zashboard) in a new tab"
++msgstr "在新分頁中開啟面板（Zashboard）"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is restarting."
++msgstr "Nikki 正在重新啟動。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The dashboard cannot be opened: %s"
++msgstr "無法開啟面板：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki must be running, and the profile (or Mixin → Dashboard & API) must set an API address."
++msgstr "Nikki 必須正在執行，且設定檔（或 混入 → 面板與 API）必須設定 API 位址。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download failed: %s"
++msgstr "下載失敗：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Redirect"
++msgstr "Redirect"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "TPROXY"
++msgstr "TPROXY"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "TUN"
++msgstr "TUN"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Get started"
++msgstr "快速開始"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Three steps to route your traffic through Nikki."
++msgstr "三個步驟讓流量經過 Nikki。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add a profile"
++msgstr "新增設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Upload your Clash / mihomo YAML file, or add the subscription URL your provider gave you."
++msgstr "上傳你的 Clash / mihomo YAML 檔案，或新增服務商提供的訂閱連結。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Go to Profiles"
++msgstr "前往設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose it"
++msgstr "選擇它"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Pick that profile in \"Profile\" below. Nikki starts mihomo with it."
++msgstr "在下方「設定檔」中選擇它。Nikki 會使用它啟動 mihomo。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose profile"
++msgstr "選擇設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Enable and apply"
++msgstr "啟用並套用"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Tick \"Enable\", then press Save & Apply at the bottom of the page."
++msgstr "勾選「啟用」，然後按頁面底部的「儲存並套用」。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Show the switch"
++msgstr "顯示開關"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No URL set"
++msgstr "未設定連結"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Set it up"
++msgstr "前往設定"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Manage"
++msgstr "管理"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "None chosen"
++msgstr "未選擇"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core only"
++msgstr "僅核心"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No firewall rules; use the proxy ports directly."
++msgstr "不設定防火牆規則；直接使用代理連接埠。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent proxy off"
++msgstr "透明代理已關閉"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy settings"
++msgstr "代理設定"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "off"
++msgstr "關閉"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Traffic"
++msgstr "流量"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard"
++msgstr "面板"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Port %s"
++msgstr "連接埠 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "From profile"
++msgstr "來自設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard update requested. It downloads in the background."
++msgstr "已要求更新面板，將在背景下載。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update dashboard"
++msgstr "更新面板"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Versions"
++msgstr "版本"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core %s"
++msgstr "核心 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core unknown"
++msgstr "核心版本未知"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "LuCI app %s"
++msgstr "LuCI 應用程式 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Service"
++msgstr "服務"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "General"
++msgstr "一般"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Startup & Schedule"
++msgstr "啟動與排程"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Start Nikki at boot and keep it running."
++msgstr "開機時啟動 Nikki 並保持執行。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The Clash / mihomo configuration Nikki runs. Add files and subscriptions on the Profiles page."
++msgstr "Nikki 執行的 Clash / mihomo 設定。請在設定檔頁面新增檔案和訂閱。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "no URL set"
++msgstr "未設定連結"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check the profile with mihomo before starting, and refuse to start with a broken one."
++msgstr "啟動前用 mihomo 檢查設定檔，設定有誤時拒絕啟動。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Run mihomo without the transparent-proxy firewall rules. Devices then use the proxy ports (7890 mixed, 7893 HTTP) themselves."
++msgstr "執行 mihomo 但不設定透明代理防火牆規則。裝置需自行使用代理連接埠（7890 混合，7893 HTTP）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds to wait at boot before starting, for example until the mobile connection is up."
++msgstr "開機後等待幾秒再啟動，例如等待行動網路連線就緒。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Start immediately"
++msgstr "立即啟動"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart Nikki on a schedule, which also refreshes subscriptions set to prefer the remote copy."
++msgstr "依排程重新啟動 Nikki，同時更新設為優先遠端的訂閱。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart Schedule"
++msgstr "重新啟動排程"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cron format: minute hour day month weekday. \"0 3 * * *\" is every day at 03:00."
++msgstr "Cron 格式：分 時 日 月 週。「0 3 * * *」表示每天 03:00。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Advanced: Process"
++msgstr "進階：處理程序"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Limits and environment for the mihomo process. The defaults suit most routers; change them only when you know you need to."
++msgstr "mihomo 處理程序的資源限制與環境變數。預設值適合大多數路由器，確有需要時再修改。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "On a configuration change, reload mihomo in place instead of restarting it. Faster, but some changes only take effect after a restart."
++msgstr "設定變更時就地重新載入 mihomo，而不是重新啟動。速度較快，但部分變更需要重新啟動後才生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Resource Limits"
++msgstr "資源限制"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Environment"
++msgstr "環境變數"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How many CPU cores mihomo may use at once."
++msgstr "mihomo 可同時使用的 CPU 核心數。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A soft memory limit for mihomo, in bytes. Lower it if the router runs short of memory."
++msgstr "mihomo 的軟性記憶體限制，單位為位元組。路由器記憶體不足時可調低。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Extra directories mihomo may read files from."
++msgstr "mihomo 可讀取檔案的額外目錄。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent proxy for the whole network, powered by the mihomo (Clash Meta) core."
++msgstr "基於 mihomo（Clash Meta）核心的全網透明代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How to use"
++msgstr "使用方式"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Apply configuration changes without restarting the core"
++msgstr "套用設定變更，不重新啟動核心"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is reloading its configuration."
++msgstr "Nikki 正在重新載入設定。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Reload"
++msgstr "重新載入"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Profile files"
++msgstr "設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Your own profile. Changes apply at the next start or reload."
++msgstr "你自己的設定檔。變更會在下次啟動或重新載入時生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscriptions"
++msgstr "訂閱"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A downloaded subscription. The next update replaces it; put lasting changes in Mixin instead."
++msgstr "已下載的訂閱。下次更新會覆蓋它；需要長期保留的修改請放在混入中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Merged over the profile when \"Mixin File\" is enabled on the Mixin page."
++msgstr "在混入頁面啟用「混入檔案」時，合併到設定檔之上。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Generated at every start from the profile and Mixin. Read it to see what mihomo really runs; edits here are lost on the next start."
++msgstr "每次啟動時由設定檔和混入產生。可用來查看 mihomo 實際執行的內容；在此所做的修改會在下次啟動時遺失。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rule providers"
++msgstr "規則集"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Downloaded by mihomo; it may replace this file on its next update."
++msgstr "由 mihomo 下載；下次更新時可能會覆蓋此檔案。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy providers"
++msgstr "代理集"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d lines · %s"
++msgstr "%d 行 · %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose a file to view or edit it."
++msgstr "選擇一個檔案以檢視或編輯。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Not created yet"
++msgstr "尚未建立"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Discard the unsaved changes to this file?"
++msgstr "放棄此檔案尚未儲存的變更？"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Saved %s."
++msgstr "已儲存 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not save %s: %s"
++msgstr "無法儲存 %s：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is applying the change."
++msgstr "Nikki 正在套用變更。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "-- Choose a file --"
++msgstr "-- 選擇檔案 --"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "File content"
++msgstr "檔案內容"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Unsaved changes"
++msgstr "有尚未儲存的變更"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download"
++msgstr "下載"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Load the file from the router again, dropping unsaved changes"
++msgstr "從路由器重新載入檔案，放棄尚未儲存的變更"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Revert"
++msgstr "還原"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "View and edit Nikki's YAML files directly. Save writes the file; Save & Apply also reloads Nikki. Ctrl+S saves."
++msgstr "直接檢視和編輯 Nikki 的 YAML 檔案。「儲存」寫入檔案；「儲存並套用」也會重新載入 Nikki。按 Ctrl+S 儲存。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "App log"
++msgstr "應用程式日誌"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "What Nikki itself does: starting, stopping, profile and subscription updates, firewall rules."
++msgstr "Nikki 本身的動作：啟動、停止、設定檔與訂閱更新、防火牆規則。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core log"
++msgstr "核心日誌"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "What mihomo reports: connections, rule matches, DNS, errors. Its detail is set by Log Level on the Mixin page."
++msgstr "mihomo 回報的內容：連線、規則比對、DNS、錯誤。詳細程度由混入頁面的日誌等級決定。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No lines match the filter."
++msgstr "沒有符合篩選條件的行。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The log is empty."
++msgstr "日誌是空的。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Showing the last %d of %d lines. Download has them all."
++msgstr "顯示最後 %d 行（共 %d 行）。下載可取得全部內容。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d of %d lines"
++msgstr "%d / %d 行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d lines"
++msgstr "%d 行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Updated %s"
++msgstr "更新於 %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Clear the %s? This cannot be undone."
++msgstr "清除%s？此動作無法復原。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is turned off. Creating the report enables and starts it, and it stays enabled afterwards. Continue?"
++msgstr "Nikki 已關閉。產生報告會啟用並啟動它，之後也會保持啟用。是否繼續？"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "the debug script failed"
++msgstr "除錯腳本執行失敗"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not create the debug report: %s"
++msgstr "無法產生除錯報告：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Log settings"
++msgstr "日誌設定"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Logs are kept in memory (/var/log/nikki), so they are lost at reboot and must be kept small."
++msgstr "日誌保存在記憶體中（/var/log/nikki），重新開機後會遺失，因此需要保持較小。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Empty both logs whenever Nikki stops."
++msgstr "每次 Nikki 停止時清除兩份日誌。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check the logs on a schedule and empty any that grew past the size limit."
++msgstr "依排程檢查日誌，清除超過大小限制的日誌。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check Schedule"
++msgstr "檢查排程"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cron format. \"*/5 * * * *\" checks every five minutes."
++msgstr "Cron 格式。「*/5 * * * *」表示每五分鐘檢查一次。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Size Limit"
++msgstr "大小限制"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Size Limit Unit"
++msgstr "大小單位"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Filter lines…"
++msgstr "篩選日誌行…"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Filter lines"
++msgstr "篩選日誌行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Level"
++msgstr "等級"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "All lines"
++msgstr "所有行"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Warnings and errors"
++msgstr "警告與錯誤"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Errors only"
++msgstr "僅錯誤"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Logs"
++msgstr "日誌"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "When Nikki does not start or a site does not load, the reason is usually here. Start with the App log, then the Core log."
++msgstr "Nikki 無法啟動或網站無法開啟時，原因通常在這裡。先看應用程式日誌，再看核心日誌。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Clear"
++msgstr "清除"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Follow"
++msgstr "跟隨"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto refresh"
++msgstr "自動重新整理"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Debug report"
++msgstr "除錯報告"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Collects versions, the configuration, the running profile and the routing state into one file to attach to a bug report. Server addresses, passwords and subscription URLs are masked; read it before sharing all the same."
++msgstr "將版本、設定、執行中的設定檔和路由狀態收集到一個檔案中，方便附在問題回報裡。伺服器位址、密碼和訂閱連結已遮蔽；分享前仍請先檢查一遍。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Overrides"
++msgstr "覆寫設定"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How much mihomo writes to the core log. \"warning\" is a good default; \"debug\" only while troubleshooting."
++msgstr "mihomo 寫入核心日誌的詳細程度。「warning」是合適的預設值；只在排查問題時使用「debug」。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rule: follow the profile's rules (normal). Global: send everything through the proxy selected in the GLOBAL group. Direct: send nothing through a proxy."
++msgstr "規則：依設定檔的規則（一般）。全域：所有流量走 GLOBAL 群組中選取的代理。直連：不使用代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Match rules by the process that opened the connection. Only useful for traffic from the router itself."
++msgstr "依發起連線的處理程序比對規則。只對路由器本身的流量有用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Bind outgoing proxy connections to this interface, for example the mobile WAN."
++msgstr "將外送代理連線綁定到此介面，例如行動網路 WAN。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Report latency tests without the connection handshake, so results from different protocols compare fairly."
++msgstr "延遲測試不計入連線交握，讓不同協定的結果能公平比較。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Connect to all resolved addresses at once and use the fastest."
++msgstr "同時連線所有解析出的位址，使用最快的一個。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard & API"
++msgstr "面板與 API"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Where \"Update Dashboard\" downloads the dashboard from. CleanWRT ships Zashboard preinstalled."
++msgstr "「更新面板」從何處下載面板。CleanWRT 已預先安裝 Zashboard。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Address the dashboard and API listen on, such as 0.0.0.0:9090."
++msgstr "面板和 API 的監聽位址，例如 0.0.0.0:9090。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The password for the dashboard and API. \"Open Dashboard\" fills it in for you."
++msgstr "面板和 API 的密碼。「開啟面板」會自動填入。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Remember the proxies chosen in the dashboard across restarts."
++msgstr "重新啟動後記住在面板中選擇的代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy Ports"
++msgstr "代理連接埠"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Let devices on your network use the proxy ports below directly."
++msgstr "允許區域網路裝置直接使用下方的代理連接埠。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "One port that speaks both HTTP and SOCKS5. Point an app's proxy setting here."
++msgstr "同時支援 HTTP 和 SOCKS5 的連接埠。將應用程式的代理設定指向這裡。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Used by Redirect mode on the Proxy page."
++msgstr "供代理頁面的 Redirect 模式使用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Used by TPROXY mode on the Proxy page."
++msgstr "供代理頁面的 TPROXY 模式使用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's proxy users with the list below. Applies to the HTTP, SOCKS and mixed ports."
++msgstr "用下方清單取代設定檔中的代理使用者。適用於 HTTP、SOCKS 和混合連接埠。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The profile's own TUN interface. TUN mode on the Proxy page adds its own, so this can stay Unmodified."
++msgstr "設定檔自帶的 TUN 介面。代理頁面的 TUN 模式會新增自己的介面，因此這裡可保持「不修改」。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "System is fastest; gVisor is the most compatible; Mixed uses System for TCP and gVisor for UDP."
++msgstr "System 最快；gVisor 相容性最好；Mixed 對 TCP 使用 System，對 UDP 使用 gVisor。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Let mihomo answer DNS. Needed for domain rules and Fake-IP."
++msgstr "由 mihomo 回應 DNS。網域規則和 Fake-IP 需要此功能。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Fake-IP answers instantly with placeholder addresses and resolves on the proxy side: faster, and no DNS leaks. Redir-Host returns real addresses: more compatible with apps that check them."
++msgstr "Fake-IP 立即回傳佔位位址，在代理端解析：較快，且無 DNS 洩漏。Redir-Host 回傳真實位址：對會檢查位址的應用程式相容性較好。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's list of domains that always get a real address (for example NTP servers or game consoles)."
++msgstr "取代設定檔中一律回傳真實位址的網域清單（例如 NTP 伺服器或遊戲主機）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Resolve each domain through the proxy its rule picks, so lookups follow the same path as the traffic."
++msgstr "透過各網域規則所選的代理進行解析，讓查詢與流量走同一條路徑。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Hosts & Nameservers"
++msgstr "Hosts 與網域名稱伺服器"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's upstream DNS servers with the list below."
++msgstr "用下方清單取代設定檔中的上游 DNS 伺服器。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Use specific DNS servers for matching domains, for example a local resolver for your own domain."
++msgstr "為符合的網域使用指定的 DNS 伺服器，例如為你自己的網域使用本機解析器。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Sniffer"
++msgstr "嗅探"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Read the domain name from the start of a connection (TLS SNI, HTTP Host), so domain rules work even when a device connects by IP address."
++msgstr "從連線開頭讀取網域名稱（TLS SNI、HTTP Host），這樣裝置以 IP 位址連線時網域規則也能生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules"
++msgstr "規則"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add the rule providers below to the profile's own."
++msgstr "將下方的規則集加入設定檔自帶的規則集。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add the rules below in front of the profile's own rules, so they win."
++msgstr "將下方規則加在設定檔規則之前，讓它們優先生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "GeoX"
++msgstr "GeoX"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Memory Conservative uses less RAM, which suits routers, at a small speed cost."
++msgstr "「記憶體保守」佔用較少記憶體，適合路由器，速度略有損失。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download fresh GeoIP and GeoSite databases on a schedule."
++msgstr "依排程下載最新的 GeoIP 和 GeoSite 資料庫。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Mixin File"
++msgstr "混入檔案"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Merge the YAML in %s over the profile. Settings on the other tabs still win over it. Edit the file on the Editor page (File for Mixin)."
++msgstr "將 %s 中的 YAML 合併到設定檔之上。其他分頁中的設定仍優先於它。可在編輯器頁面編輯該檔案（混入檔案）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Mixin"
++msgstr "混入"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Override settings of your profile without editing it. Each setting left at \"Unmodified\" keeps the value from the profile; anything you set here wins, and survives subscription updates."
++msgstr "不需修改設定檔即可覆寫其中的設定。保持「不修改」的設定沿用設定檔中的值；在此設定的值優先生效，並在訂閱更新後保留。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No profile files yet. Upload one above, or use a subscription below."
++msgstr "還沒有設定檔。請在上方上傳，或使用下方的訂閱。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "In use"
++msgstr "使用中"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "changed"
++msgstr "修改於"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Run Nikki with this profile"
++msgstr "使用此設定檔執行 Nikki"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Use"
++msgstr "使用"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Edit"
++msgstr "編輯"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete"
++msgstr "刪除"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete profile"
++msgstr "刪除設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete \"%s\" from the router? This cannot be undone."
++msgstr "從路由器刪除「%s」？此動作無法復原。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "This profile is in use. Nikki will not start again until you choose another one."
++msgstr "此設定檔正在使用中。在你選擇其他設定檔之前，Nikki 將無法再次啟動。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cancel"
++msgstr "取消"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Deleted %s."
++msgstr "已刪除 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not delete %s: %s"
++msgstr "無法刪除 %s：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Only .yaml and .yml files can be uploaded, with a name of letters, digits, spaces, dots, dashes and underscores. Skipped: %s"
++msgstr "只能上傳 .yaml 和 .yml 檔案，檔名只能包含字母、數字、空格、點、連字號和底線。已略過：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the existing %s?"
++msgstr "取代現有的 %s？"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Uploaded %s."
++msgstr "已上傳 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Upload of %s failed: %s"
++msgstr "上傳 %s 失敗：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Drop a profile here"
++msgstr "將設定檔拖放到這裡"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A Clash / mihomo YAML file (.yaml or .yml). It is saved to %s."
++msgstr "Clash / mihomo YAML 檔案（.yaml 或 .yml），將儲存到 %s。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose file…"
++msgstr "選擇檔案…"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Configuration files stored on the router. Choose one with \"Use\", or on the Overview page."
++msgstr "儲存在路由器上的設定檔。按「使用」選擇，或在概覽頁面中選擇。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A subscription is a profile Nikki downloads from your provider's URL. \"Update\" downloads it now; with \"Prefer: Remote\" it is downloaded again at every start."
++msgstr "訂閱是 Nikki 從服務商連結下載的設定檔。「更新」會立即下載；選擇「優先：遠端」時每次啟動都會重新下載。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add subscription"
++msgstr "新增訂閱"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription: %s"
++msgstr "訂閱：%s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "New subscription"
++msgstr "新訂閱"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A label for this subscription, shown in the profile list."
++msgstr "此訂閱的名稱，顯示在設定檔清單中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Edit this subscription and enter your provider's URL."
++msgstr "編輯此訂閱並填入服務商的連結。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Data used"
++msgstr "已用流量"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Not reported"
++msgstr "未提供"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expires"
++msgstr "到期時間"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expired"
++msgstr "已到期"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d days left"
++msgstr "剩餘 %d 天"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Last update"
++msgstr "最後更新"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The last update failed. The Logs page shows why."
++msgstr "上次更新失敗。原因請查看日誌頁面。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Failed"
++msgstr "失敗"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Never"
++msgstr "從未"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto: daily"
++msgstr "自動：每天"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto: every %s h"
++msgstr "自動：每 %s 小時"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Set the subscription URL first: press Edit on this row."
++msgstr "請先設定訂閱連結：按此行的「編輯」。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription \"%s\" updated."
++msgstr "訂閱「%s」已更新。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription \"%s\" could not be updated. Check the URL; the Logs page (App log) shows the reason."
++msgstr "訂閱「%s」更新失敗。請檢查連結；日誌頁面（應用程式日誌）會顯示原因。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "This subscription is already in use."
++msgstr "此訂閱已在使用中。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription URL"
++msgstr "訂閱連結"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The link from your provider. It must return a Clash / mihomo YAML profile."
++msgstr "服務商提供的連結，必須回傳 Clash / mihomo YAML 設定檔。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Enter your provider's subscription URL."
++msgstr "請輸入服務商的訂閱連結。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expecting an http:// or https:// URL"
++msgstr "需要 http:// 或 https:// 連結"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Usage Info URL"
++msgstr "用量資訊連結"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Optional. Some providers report traffic and expiry from a separate URL; leave empty to read them from the subscription itself."
++msgstr "選填。部分服務商透過另一個連結提供流量和到期資訊；留空則從訂閱本身讀取。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Some providers send a different format depending on the client name. \"clash.meta\" or \"mihomo\" usually gets the full mihomo profile."
++msgstr "部分服務商會依用戶端名稱回傳不同格式。「clash.meta」或「mihomo」通常能取得完整的 mihomo 設定檔。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Remote: download the subscription at every start. Local: start from the saved copy, and download only with Update or when there is no copy."
++msgstr "遠端：每次啟動都下載訂閱。本機：從已儲存的副本啟動，只在按「更新」或沒有副本時下載。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update automatically"
++msgstr "自動更新"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download this subscription again on a schedule while Nikki runs. When it is the one in use, Nikki restarts to use the new copy, so connections drop for a moment."
++msgstr "Nikki 執行期間依排程重新下載此訂閱。若它正在使用中，Nikki 會重新啟動以使用新副本，連線會短暫中斷。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update every"
++msgstr "更新間隔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "1 hour"
++msgstr "1 小時"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "3 hours"
++msgstr "3 小時"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "6 hours"
++msgstr "6 小時"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "12 hours"
++msgstr "12 小時"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Day (at 04:23)"
++msgstr "每天（04:23）"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Profiles"
++msgstr "設定檔"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Your Clash / mihomo configurations: files you upload and subscriptions Nikki downloads. The one marked \"In use\" is what Nikki runs."
++msgstr "你的 Clash / mihomo 設定：你上傳的檔案和 Nikki 下載的訂閱。標示為「使用中」的就是 Nikki 正在執行的設定。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent Proxy"
++msgstr "透明代理"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Send traffic through mihomo with firewall rules, so devices need no proxy settings of their own. Off: mihomo only listens on its proxy ports."
++msgstr "透過防火牆規則讓流量經過 mihomo，裝置不需自行設定代理。關閉時：mihomo 只在其代理連接埠上監聽。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Redirect is the lightest and works almost everywhere. TPROXY keeps the original destination for every protocol. TUN routes through a virtual interface and is the most compatible, at some CPU cost."
++msgstr "Redirect 最輕量，幾乎處處可用。TPROXY 對所有協定保留原始目的地。TUN 透過虛擬介面路由，相容性最好，但會佔用一些 CPU。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "UDP cannot be redirected: choose TPROXY or TUN to proxy it (games, QUIC, voice), or leave it off to send UDP directly."
++msgstr "UDP 無法使用 Redirect：選擇 TPROXY 或 TUN 來代理 UDP（遊戲、QUIC、語音），或保持關閉讓 UDP 直連。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Answer DNS queries on port 53 with mihomo, so domain rules and Fake-IP work."
++msgstr "由 mihomo 回應 53 連接埠的 DNS 查詢，讓網域規則和 Fake-IP 生效。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Turn off if your proxies do not carry IPv6; IPv6 traffic then goes out directly."
++msgstr "如果你的代理不支援 IPv6，請關閉；IPv6 流量將直接送出。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Reply to pings sent to Fake-IP addresses, so \"ping example.com\" works in Fake-IP mode."
++msgstr "回應送往 Fake-IP 位址的 ping，讓「ping example.com」在 Fake-IP 模式下可用。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "LAN Devices"
++msgstr "區域網路裝置"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy the traffic of devices on your network."
++msgstr "代理區域網路中裝置的流量。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The networks whose devices are proxied. Normally just \"lan\"."
++msgstr "需要代理其裝置的網路。通常只有「lan」。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules are checked from the top; the first enabled rule that matches a device decides. A rule with no IP, IP6 or MAC matches every device. Untick DNS or Proxy to let matching devices bypass Nikki."
++msgstr "規則由上往下檢查；第一條符合裝置的已啟用規則生效。未填 IP、IP6 或 MAC 的規則符合所有裝置。取消勾選 DNS 或代理可讓符合的裝置繞過 Nikki。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add rule"
++msgstr "新增規則"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Any"
++msgstr "任意"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Router Itself"
++msgstr "路由器本身"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Also proxy traffic that starts on the router (package downloads, update checks, other services)."
++msgstr "同時代理路由器本身發出的流量（套件下載、更新檢查、其他服務）。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules are checked from the top; the first enabled rule that matches a process decides, by its user, group or cgroup. The default first rule keeps system services such as dnsmasq and NTP direct."
++msgstr "規則由上往下檢查；第一條依使用者、群組或 cgroup 符合處理程序的已啟用規則生效。預設的第一條規則讓 dnsmasq 和 NTP 等系統服務直連。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Only connections to these ports go through Nikki; everything else goes out directly. Space-separated ports or ranges."
++msgstr "只有連到這些連接埠的流量經過 Nikki，其餘直連。多個連接埠或範圍以空格分隔。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Send traffic to mainland China addresses directly, without asking mihomo."
++msgstr "送往中國大陸位址的流量直連，不經過 mihomo。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Packets carrying these DSCP marks (0-63) skip the proxy."
++msgstr "帶有這些 DSCP 標記（0-63）的封包不走代理。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Packets carrying these firewall marks skip the proxy, for example traffic of another VPN."
++msgstr "帶有這些防火牆標記的封包不走代理，例如其他 VPN 的流量。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Advanced"
++msgstr "進階"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Private and special-purpose ranges that are never proxied. The defaults cover them; add your own local subnets if they are not in the list."
++msgstr "永不代理的私有和特殊用途位址範圍。預設值已涵蓋它們；如果你的本機子網路不在清單中，請自行新增。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds to wait for the TUN interface to appear at start."
++msgstr "啟動時等待 TUN 介面出現的秒數。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds between checks while waiting for the TUN interface."
++msgstr "等待 TUN 介面期間每次檢查的間隔秒數。"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Which traffic goes through Nikki: your devices, the router itself, and what is always sent directly. Changes take effect with Save & Apply."
++msgstr "哪些流量經過 Nikki：你的裝置、路由器本身，以及哪些一律直連。按「儲存並套用」後生效。"
+--- a/luci-app-nikki/po/ru/nikki.po
++++ b/luci-app-nikki/po/ru/nikki.po
+@@ -1125,3 +1125,1019 @@
+ #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:128
+ msgid "procd Config"
+ msgstr "Настройки procd"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "File"
++msgstr "Файл"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The mihomo core is running."
++msgstr "Ядро mihomo работает."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Stopped"
++msgstr "Остановлено"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is enabled but the core is not running. The Logs page shows why."
++msgstr "Nikki включён, но ядро не запущено. Причина — на странице «Журналы»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Disabled"
++msgstr "Отключено"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is turned off. Enable it on the Overview page."
++msgstr "Nikki выключен. Включите его на странице «Обзор»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart the service and reload the profile"
++msgstr "Перезапустить службу и перечитать профиль"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart"
++msgstr "Перезапустить"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Open the dashboard (Zashboard) in a new tab"
++msgstr "Открыть панель (Zashboard) в новой вкладке"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is restarting."
++msgstr "Nikki перезапускается."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The dashboard cannot be opened: %s"
++msgstr "Не удалось открыть панель: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki must be running, and the profile (or Mixin → Dashboard & API) must set an API address."
++msgstr "Nikki должен работать, а в профиле (или Mixin → Панель и API) должен быть задан адрес API."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download failed: %s"
++msgstr "Ошибка загрузки: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Redirect"
++msgstr "Redirect"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "TPROXY"
++msgstr "TPROXY"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "TUN"
++msgstr "TUN"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Get started"
++msgstr "Начало работы"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Three steps to route your traffic through Nikki."
++msgstr "Три шага, чтобы направить трафик через Nikki."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add a profile"
++msgstr "Добавьте профиль"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Upload your Clash / mihomo YAML file, or add the subscription URL your provider gave you."
++msgstr "Загрузите YAML-файл Clash / mihomo или добавьте ссылку на подписку от вашего провайдера."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Go to Profiles"
++msgstr "К профилям"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose it"
++msgstr "Выберите его"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Pick that profile in \"Profile\" below. Nikki starts mihomo with it."
++msgstr "Выберите этот профиль в поле «Профиль» ниже. Nikki запустит с ним mihomo."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose profile"
++msgstr "Выбрать профиль"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Enable and apply"
++msgstr "Включите и примените"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Tick \"Enable\", then press Save & Apply at the bottom of the page."
++msgstr "Отметьте «Включить», затем нажмите «Сохранить и применить» внизу страницы."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Show the switch"
++msgstr "Показать переключатель"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No URL set"
++msgstr "Ссылка не задана"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Set it up"
++msgstr "Настроить"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Manage"
++msgstr "Управление"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "None chosen"
++msgstr "Не выбран"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core only"
++msgstr "Только ядро"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No firewall rules; use the proxy ports directly."
++msgstr "Без правил брандмауэра; прокси-порты используются напрямую."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent proxy off"
++msgstr "Прозрачный прокси выключен"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy settings"
++msgstr "Настройки прокси"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "off"
++msgstr "выкл."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Traffic"
++msgstr "Трафик"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard"
++msgstr "Панель"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Port %s"
++msgstr "Порт %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "From profile"
++msgstr "Из профиля"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard update requested. It downloads in the background."
++msgstr "Запрошено обновление панели. Она загрузится в фоне."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update dashboard"
++msgstr "Обновить панель"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Versions"
++msgstr "Версии"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core %s"
++msgstr "Ядро %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core unknown"
++msgstr "Версия ядра неизвестна"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "LuCI app %s"
++msgstr "Приложение LuCI %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Service"
++msgstr "Служба"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "General"
++msgstr "Основные"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Startup & Schedule"
++msgstr "Запуск и расписание"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Start Nikki at boot and keep it running."
++msgstr "Запускать Nikki при загрузке и держать его работающим."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The Clash / mihomo configuration Nikki runs. Add files and subscriptions on the Profiles page."
++msgstr "Конфигурация Clash / mihomo, с которой работает Nikki. Файлы и подписки добавляются на странице «Профили»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "no URL set"
++msgstr "ссылка не задана"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check the profile with mihomo before starting, and refuse to start with a broken one."
++msgstr "Проверять профиль через mihomo перед запуском и не запускаться с ошибочным."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Run mihomo without the transparent-proxy firewall rules. Devices then use the proxy ports (7890 mixed, 7893 HTTP) themselves."
++msgstr "Запускать mihomo без правил брандмауэра для прозрачного прокси. Тогда устройства сами используют прокси-порты (7890 смешанный, 7893 HTTP)."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds to wait at boot before starting, for example until the mobile connection is up."
++msgstr "Сколько секунд ждать после загрузки перед запуском, например пока не поднимется мобильное соединение."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Start immediately"
++msgstr "Запускать сразу"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart Nikki on a schedule, which also refreshes subscriptions set to prefer the remote copy."
++msgstr "Перезапускать Nikki по расписанию; это также обновляет подписки с предпочтением удалённой копии."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Restart Schedule"
++msgstr "Расписание перезапуска"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cron format: minute hour day month weekday. \"0 3 * * *\" is every day at 03:00."
++msgstr "Формат cron: минута час день месяц день_недели. «0 3 * * *» — каждый день в 03:00."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Advanced: Process"
++msgstr "Дополнительно: процесс"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Limits and environment for the mihomo process. The defaults suit most routers; change them only when you know you need to."
++msgstr "Ограничения и окружение процесса mihomo. Значения по умолчанию подходят большинству роутеров; меняйте их, только если точно нужно."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "On a configuration change, reload mihomo in place instead of restarting it. Faster, but some changes only take effect after a restart."
++msgstr "При изменении конфигурации перечитывать её в mihomo без перезапуска. Быстрее, но некоторые изменения вступают в силу только после перезапуска."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Resource Limits"
++msgstr "Ограничения ресурсов"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Environment"
++msgstr "Окружение"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How many CPU cores mihomo may use at once."
++msgstr "Сколько ядер процессора mihomo может использовать одновременно."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A soft memory limit for mihomo, in bytes. Lower it if the router runs short of memory."
++msgstr "Мягкий лимит памяти для mihomo, в байтах. Уменьшите, если роутеру не хватает памяти."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Extra directories mihomo may read files from."
++msgstr "Дополнительные каталоги, из которых mihomo может читать файлы."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent proxy for the whole network, powered by the mihomo (Clash Meta) core."
++msgstr "Прозрачный прокси для всей сети на ядре mihomo (Clash Meta)."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How to use"
++msgstr "Как пользоваться"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Apply configuration changes without restarting the core"
++msgstr "Применить изменения конфигурации без перезапуска ядра"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is reloading its configuration."
++msgstr "Nikki перечитывает конфигурацию."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Reload"
++msgstr "Перечитать"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Profile files"
++msgstr "Файлы профилей"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Your own profile. Changes apply at the next start or reload."
++msgstr "Ваш собственный профиль. Изменения вступают в силу при следующем запуске или перечитывании."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscriptions"
++msgstr "Подписки"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A downloaded subscription. The next update replaces it; put lasting changes in Mixin instead."
++msgstr "Загруженная подписка. Следующее обновление заменит её; постоянные изменения делайте в Mixin."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Merged over the profile when \"Mixin File\" is enabled on the Mixin page."
++msgstr "Накладывается поверх профиля, когда на странице Mixin включён «Файл Mixin»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Generated at every start from the profile and Mixin. Read it to see what mihomo really runs; edits here are lost on the next start."
++msgstr "Создаётся при каждом запуске из профиля и Mixin. Здесь видно, что на самом деле запускает mihomo; правки будут потеряны при следующем запуске."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rule providers"
++msgstr "Наборы правил"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Downloaded by mihomo; it may replace this file on its next update."
++msgstr "Загружается mihomo; при следующем обновлении файл может быть заменён."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy providers"
++msgstr "Наборы прокси"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d lines · %s"
++msgstr "%d строк · %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose a file to view or edit it."
++msgstr "Выберите файл для просмотра или правки."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Not created yet"
++msgstr "Ещё не создан"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Discard the unsaved changes to this file?"
++msgstr "Отменить несохранённые изменения в этом файле?"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Saved %s."
++msgstr "%s сохранён."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not save %s: %s"
++msgstr "Не удалось сохранить %s: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is applying the change."
++msgstr "Nikki применяет изменение."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "-- Choose a file --"
++msgstr "-- Выберите файл --"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "File content"
++msgstr "Содержимое файла"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Unsaved changes"
++msgstr "Есть несохранённые изменения"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download"
++msgstr "Скачать"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Load the file from the router again, dropping unsaved changes"
++msgstr "Заново загрузить файл с роутера, отбросив несохранённые изменения"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Revert"
++msgstr "Вернуть"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "View and edit Nikki's YAML files directly. Save writes the file; Save & Apply also reloads Nikki. Ctrl+S saves."
++msgstr "Просмотр и правка YAML-файлов Nikki. «Сохранить» записывает файл; «Сохранить и применить» также перечитывает Nikki. Ctrl+S — сохранить."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "App log"
++msgstr "Журнал приложения"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "What Nikki itself does: starting, stopping, profile and subscription updates, firewall rules."
++msgstr "Действия самого Nikki: запуск, остановка, обновление профилей и подписок, правила брандмауэра."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Core log"
++msgstr "Журнал ядра"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "What mihomo reports: connections, rule matches, DNS, errors. Its detail is set by Log Level on the Mixin page."
++msgstr "Сообщения mihomo: соединения, срабатывание правил, DNS, ошибки. Подробность задаётся уровнем журнала на странице Mixin."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No lines match the filter."
++msgstr "Нет строк, подходящих под фильтр."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The log is empty."
++msgstr "Журнал пуст."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Showing the last %d of %d lines. Download has them all."
++msgstr "Показаны последние %d из %d строк. Скачайте файл, чтобы получить все."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d of %d lines"
++msgstr "%d из %d строк"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d lines"
++msgstr "%d строк"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Updated %s"
++msgstr "Обновлено в %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Clear the %s? This cannot be undone."
++msgstr "Очистить %s? Это действие нельзя отменить."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Nikki is turned off. Creating the report enables and starts it, and it stays enabled afterwards. Continue?"
++msgstr "Nikki выключен. При создании отчёта он будет включён и запущен и останется включённым. Продолжить?"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "the debug script failed"
++msgstr "ошибка отладочного скрипта"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not create the debug report: %s"
++msgstr "Не удалось создать отладочный отчёт: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Log settings"
++msgstr "Настройки журналов"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Logs are kept in memory (/var/log/nikki), so they are lost at reboot and must be kept small."
++msgstr "Журналы хранятся в памяти (/var/log/nikki), поэтому теряются при перезагрузке и должны быть небольшими."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Empty both logs whenever Nikki stops."
++msgstr "Очищать оба журнала при каждой остановке Nikki."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check the logs on a schedule and empty any that grew past the size limit."
++msgstr "Проверять журналы по расписанию и очищать те, что превысили лимит размера."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Check Schedule"
++msgstr "Расписание проверки"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cron format. \"*/5 * * * *\" checks every five minutes."
++msgstr "Формат cron. «*/5 * * * *» — проверка каждые пять минут."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Size Limit"
++msgstr "Лимит размера"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Size Limit Unit"
++msgstr "Единица размера"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Filter lines…"
++msgstr "Фильтр строк…"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Filter lines"
++msgstr "Фильтр строк"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Level"
++msgstr "Уровень"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "All lines"
++msgstr "Все строки"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Warnings and errors"
++msgstr "Предупреждения и ошибки"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Errors only"
++msgstr "Только ошибки"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Logs"
++msgstr "Журналы"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "When Nikki does not start or a site does not load, the reason is usually here. Start with the App log, then the Core log."
++msgstr "Если Nikki не запускается или сайт не открывается, причина обычно здесь. Сначала смотрите журнал приложения, затем журнал ядра."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Clear"
++msgstr "Очистить"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Follow"
++msgstr "Следить"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto refresh"
++msgstr "Автообновление"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Debug report"
++msgstr "Отладочный отчёт"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Collects versions, the configuration, the running profile and the routing state into one file to attach to a bug report. Server addresses, passwords and subscription URLs are masked; read it before sharing all the same."
++msgstr "Собирает версии, конфигурацию, работающий профиль и состояние маршрутизации в один файл для приложения к сообщению об ошибке. Адреса серверов, пароли и ссылки подписок скрыты, но всё равно просмотрите файл перед отправкой."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Overrides"
++msgstr "Переопределения"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "How much mihomo writes to the core log. \"warning\" is a good default; \"debug\" only while troubleshooting."
++msgstr "Насколько подробно mihomo пишет в журнал ядра. «warning» — хорошее значение по умолчанию; «debug» — только при поиске проблем."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rule: follow the profile's rules (normal). Global: send everything through the proxy selected in the GLOBAL group. Direct: send nothing through a proxy."
++msgstr "Rule: по правилам профиля (обычно). Global: весь трафик через прокси, выбранный в группе GLOBAL. Direct: без прокси."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Match rules by the process that opened the connection. Only useful for traffic from the router itself."
++msgstr "Сопоставлять правила по процессу, открывшему соединение. Полезно только для трафика самого роутера."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Bind outgoing proxy connections to this interface, for example the mobile WAN."
++msgstr "Привязывать исходящие прокси-соединения к этому интерфейсу, например к мобильному WAN."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Report latency tests without the connection handshake, so results from different protocols compare fairly."
++msgstr "Измерять задержку без рукопожатия соединения, чтобы результаты разных протоколов были сравнимы."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Connect to all resolved addresses at once and use the fastest."
++msgstr "Подключаться ко всем найденным адресам сразу и использовать самый быстрый."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Dashboard & API"
++msgstr "Панель и API"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Where \"Update Dashboard\" downloads the dashboard from. CleanWRT ships Zashboard preinstalled."
++msgstr "Откуда «Обновить панель» загружает панель. В CleanWRT Zashboard уже установлена."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Address the dashboard and API listen on, such as 0.0.0.0:9090."
++msgstr "Адрес, на котором слушают панель и API, например 0.0.0.0:9090."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The password for the dashboard and API. \"Open Dashboard\" fills it in for you."
++msgstr "Пароль для панели и API. «Открыть панель» подставляет его сама."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Remember the proxies chosen in the dashboard across restarts."
++msgstr "Запоминать прокси, выбранные в панели, между перезапусками."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy Ports"
++msgstr "Прокси-порты"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Let devices on your network use the proxy ports below directly."
++msgstr "Разрешить устройствам вашей сети напрямую использовать прокси-порты ниже."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "One port that speaks both HTTP and SOCKS5. Point an app's proxy setting here."
++msgstr "Один порт для HTTP и SOCKS5. Укажите его в настройках прокси приложения."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Used by Redirect mode on the Proxy page."
++msgstr "Используется режимом Redirect на странице «Прокси»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Used by TPROXY mode on the Proxy page."
++msgstr "Используется режимом TPROXY на странице «Прокси»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's proxy users with the list below. Applies to the HTTP, SOCKS and mixed ports."
++msgstr "Заменить пользователей прокси из профиля списком ниже. Действует для портов HTTP, SOCKS и смешанного."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The profile's own TUN interface. TUN mode on the Proxy page adds its own, so this can stay Unmodified."
++msgstr "Собственный TUN-интерфейс профиля. Режим TUN на странице «Прокси» добавляет свой, поэтому здесь можно оставить «Без изменений»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "System is fastest; gVisor is the most compatible; Mixed uses System for TCP and gVisor for UDP."
++msgstr "System — самый быстрый; gVisor — самый совместимый; Mixed использует System для TCP и gVisor для UDP."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Let mihomo answer DNS. Needed for domain rules and Fake-IP."
++msgstr "Отвечать на DNS-запросы через mihomo. Нужно для доменных правил и Fake-IP."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Fake-IP answers instantly with placeholder addresses and resolves on the proxy side: faster, and no DNS leaks. Redir-Host returns real addresses: more compatible with apps that check them."
++msgstr "Fake-IP сразу отвечает временными адресами и разрешает имена на стороне прокси: быстрее и без утечек DNS. Redir-Host возвращает настоящие адреса: совместимее с приложениями, которые их проверяют."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's list of domains that always get a real address (for example NTP servers or game consoles)."
++msgstr "Заменить список доменов из профиля, которые всегда получают настоящий адрес (например, серверы NTP или игровые приставки)."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Resolve each domain through the proxy its rule picks, so lookups follow the same path as the traffic."
++msgstr "Разрешать каждый домен через прокси, выбранный его правилом, чтобы запросы шли тем же путём, что и трафик."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Hosts & Nameservers"
++msgstr "Hosts и DNS-серверы"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the profile's upstream DNS servers with the list below."
++msgstr "Заменить вышестоящие DNS-серверы профиля списком ниже."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Use specific DNS servers for matching domains, for example a local resolver for your own domain."
++msgstr "Использовать отдельные DNS-серверы для подходящих доменов, например локальный резолвер для вашего домена."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Sniffer"
++msgstr "Сниффер"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Read the domain name from the start of a connection (TLS SNI, HTTP Host), so domain rules work even when a device connects by IP address."
++msgstr "Читать имя домена из начала соединения (TLS SNI, HTTP Host), чтобы доменные правила работали, даже когда устройство подключается по IP-адресу."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules"
++msgstr "Правила"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add the rule providers below to the profile's own."
++msgstr "Добавить наборы правил ниже к наборам профиля."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add the rules below in front of the profile's own rules, so they win."
++msgstr "Поставить правила ниже перед правилами профиля, чтобы они имели приоритет."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "GeoX"
++msgstr "GeoX"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Memory Conservative uses less RAM, which suits routers, at a small speed cost."
++msgstr "Memory Conservative расходует меньше памяти, что подходит роутерам, ценой небольшой потери скорости."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download fresh GeoIP and GeoSite databases on a schedule."
++msgstr "Загружать свежие базы GeoIP и GeoSite по расписанию."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Mixin File"
++msgstr "Файл Mixin"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Merge the YAML in %s over the profile. Settings on the other tabs still win over it. Edit the file on the Editor page (File for Mixin)."
++msgstr "Наложить YAML из %s поверх профиля. Настройки на других вкладках всё равно важнее. Файл правится на странице «Редактор» (Файл для Mixin)."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Mixin"
++msgstr "Mixin"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Override settings of your profile without editing it. Each setting left at \"Unmodified\" keeps the value from the profile; anything you set here wins, and survives subscription updates."
++msgstr "Переопределяйте настройки профиля, не редактируя его. Настройка в положении «Без изменений» берёт значение из профиля; заданное здесь имеет приоритет и сохраняется при обновлении подписки."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "No profile files yet. Upload one above, or use a subscription below."
++msgstr "Файлов профилей пока нет. Загрузите файл выше или используйте подписку ниже."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "In use"
++msgstr "Используется"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "changed"
++msgstr "изменён"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Run Nikki with this profile"
++msgstr "Запустить Nikki с этим профилем"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Use"
++msgstr "Использовать"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Edit"
++msgstr "Изменить"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete"
++msgstr "Удалить"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete profile"
++msgstr "Удаление профиля"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Delete \"%s\" from the router? This cannot be undone."
++msgstr "Удалить «%s» с роутера? Это действие нельзя отменить."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "This profile is in use. Nikki will not start again until you choose another one."
++msgstr "Этот профиль используется. Nikki не запустится снова, пока вы не выберете другой."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Cancel"
++msgstr "Отмена"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Deleted %s."
++msgstr "%s удалён."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Could not delete %s: %s"
++msgstr "Не удалось удалить %s: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Only .yaml and .yml files can be uploaded, with a name of letters, digits, spaces, dots, dashes and underscores. Skipped: %s"
++msgstr "Загружать можно только файлы .yaml и .yml с именем из букв, цифр, пробелов, точек, дефисов и подчёркиваний. Пропущено: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Replace the existing %s?"
++msgstr "Заменить существующий %s?"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Uploaded %s."
++msgstr "%s загружен."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Upload of %s failed: %s"
++msgstr "Не удалось загрузить %s: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Drop a profile here"
++msgstr "Перетащите профиль сюда"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A Clash / mihomo YAML file (.yaml or .yml). It is saved to %s."
++msgstr "YAML-файл Clash / mihomo (.yaml или .yml). Он будет сохранён в %s."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Choose file…"
++msgstr "Выбрать файл…"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Configuration files stored on the router. Choose one with \"Use\", or on the Overview page."
++msgstr "Файлы конфигурации на роутере. Выберите один кнопкой «Использовать» или на странице «Обзор»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A subscription is a profile Nikki downloads from your provider's URL. \"Update\" downloads it now; with \"Prefer: Remote\" it is downloaded again at every start."
++msgstr "Подписка — это профиль, который Nikki загружает по ссылке провайдера. «Обновить» загружает его сейчас; при «Предпочтение: удалённая» он загружается заново при каждом запуске."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add subscription"
++msgstr "Добавить подписку"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription: %s"
++msgstr "Подписка: %s"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "New subscription"
++msgstr "Новая подписка"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "A label for this subscription, shown in the profile list."
++msgstr "Название подписки, показывается в списке профилей."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Edit this subscription and enter your provider's URL."
++msgstr "Измените эту подписку и укажите ссылку провайдера."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Data used"
++msgstr "Использовано"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Not reported"
++msgstr "Нет данных"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expires"
++msgstr "Истекает"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expired"
++msgstr "Истекла"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "%d days left"
++msgstr "Осталось дней: %d"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Last update"
++msgstr "Последнее обновление"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The last update failed. The Logs page shows why."
++msgstr "Последнее обновление не удалось. Причина — на странице «Журналы»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Failed"
++msgstr "Ошибка"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Never"
++msgstr "Никогда"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto: daily"
++msgstr "Авто: ежедневно"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Auto: every %s h"
++msgstr "Авто: каждые %s ч"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Set the subscription URL first: press Edit on this row."
++msgstr "Сначала задайте ссылку подписки: нажмите «Изменить» в этой строке."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription \"%s\" updated."
++msgstr "Подписка «%s» обновлена."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription \"%s\" could not be updated. Check the URL; the Logs page (App log) shows the reason."
++msgstr "Не удалось обновить подписку «%s». Проверьте ссылку; причина — в журнале приложения на странице «Журналы»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "This subscription is already in use."
++msgstr "Эта подписка уже используется."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Subscription URL"
++msgstr "Ссылка подписки"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The link from your provider. It must return a Clash / mihomo YAML profile."
++msgstr "Ссылка от провайдера. Она должна отдавать YAML-профиль Clash / mihomo."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Enter your provider's subscription URL."
++msgstr "Введите ссылку подписки от провайдера."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Expecting an http:// or https:// URL"
++msgstr "Ожидается ссылка http:// или https://"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Usage Info URL"
++msgstr "Ссылка на данные об использовании"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Optional. Some providers report traffic and expiry from a separate URL; leave empty to read them from the subscription itself."
++msgstr "Необязательно. Некоторые провайдеры отдают трафик и срок действия по отдельной ссылке; оставьте пустым, чтобы брать их из самой подписки."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Some providers send a different format depending on the client name. \"clash.meta\" or \"mihomo\" usually gets the full mihomo profile."
++msgstr "Некоторые провайдеры отдают разный формат в зависимости от имени клиента. С «clash.meta» или «mihomo» обычно приходит полный профиль mihomo."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Remote: download the subscription at every start. Local: start from the saved copy, and download only with Update or when there is no copy."
++msgstr "Удалённая: загружать подписку при каждом запуске. Локальная: запускаться с сохранённой копии и загружать только по кнопке «Обновить» или если копии нет."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update automatically"
++msgstr "Обновлять автоматически"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Download this subscription again on a schedule while Nikki runs. When it is the one in use, Nikki restarts to use the new copy, so connections drop for a moment."
++msgstr "Загружать эту подписку заново по расписанию, пока Nikki работает. Если она используется, Nikki перезапустится с новой копией, и соединения ненадолго прервутся."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Update every"
++msgstr "Обновлять каждые"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "1 hour"
++msgstr "1 час"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "3 hours"
++msgstr "3 часа"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "6 hours"
++msgstr "6 часов"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "12 hours"
++msgstr "12 часов"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Day (at 04:23)"
++msgstr "День (в 04:23)"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Profiles"
++msgstr "Профили"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Your Clash / mihomo configurations: files you upload and subscriptions Nikki downloads. The one marked \"In use\" is what Nikki runs."
++msgstr "Ваши конфигурации Clash / mihomo: загруженные файлы и подписки, которые загружает Nikki. Отмеченный «Используется» — тот, с которым работает Nikki."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Transparent Proxy"
++msgstr "Прозрачный прокси"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Send traffic through mihomo with firewall rules, so devices need no proxy settings of their own. Off: mihomo only listens on its proxy ports."
++msgstr "Направлять трафик через mihomo правилами брандмауэра, чтобы устройствам не нужны были свои настройки прокси. Выключено: mihomo только слушает свои прокси-порты."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Redirect is the lightest and works almost everywhere. TPROXY keeps the original destination for every protocol. TUN routes through a virtual interface and is the most compatible, at some CPU cost."
++msgstr "Redirect — самый лёгкий и работает почти везде. TPROXY сохраняет исходный адрес назначения для любого протокола. TUN маршрутизирует через виртуальный интерфейс и самый совместимый, но нагружает процессор."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "UDP cannot be redirected: choose TPROXY or TUN to proxy it (games, QUIC, voice), or leave it off to send UDP directly."
++msgstr "UDP нельзя перенаправить через Redirect: выберите TPROXY или TUN, чтобы проксировать его (игры, QUIC, голос), или оставьте выключенным, чтобы UDP шёл напрямую."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Answer DNS queries on port 53 with mihomo, so domain rules and Fake-IP work."
++msgstr "Отвечать на DNS-запросы на порту 53 через mihomo, чтобы работали доменные правила и Fake-IP."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Turn off if your proxies do not carry IPv6; IPv6 traffic then goes out directly."
++msgstr "Выключите, если ваши прокси не поддерживают IPv6; тогда трафик IPv6 пойдёт напрямую."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Reply to pings sent to Fake-IP addresses, so \"ping example.com\" works in Fake-IP mode."
++msgstr "Отвечать на ping к адресам Fake-IP, чтобы «ping example.com» работал в режиме Fake-IP."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "LAN Devices"
++msgstr "Устройства LAN"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Proxy the traffic of devices on your network."
++msgstr "Проксировать трафик устройств вашей сети."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "The networks whose devices are proxied. Normally just \"lan\"."
++msgstr "Сети, устройства которых проксируются. Обычно только «lan»."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules are checked from the top; the first enabled rule that matches a device decides. A rule with no IP, IP6 or MAC matches every device. Untick DNS or Proxy to let matching devices bypass Nikki."
++msgstr "Правила проверяются сверху вниз; решает первое включённое правило, подходящее устройству. Правило без IP, IP6 и MAC подходит всем устройствам. Снимите DNS или «Прокси», чтобы подходящие устройства шли в обход Nikki."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Add rule"
++msgstr "Добавить правило"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Any"
++msgstr "Любой"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Router Itself"
++msgstr "Сам роутер"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Also proxy traffic that starts on the router (package downloads, update checks, other services)."
++msgstr "Проксировать и трафик, исходящий от самого роутера (загрузка пакетов, проверка обновлений, другие службы)."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Rules are checked from the top; the first enabled rule that matches a process decides, by its user, group or cgroup. The default first rule keeps system services such as dnsmasq and NTP direct."
++msgstr "Правила проверяются сверху вниз; решает первое включённое правило, подходящее процессу по пользователю, группе или cgroup. Первое правило по умолчанию пускает напрямую системные службы, такие как dnsmasq и NTP."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Only connections to these ports go through Nikki; everything else goes out directly. Space-separated ports or ranges."
++msgstr "Через Nikki идут только соединения на эти порты; всё остальное — напрямую. Порты или диапазоны через пробел."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Send traffic to mainland China addresses directly, without asking mihomo."
++msgstr "Отправлять трафик на адреса материкового Китая напрямую, без mihomo."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Packets carrying these DSCP marks (0-63) skip the proxy."
++msgstr "Пакеты с этими метками DSCP (0-63) идут мимо прокси."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Packets carrying these firewall marks skip the proxy, for example traffic of another VPN."
++msgstr "Пакеты с этими метками брандмауэра идут мимо прокси, например трафик другого VPN."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Advanced"
++msgstr "Дополнительно"
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Private and special-purpose ranges that are never proxied. The defaults cover them; add your own local subnets if they are not in the list."
++msgstr "Частные и служебные диапазоны, которые никогда не проксируются. Значения по умолчанию их охватывают; добавьте свои локальные подсети, если их нет в списке."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds to wait for the TUN interface to appear at start."
++msgstr "Сколько секунд ждать появления TUN-интерфейса при запуске."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Seconds between checks while waiting for the TUN interface."
++msgstr "Интервал в секундах между проверками при ожидании TUN-интерфейса."
++
++#: CleanWRT patches/feeds/nikki (0001, 0002)
++msgid "Which traffic goes through Nikki: your devices, the router itself, and what is always sent directly. Changes take effect with Save & Apply."
++msgstr "Какой трафик идёт через Nikki: ваши устройства, сам роутер и то, что всегда идёт напрямую. Изменения вступают в силу после «Сохранить и применить»."

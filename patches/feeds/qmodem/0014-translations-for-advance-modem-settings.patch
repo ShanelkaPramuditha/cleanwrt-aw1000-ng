@@ -1,0 +1,959 @@
+QModem Advance Modem Settings: Chinese and Russian for the new strings
+
+Patch 0012 added 75 strings to Advance Modem Settings (the cell list, the lock form, saved
+cells, auto-refresh, the auto-unlock switch, the Set IMEI and Reboot Modem help), and two of
+the page's older strings ("Scan", "-- custom ---") were never translated. luci-app-qmodem ships
+zh_Hans, zh-cn (an identical copy) and ru catalogs; none had them.
+
+The 77 entries are appended to each of the three files with a "#: CleanWRT" source note. The
+page builds some sentences from pieces around a number ("Unlock when the cell is lost for" N
+"minutes"), and those pieces are translated to read in that order. Every file still compiles
+with po2lmo; the duplicate entries msgfmt reports were already in the upstream files, and none
+is added. The translations were written for CleanWRT, not by native speakers; fixes are
+welcome.
+
+Applies to: https://github.com/FUjr/QModem.git @ 0988085b, after 0013.
+Upstream status: local to CleanWRT.
+
+--- a/luci/luci-app-qmodem/po/zh_Hans/qmodem.po
++++ b/luci/luci-app-qmodem/po/zh_Hans/qmodem.po
+@@ -884,3 +884,311 @@
+ 
+ msgid "If slot 2 config is not set,will use slot 1 config."
+ msgstr "如果未设置插槽2配置，将使用插槽1配置。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "No signal"
++msgstr "无信号"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Poor"
++msgstr "差"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Fair"
++msgstr "一般"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Good"
++msgstr "良好"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Excellent"
++msgstr "极好"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The cells (towers) the modem can hear right now, the one it is using first. Click a cell to fill in the lock form, or press Lock on its row. A locked modem stays on that cell even when its signal gets worse, so unlock it if the connection drops."
++msgstr "调制解调器当前能收到的小区（基站），正在使用的排在最前。点击某个小区可填入锁定表单，或点击该行的“锁定”。锁定后，即使信号变差，模块也会一直停留在该小区，连接中断时请解锁。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock"
++msgstr "解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Scan"
++msgstr "扫描"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-refresh off"
++msgstr "自动刷新：关"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 15 s"
++msgstr "每 15 秒"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 30 s"
++msgstr "每 30 秒"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 60 s"
++msgstr "每 60 秒"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-refresh"
++msgstr "自动刷新"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Signal"
++msgstr "信号"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Cell"
++msgstr "小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Network"
++msgstr "网络"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Press Scan to list the cells."
++msgstr "点击“扫描”列出小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock manually"
++msgstr "手动锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in when you click a cell. For 5G, check the band and SCS: the modem does not report them for neighbour cells, so they are worked out from the ARFCN."
++msgstr "点击小区时自动填写。对于 5G，请检查频段和 SCS：模块不会报告邻区的这些信息，它们是根据 ARFCN 推算的。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "e.g."
++msgstr "例如"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock again after the modem or router restarts"
++msgstr "模块或路由器重启后重新锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Network type"
++msgstr "网络类型"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Physical cell ID, the number that tells cells on one frequency apart."
++msgstr "物理小区 ID，用于区分同一频点上的小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The channel number of the cell's frequency (EARFCN for LTE)."
++msgstr "小区频率的信道号（LTE 为 EARFCN）。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The NR band number, without the n."
++msgstr "NR 频段号，不带 n。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Subcarrier spacing: usually 30 kHz on n41, n77, n78 and n79, 15 kHz on lower bands."
++msgstr "子载波间隔：n41、n77、n78 和 n79 通常为 30 kHz，较低频段为 15 kHz。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Keep after reboot"
++msgstr "重启后保持"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock when the cell is lost for"
++msgstr "当小区丢失持续"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "minutes"
++msgstr "分钟时解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock automatically"
++msgstr "自动解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Checked once a minute. When the modem stays without a usable cell this long, it is unlocked so it can find another cell."
++msgstr "每分钟检查一次。模块在这段时间内一直没有可用小区时，会被解锁以便寻找其他小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock"
++msgstr "锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Save cell"
++msgstr "保存小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Scanning..."
++msgstr "正在扫描..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem did not answer. Check that it is connected, then scan again."
++msgstr "模块没有响应。请检查它是否已连接，然后重新扫描。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "No cells to show."
++msgstr "没有可显示的小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Updated"
++msgstr "更新于"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Working..."
++msgstr "正在处理..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Sending to the modem..."
++msgstr "正在发送到模块..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem refused the request. Check the values and try again."
++msgstr "模块拒绝了请求。请检查数值后重试。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock the modem from its locked cell? It will choose a cell on its own again."
++msgstr "解除模块的小区锁定？它将重新自行选择小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlocked. The modem chooses its cell on its own again."
++msgstr "已解锁。模块将重新自行选择小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter a PCI from 0 to 1007."
++msgstr "请输入 0 到 1007 之间的 PCI。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter the ARFCN as a number."
++msgstr "请输入数字形式的 ARFCN。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter the NR band number, for example 78."
++msgstr "请输入 NR 频段号，例如 78。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock the modem to this cell?"
++msgstr "将模块锁定到此小区？"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The connection drops for a few seconds while the modem moves to it."
++msgstr "模块切换到该小区时，连接会中断几秒钟。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Locked to"
++msgstr "已锁定到"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "locked to"
++msgstr "已锁定到"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "not locked"
++msgstr "未锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-unlock after"
++msgstr "丢失小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "min without the cell"
++msgstr "分钟后自动解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "RSRP over the last"
++msgstr "最近"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "scans"
++msgstr "次扫描的 RSRP"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "to"
++msgstr "至"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Fill in PCI and ARFCN first: click a cell in the table."
++msgstr "请先填写 PCI 和 ARFCN：点击表格中的小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "A name for this cell, for example Home tower:"
++msgstr "为此小区命名，例如“家附近的基站”："
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Saved as"
++msgstr "已保存为"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Saved cells"
++msgstr "已保存的小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "click to fill in the form"
++msgstr "点击填入表单"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in"
++msgstr "已填入"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Press Lock to lock to it."
++msgstr "点击“锁定”即可锁定到它。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Forget this cell"
++msgstr "忘记此小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Forget"
++msgstr "忘记"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in from the link: check the values, then press Lock."
++msgstr "已根据链接填写：请检查数值，然后点击“锁定”。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem reports no cells. Try again in a moment."
++msgstr "模块没有报告任何小区。请稍后重试。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Click to fill in the lock form"
++msgstr "点击填入锁定表单"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour, other frequency"
++msgstr "邻区，不同频点"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour, same frequency"
++msgstr "邻区，同频点"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Locked"
++msgstr "已锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Cell ID"
++msgstr "小区 ID"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour cells do not report their network. The modem measures them on the frequencies your operator lists, so they are almost always the same network."
++msgstr "邻区不会报告所属网络。模块在运营商列出的频点上测量它们，因此几乎总是同一网络。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Worked out from the ARFCN: check it before locking."
++msgstr "根据 ARFCN 推算：锁定前请检查。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Check the band and SCS in the form below, then press Lock."
++msgstr "请在下方表单中检查频段和 SCS，然后点击“锁定”。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "15 digits"
++msgstr "15 位数字"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Soft reboot restarts the modem with an AT command. Hard reboot cuts its power, for when it no longer answers."
++msgstr "软重启通过 AT 命令重启模块。硬重启会断开其电源，用于模块已无响应时。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "-- custom ---"
++msgstr "-- 自定义 --"
+--- a/luci/luci-app-qmodem/po/zh-cn/qmodem.po
++++ b/luci/luci-app-qmodem/po/zh-cn/qmodem.po
+@@ -884,3 +884,311 @@
+ 
+ msgid "If slot 2 config is not set,will use slot 1 config."
+ msgstr "如果未设置插槽2配置，将使用插槽1配置。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "No signal"
++msgstr "无信号"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Poor"
++msgstr "差"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Fair"
++msgstr "一般"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Good"
++msgstr "良好"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Excellent"
++msgstr "极好"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The cells (towers) the modem can hear right now, the one it is using first. Click a cell to fill in the lock form, or press Lock on its row. A locked modem stays on that cell even when its signal gets worse, so unlock it if the connection drops."
++msgstr "调制解调器当前能收到的小区（基站），正在使用的排在最前。点击某个小区可填入锁定表单，或点击该行的“锁定”。锁定后，即使信号变差，模块也会一直停留在该小区，连接中断时请解锁。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock"
++msgstr "解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Scan"
++msgstr "扫描"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-refresh off"
++msgstr "自动刷新：关"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 15 s"
++msgstr "每 15 秒"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 30 s"
++msgstr "每 30 秒"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 60 s"
++msgstr "每 60 秒"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-refresh"
++msgstr "自动刷新"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Signal"
++msgstr "信号"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Cell"
++msgstr "小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Network"
++msgstr "网络"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Press Scan to list the cells."
++msgstr "点击“扫描”列出小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock manually"
++msgstr "手动锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in when you click a cell. For 5G, check the band and SCS: the modem does not report them for neighbour cells, so they are worked out from the ARFCN."
++msgstr "点击小区时自动填写。对于 5G，请检查频段和 SCS：模块不会报告邻区的这些信息，它们是根据 ARFCN 推算的。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "e.g."
++msgstr "例如"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock again after the modem or router restarts"
++msgstr "模块或路由器重启后重新锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Network type"
++msgstr "网络类型"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Physical cell ID, the number that tells cells on one frequency apart."
++msgstr "物理小区 ID，用于区分同一频点上的小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The channel number of the cell's frequency (EARFCN for LTE)."
++msgstr "小区频率的信道号（LTE 为 EARFCN）。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The NR band number, without the n."
++msgstr "NR 频段号，不带 n。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Subcarrier spacing: usually 30 kHz on n41, n77, n78 and n79, 15 kHz on lower bands."
++msgstr "子载波间隔：n41、n77、n78 和 n79 通常为 30 kHz，较低频段为 15 kHz。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Keep after reboot"
++msgstr "重启后保持"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock when the cell is lost for"
++msgstr "当小区丢失持续"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "minutes"
++msgstr "分钟时解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock automatically"
++msgstr "自动解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Checked once a minute. When the modem stays without a usable cell this long, it is unlocked so it can find another cell."
++msgstr "每分钟检查一次。模块在这段时间内一直没有可用小区时，会被解锁以便寻找其他小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock"
++msgstr "锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Save cell"
++msgstr "保存小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Scanning..."
++msgstr "正在扫描..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem did not answer. Check that it is connected, then scan again."
++msgstr "模块没有响应。请检查它是否已连接，然后重新扫描。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "No cells to show."
++msgstr "没有可显示的小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Updated"
++msgstr "更新于"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Working..."
++msgstr "正在处理..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Sending to the modem..."
++msgstr "正在发送到模块..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem refused the request. Check the values and try again."
++msgstr "模块拒绝了请求。请检查数值后重试。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock the modem from its locked cell? It will choose a cell on its own again."
++msgstr "解除模块的小区锁定？它将重新自行选择小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlocked. The modem chooses its cell on its own again."
++msgstr "已解锁。模块将重新自行选择小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter a PCI from 0 to 1007."
++msgstr "请输入 0 到 1007 之间的 PCI。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter the ARFCN as a number."
++msgstr "请输入数字形式的 ARFCN。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter the NR band number, for example 78."
++msgstr "请输入 NR 频段号，例如 78。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock the modem to this cell?"
++msgstr "将模块锁定到此小区？"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The connection drops for a few seconds while the modem moves to it."
++msgstr "模块切换到该小区时，连接会中断几秒钟。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Locked to"
++msgstr "已锁定到"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "locked to"
++msgstr "已锁定到"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "not locked"
++msgstr "未锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-unlock after"
++msgstr "丢失小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "min without the cell"
++msgstr "分钟后自动解锁"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "RSRP over the last"
++msgstr "最近"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "scans"
++msgstr "次扫描的 RSRP"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "to"
++msgstr "至"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Fill in PCI and ARFCN first: click a cell in the table."
++msgstr "请先填写 PCI 和 ARFCN：点击表格中的小区。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "A name for this cell, for example Home tower:"
++msgstr "为此小区命名，例如“家附近的基站”："
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Saved as"
++msgstr "已保存为"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Saved cells"
++msgstr "已保存的小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "click to fill in the form"
++msgstr "点击填入表单"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in"
++msgstr "已填入"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Press Lock to lock to it."
++msgstr "点击“锁定”即可锁定到它。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Forget this cell"
++msgstr "忘记此小区"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Forget"
++msgstr "忘记"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in from the link: check the values, then press Lock."
++msgstr "已根据链接填写：请检查数值，然后点击“锁定”。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem reports no cells. Try again in a moment."
++msgstr "模块没有报告任何小区。请稍后重试。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Click to fill in the lock form"
++msgstr "点击填入锁定表单"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour, other frequency"
++msgstr "邻区，不同频点"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour, same frequency"
++msgstr "邻区，同频点"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Locked"
++msgstr "已锁定"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Cell ID"
++msgstr "小区 ID"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour cells do not report their network. The modem measures them on the frequencies your operator lists, so they are almost always the same network."
++msgstr "邻区不会报告所属网络。模块在运营商列出的频点上测量它们，因此几乎总是同一网络。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Worked out from the ARFCN: check it before locking."
++msgstr "根据 ARFCN 推算：锁定前请检查。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Check the band and SCS in the form below, then press Lock."
++msgstr "请在下方表单中检查频段和 SCS，然后点击“锁定”。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "15 digits"
++msgstr "15 位数字"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Soft reboot restarts the modem with an AT command. Hard reboot cuts its power, for when it no longer answers."
++msgstr "软重启通过 AT 命令重启模块。硬重启会断开其电源，用于模块已无响应时。"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "-- custom ---"
++msgstr "-- 自定义 --"
+--- a/luci/luci-app-qmodem/po/ru/modem.po
++++ b/luci/luci-app-qmodem/po/ru/modem.po
+@@ -602,3 +602,311 @@
+ 
+ msgid "Clear AT Command"
+ msgstr "Очистить команду AT"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "No signal"
++msgstr "Нет сигнала"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Poor"
++msgstr "Плохой"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Fair"
++msgstr "Средний"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Good"
++msgstr "Хороший"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Excellent"
++msgstr "Отличный"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The cells (towers) the modem can hear right now, the one it is using first. Click a cell to fill in the lock form, or press Lock on its row. A locked modem stays on that cell even when its signal gets worse, so unlock it if the connection drops."
++msgstr "Соты (вышки), которые модем слышит сейчас; та, что используется, — первая. Нажмите на соту, чтобы заполнить форму блокировки, или нажмите «Заблокировать» в её строке. Заблокированный модем остаётся на этой соте, даже когда сигнал ухудшается, поэтому разблокируйте его, если связь пропала."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock"
++msgstr "Разблокировать"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Scan"
++msgstr "Сканировать"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-refresh off"
++msgstr "Автообновление выкл."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 15 s"
++msgstr "Каждые 15 с"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 30 s"
++msgstr "Каждые 30 с"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Every 60 s"
++msgstr "Каждые 60 с"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-refresh"
++msgstr "Автообновление"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Signal"
++msgstr "Сигнал"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Cell"
++msgstr "Сота"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Network"
++msgstr "Сеть"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Press Scan to list the cells."
++msgstr "Нажмите «Сканировать», чтобы увидеть список сот."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock manually"
++msgstr "Блокировка вручную"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in when you click a cell. For 5G, check the band and SCS: the modem does not report them for neighbour cells, so they are worked out from the ARFCN."
++msgstr "Заполняется при нажатии на соту. Для 5G проверьте диапазон и SCS: модем не сообщает их для соседних сот, они вычисляются по ARFCN."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "e.g."
++msgstr "например"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock again after the modem or router restarts"
++msgstr "Блокировать снова после перезапуска модема или роутера"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Network type"
++msgstr "Тип сети"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Physical cell ID, the number that tells cells on one frequency apart."
++msgstr "Физический идентификатор соты — номер, отличающий соты на одной частоте."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The channel number of the cell's frequency (EARFCN for LTE)."
++msgstr "Номер канала частоты соты (EARFCN для LTE)."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The NR band number, without the n."
++msgstr "Номер диапазона NR, без буквы n."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Subcarrier spacing: usually 30 kHz on n41, n77, n78 and n79, 15 kHz on lower bands."
++msgstr "Разнос поднесущих: обычно 30 кГц в n41, n77, n78 и n79, 15 кГц в более низких диапазонах."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Keep after reboot"
++msgstr "Сохранять после перезагрузки"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock when the cell is lost for"
++msgstr "Разблокировать, если сота потеряна на"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "minutes"
++msgstr "мин."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock automatically"
++msgstr "Разблокировать автоматически"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Checked once a minute. When the modem stays without a usable cell this long, it is unlocked so it can find another cell."
++msgstr "Проверка раз в минуту. Если модем столько времени остаётся без пригодной соты, он разблокируется, чтобы найти другую."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock"
++msgstr "Заблокировать"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Save cell"
++msgstr "Сохранить соту"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Scanning..."
++msgstr "Сканирование..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem did not answer. Check that it is connected, then scan again."
++msgstr "Модем не ответил. Проверьте, что он подключён, и повторите сканирование."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "No cells to show."
++msgstr "Нет сот для показа."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Updated"
++msgstr "Обновлено в"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Working..."
++msgstr "Выполняется..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Sending to the modem..."
++msgstr "Отправка модему..."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem refused the request. Check the values and try again."
++msgstr "Модем отклонил запрос. Проверьте значения и попробуйте снова."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlock the modem from its locked cell? It will choose a cell on its own again."
++msgstr "Снять блокировку соты? Модем снова будет сам выбирать соту."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Unlocked. The modem chooses its cell on its own again."
++msgstr "Разблокировано. Модем снова сам выбирает соту."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter a PCI from 0 to 1007."
++msgstr "Введите PCI от 0 до 1007."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter the ARFCN as a number."
++msgstr "Введите ARFCN числом."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Enter the NR band number, for example 78."
++msgstr "Введите номер диапазона NR, например 78."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Lock the modem to this cell?"
++msgstr "Заблокировать модем на этой соте?"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The connection drops for a few seconds while the modem moves to it."
++msgstr "Связь прервётся на несколько секунд, пока модем переходит на неё."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Locked to"
++msgstr "Заблокировано на"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "locked to"
++msgstr "заблокирован на"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "not locked"
++msgstr "не заблокирован"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Auto-unlock after"
++msgstr "Автоматическая разблокировка через"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "min without the cell"
++msgstr "мин. без соты"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "RSRP over the last"
++msgstr "RSRP за последние"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "scans"
++msgstr "сканирований"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "to"
++msgstr "до"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Fill in PCI and ARFCN first: click a cell in the table."
++msgstr "Сначала заполните PCI и ARFCN: нажмите на соту в таблице."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "A name for this cell, for example Home tower:"
++msgstr "Название для этой соты, например «Домашняя вышка»:"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Saved as"
++msgstr "Сохранено как"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Saved cells"
++msgstr "Сохранённые соты"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "click to fill in the form"
++msgstr "нажмите, чтобы заполнить форму"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in"
++msgstr "Заполнено:"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Press Lock to lock to it."
++msgstr "Нажмите «Заблокировать», чтобы заблокировать на ней."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Forget this cell"
++msgstr "Забыть эту соту"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Forget"
++msgstr "Забыть"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Filled in from the link: check the values, then press Lock."
++msgstr "Заполнено по ссылке: проверьте значения и нажмите «Заблокировать»."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "The modem reports no cells. Try again in a moment."
++msgstr "Модем не сообщает ни одной соты. Попробуйте чуть позже."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Click to fill in the lock form"
++msgstr "Нажмите, чтобы заполнить форму блокировки"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour, other frequency"
++msgstr "Соседняя, другая частота"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour, same frequency"
++msgstr "Соседняя, та же частота"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Locked"
++msgstr "Заблокирована"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Cell ID"
++msgstr "ID соты"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Neighbour cells do not report their network. The modem measures them on the frequencies your operator lists, so they are almost always the same network."
++msgstr "Соседние соты не сообщают, к какой сети относятся. Модем измеряет их на частотах, которые указывает ваш оператор, поэтому почти всегда это та же сеть."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Worked out from the ARFCN: check it before locking."
++msgstr "Вычислено по ARFCN: проверьте перед блокировкой."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Check the band and SCS in the form below, then press Lock."
++msgstr "Проверьте диапазон и SCS в форме ниже, затем нажмите «Заблокировать»."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "15 digits"
++msgstr "15 цифр"
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "Soft reboot restarts the modem with an AT command. Hard reboot cuts its power, for when it no longer answers."
++msgstr "Мягкая перезагрузка перезапускает модем AT-командой. Жёсткая отключает ему питание — для случая, когда он больше не отвечает."
++
++#: CleanWRT patches/feeds/qmodem (0012)
++msgid "-- custom ---"
++msgstr "-- свой вариант --"

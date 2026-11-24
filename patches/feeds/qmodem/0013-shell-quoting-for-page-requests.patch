@@ -1,0 +1,156 @@
+QModem pages: request values reach the shell quoted
+
+The LuCI controller built its shell commands by pasting request values into them. In
+modemCtrl, the action and the modem section name went in unquoted and params inside double
+quotes, where the shell still expands $(...), backticks and $VAR; sendATCommand pasted the AT
+port and command in unquoted. Any value with a space broke the request (an AT command such as
+AT+QCFG="band", 0 lost everything after the space), and a crafted value ran as a shell command
+as root. The pages need a logged-in administrator, so this was not reachable from outside, but
+it turned a page form into a root shell and broke ordinary input.
+
+- controller/qmodem.lua: every request value goes to the shell single-quoted (shq). The action
+  and the section name must be letters, digits, _ and - only, or the request gets a 400. The
+  pages send params JSON-encoded one level more than the script reads; the double quotes used
+  to strip that level by accident, so it is now taken off explicitly (a params value that
+  parses as a JSON string is replaced by that string). Every existing caller - Lock Band, Rat
+  Prefer, Dial Mode, Set IMEI, Neighbor Cell, Reboot Modem, AT Debug - sends exactly what it
+  sent before to the script.
+- modem_ctrl.sh: "$3" is quoted where it is handed to set_imei, set_lockband, set_mode,
+  set_neighborcell, set_network_prefer, set_sms_storage and set_sim_slot, and in the reboot,
+  send_at and send_sms branches, so a value keeps its spaces and a * in it is not a glob.
+
+Applies to: https://github.com/FUjr/QModem.git @ 0988085b, after 0012.
+Upstream status: local to CleanWRT.
+
+--- a/luci/luci-app-qmodem/luasrc/controller/qmodem.lua
++++ b/luci/luci-app-qmodem/luasrc/controller/qmodem.lua
+@@ -9,6 +9,17 @@
+ local run_path="/tmp/run/qmodem/"
+ local modem_ctrl = "/usr/share/qmodem/modem_ctrl.sh "
+ 
++-- CleanWRT: values from a request reach the shell single-quoted, so spaces,
++-- quotes, $ and backticks in them are data, never shell syntax
++local function shq(s)
++	return "'" .. (tostring(s or ""):gsub("'", "'\\''")) .. "'"
++end
++
++-- an action or a modem section name: letters, digits, _ and - only
++local function is_name(s)
++	return type(s) == "string" and s:match("^[%w_%-]+$") ~= nil
++end
++
+ function index()
+     if not nixio.fs.access("/etc/config/qmodem") then
+         return
+@@ -72,10 +83,26 @@
+ 	local cfg_id = http.formvalue("cfg")
+ 	local params = http.formvalue("params")
+ 	local translate = http.formvalue("translate")
++	-- CleanWRT: the action and the section name were pasted into the command
++	-- unquoted, and params inside double quotes, where the shell still expands
++	-- $(...), backticks and $VAR. Refuse a malformed name; quote every value.
++	if not is_name(action) or not is_name(cfg_id) then
++		luci.http.status(400, "Bad Request")
++		luci.http.prepare_content("application/json")
++		luci.http.write('{"error":"invalid action or cfg"}')
++		return
++	end
+ 	if params then
+-		result = shell(modem_ctrl..action.." "..cfg_id.." ".."\""..params.."\"")
+-	else 
+-		result = shell(modem_ctrl..action.." "..cfg_id)
++		-- The pages send params JSON-encoded one level more than the script
++		-- reads (a JSON string holding the JSON). The double quotes used to strip
++		-- that level as a side effect; take it off here instead.
++		local inner = json.parse(params)
++		if type(inner) == "string" then
++			params = inner
++		end
++		result = shell(modem_ctrl..shq(action).." "..shq(cfg_id).." "..shq(params))
++	else
++		result = shell(modem_ctrl..shq(action).." "..shq(cfg_id))
+ 	end
+ 	if translate == "1" then
+ 		modem_more_info = json.parse(result)
+@@ -93,7 +120,8 @@
+ 	at_command AT命令
+ ]]
+ function at(at_port,at_command)
+-	local command="source "..script_path.."modem_util.sh && at "..at_port.." "..at_command
++	-- CleanWRT: the port and the command are request values: quote them
++	local command="source "..script_path.."modem_util.sh && at "..shq(at_port).." "..shq(at_command)
+ 	local result=shell(command)
+ 	result=string.gsub(result, "\r", "")
+ 	return result
+--- a/application/qmodem/files/usr/share/qmodem/modem_ctrl.sh
++++ b/application/qmodem/files/usr/share/qmodem/modem_ctrl.sh
+@@ -179,8 +179,8 @@
+         rm -rf /tmp/cache_sms_$2
+         ;;
+     "do_reboot")
+-        reboot_method=$(echo $3 |jq -r '.method')
+-        echo $3 > /tmp/555/reboot
++        reboot_method=$(echo "$3" |jq -r '.method')
++        echo "$3" > /tmp/555/reboot
+         case $reboot_method in
+             "hard")
+                 hard_reboot
+@@ -251,7 +251,8 @@
+     "send_at")
+         cmd=$(echo "$3" | jq -r '.at')
+         port=$(echo "$3" | jq -r '.port')
+-        res=$(at $port $cmd)
++        # CleanWRT: quoted, so an AT command with spaces or * reaches the modem whole
++        res=$(at "$port" "$cmd")
+         json_add_object at_cfg
+         if [ "$?" == 0 ]; then
+             json_add_string status "1"
+@@ -276,8 +277,8 @@
+         ;;
+     "send_sms")
+         cmd_json=$3
+-        phone_number=$(echo $cmd_json | jq -r '.phone_number')
+-        message_content=$(echo $cmd_json | jq -r '.message_content')
++        phone_number=$(echo "$cmd_json" | jq -r '.phone_number')
++        message_content=$(echo "$cmd_json" | jq -r '.message_content')
+         [ -n "$sms_at_port" ] && at_port=$sms_at_port
+         sms_tool_q -d $at_port send "$phone_number" "$message_content" > /dev/null
+         json_select result
+@@ -291,22 +292,22 @@
+         json_close_object
+         ;;
+     "set_imei")
+-        set_imei $3
++        set_imei "$3"
+         ;;
+     "set_lockband")
+-        set_lockband $3
++        set_lockband "$3"
+         ;;
+     "set_mode")
+-        set_mode $3
++        set_mode "$3"
+         ;;
+     "set_neighborcell")
+-        set_neighborcell $3
++        set_neighborcell "$3"
+         ;;
+     "set_network_prefer")
+-        set_network_prefer $3
++        set_network_prefer "$3"
+         ;;
+     "set_sms_storage")
+-        set_sms_storage $3
++        set_sms_storage "$3"
+         ;;
+     "sim_info")
+         cache_file="/tmp/cache_$1_$2"
+@@ -320,7 +321,7 @@
+         get_sim_slot
+         ;;
+     "set_sim_slot")
+-        set_sim_slot $3
++        set_sim_slot "$3"
+         ;;
+ esac
+ #optionally keep a golden snapshot of the final JSON for fixture tests

@@ -72,6 +72,11 @@ that links to each step:
    the Overview page.
 3. On *Overview*, tick **Enable** and press **Save & Apply**.
 
+To keep a subscription current, open it with **Edit**, tick **Update automatically** and choose
+**Update every** (1 to 12 hours, or once a day at 04:23). While Nikki runs it is downloaded on that
+schedule. When it is the subscription in use and the download succeeds, Nikki restarts to use it,
+so connections drop for a moment; a failed download keeps the working copy.
+
 Every Nikki page shows whether Nikki is **Running**, **Stopped** (enabled, but the core is not
 running: see *Logs*) or **Disabled**. Every page also has **Restart** and **Open Dashboard**. The
 dashboard is Zashboard, already installed, and LuCI fills in the secret. There you switch proxies
@@ -80,7 +85,7 @@ and groups, run latency tests, and watch connections, rules and logs live.
 | Page | What it is for |
 |---|---|
 | *Overview* | on/off, the profile in use, startup and scheduled restart, process limits |
-| *Profiles* | profile files (upload, use, edit, download, delete) and subscriptions with their data use and expiry |
+| *Profiles* | profile files (upload, use, edit, download, delete) and subscriptions with their data use, expiry and automatic updates |
 | *Proxy* | which traffic goes through Nikki: LAN devices, the router itself, ports and addresses that bypass it |
 | *Mixin* | overrides parts of the profile without editing it: ports, DNS mode (fake-ip by default), TUN, the dashboard address. A setting left at *Unmodified* keeps the profile's value |
 | *Editor* | the YAML files themselves. It says when a file is regenerated, so edits to it would not last |

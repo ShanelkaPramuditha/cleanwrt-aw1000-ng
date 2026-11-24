@@ -24,12 +24,24 @@ The tab is rebuilt:
 - The form has real labels and help text, checks PCI (0-1007), ARFCN and band before sending,
   and has a "Keep after reboot" switch for QModem's existing boot hook
   (lockcell_boot_hook_*), reflecting its saved state.
+- "Unlock automatically": the lock request also saves lockcell_guard_enabled and
+  lockcell_guard_minutes on the modem's section, which CleanWRT's cw-cell-lock-guard service
+  reads; the summary says when the guard is on.
+- Auto-refresh (off, 15, 30 or 60 s, remembered in the browser) scans again while the tab is open
+  and pauses when it is hidden. Each scan adds to a short RSRP history per cell, drawn as a
+  sparkline in the Signal column (kept for the browser tab only).
+- "Save cell" keeps a named cell in the browser; saved cells show as chips above the form (a
+  click fills it in) and as a star tag on their row.
+- ?tab=NeighborCell&rat=&pci=&arfcn=[&band=] opens the tab with that cell filled in (3ginfo
+  patch 0007 links here); nothing is locked until Lock is pressed.
 
 Backend (vendor/quectel.sh, Qualcomm platform): RSRQ and RSRP are read from the right fields,
 RSSI and SINR are added, each line starts with empty values so one cell's numbers never carry
 over to the next, and get_neighborcell also returns "operator" (AT+COPS?) and a "serving"
-array parsed from AT+QENG="servingcell" (LTE, NR5G-SA, and EN-DC's LTE + NR5G-NSA). Existing
-keys keep their names and meaning, so other readers of this reply are unaffected.
+array parsed from AT+QENG="servingcell" (LTE, NR5G-SA, and EN-DC's LTE + NR5G-NSA), the
+registration "state" (NOCONN, CONNECT, SEARCH, LIMSRV) and the guard settings. When AT+COPS?
+answers with digits, the operator's name is taken from AT+QSPN. Existing keys keep their names
+and meaning, so other readers of this reply are unaffected.
 
 The other tabs: a row of buttons at the foot of a card no longer sits on the card's edge
 (Vantage pulls a card's last table into its bottom padding; createBtnRow rows get it back,
@@ -83,7 +95,7 @@ Upstream status: local to CleanWRT.
  		}
  
  		createCheckbox(rat){
-@@ -756,228 +768,497 @@
+@@ -756,228 +768,707 @@
  		}
  	}
  
@@ -172,11 +184,33 @@ Upstream status: local to CleanWRT.
 +			this.scanned = false;
 +			this.busy = false;
 +			this.selected = null;
++			this.timer = null;
++			this.history = this.load_store(sessionStorage, 'qm-nc-history-' + cfg_id, {});
++			this.saved = this.load_store(localStorage, 'qm-nc-saved', []);
 +			this.render();
  		}
  
 -		scan_neighborcell(){
 -			this.get_config();
++		// browser storage that may be missing or full: never let it break the tab
++		load_store(store, key, fallback){
++			try {
++				const v = JSON.parse(store.getItem(key));
++				return v && typeof v == 'object' ? v : fallback;
++			} catch (e) {
++				return fallback;
++			}
+ 		}
+ 
+-		// pause(){
+-		// 	if (this.task != null) {
+-		// 		clearInterval(this.task);
+-		// 	}
+-		// }
++		save_store(store, key, value){
++			try { store.setItem(key, JSON.stringify(value)); } catch (e) { }
++		}
++
 +		el(tag, cls, text){
 +			const e = document.createElement(tag);
 +			if (cls) e.className = cls;
@@ -199,18 +233,7 @@ Upstream status: local to CleanWRT.
 +			if (help) field.appendChild(this.el('div', 'cbi-value-description', help));
 +			row.append(title, field);
 +			return row;
- 		}
- 
--		// pause(){
--		// 	if (this.task != null) {
--		// 		clearInterval(this.task);
--		// 	}
--		// }
-+		render(){
-+			const fs = this.fieldset;
-+			fs.classList.add('qm-nc');
-+
-+			fs.appendChild(this.createDescription("<%_The cells (towers) the modem can hear right now, the one it is using first. Click a cell to fill in the lock form, or press Lock on its row. A locked modem stays on that cell even when its signal gets worse, so unlock it if the connection drops.%>"));
++		}
  
 -		// update(){
 -			
@@ -218,6 +241,12 @@ Upstream status: local to CleanWRT.
 -		// 		this.get_config();
 -		// 	},10000);
 -		// }
++		render(){
++			const fs = this.fieldset;
++			fs.classList.add('qm-nc');
++
++			fs.appendChild(this.createDescription("<%_The cells (towers) the modem can hear right now, the one it is using first. Click a cell to fill in the lock form, or press Lock on its row. A locked modem stays on that cell even when its signal gets worse, so unlock it if the connection drops.%>"));
++
 +			// the network, the lock status, and Scan / Unlock
 +			const summary = this.el('div', 'qm-nc-summary');
 +			this.net_node = this.el('div', 'qm-nc-net');
@@ -229,7 +258,18 @@ Upstream status: local to CleanWRT.
 +			this.unlock_btn.style.display = 'none';
 +			this.scan_btn = this.createBTN("<%_Scan%>", () => this.scan());
 +			this.scan_btn.classList.add('cbi-button-action');
-+			tools.append(this.time_node, this.unlock_btn, this.scan_btn);
++			// scan again on its own while the tab is open
++			this.refresh_input = this.createDroplist({ 0: "<%_Auto-refresh off%>", 15: "<%_Every 15 s%>", 30: "<%_Every 30 s%>", 60: "<%_Every 60 s%>" });
++			this.refresh_input.classList.add('qm-nc-refresh');
++			this.refresh_input.setAttribute('aria-label', "<%_Auto-refresh%>");
++			let every = 0;
++			try { every = Number(localStorage.getItem('qm-nc-refresh')) || 0; } catch (e) { }
++			this.refresh_input.value = [ 15, 30, 60 ].includes(every) ? String(every) : '0';
++			this.refresh_input.addEventListener('change', () => {
++				this.save_store(localStorage, 'qm-nc-refresh', Number(this.refresh_input.value));
++				this.start_timer();
++			});
++			tools.append(this.time_node, this.refresh_input, this.unlock_btn, this.scan_btn);
 +			summary.append(this.net_node, this.lock_node, tools);
 +			fs.appendChild(summary);
 +
@@ -256,6 +296,10 @@ Upstream status: local to CleanWRT.
 +			wrap.appendChild(table);
 +			fs.appendChild(wrap);
 +			this.render_empty("<%_Press Scan to list the cells.%>");
++
++			// saved cells: a click fills in the form
++			this.saved_node = this.el('div', 'qm-nc-saved');
++			fs.appendChild(this.saved_node);
 +
 +			// the lock form
 +			const form = this.el('div', 'qm-nc-form');
@@ -288,15 +332,33 @@ Upstream status: local to CleanWRT.
 +			form.appendChild(this.scs_row);
 +			form.appendChild(this.field("<%_Keep after reboot%>", boot));
 +
++			// the auto-unlock guard (/usr/sbin/cw-cell-lock-guard)
++			this.guard_input = this.createCheckbox("1");
++			this.guard_input.id = 'qm-nc-guard-' + this.cfg_id;
++			this.guard_min = this.createInput("guard_minutes", "5", "5");
++			this.guard_min.type = 'number';
++			this.guard_min.min = '1';
++			this.guard_min.max = '120';
++			this.guard_min.classList.add('qm-nc-minutes');
++			const guard = this.el('div', 'qm-nc-guard');
++			const guardLabel = this.el('label', 'qm-nc-check');
++			guardLabel.htmlFor = this.guard_input.id;
++			guardLabel.append(this.guard_input, this.el('span', null, "<%_Unlock when the cell is lost for%>"));
++			guard.append(guardLabel, this.guard_min, this.el('span', null, "<%_minutes%>"));
++			form.appendChild(this.field("<%_Unlock automatically%>", guard,
++				"<%_Checked once a minute. When the modem stays without a usable cell this long, it is unlocked so it can find another cell.%>"));
++
 +			this.lock_btn = this.createBTN("<%_Lock%>", () => this.lock_from_form());
 +			this.lock_btn.classList.add('cbi-button-apply');
++			this.save_btn = this.createBTN("<%_Save cell%>", () => this.save_cell());
 +			const actions = this.el('div', 'qm-actions');
-+			actions.append(this.lock_btn);
++			actions.append(this.lock_btn, this.save_btn);
 +			form.appendChild(actions);
 +			fs.appendChild(form);
 +
 +			this.nr_options();
 +			this.render_summary();
++			this.render_saved();
 +		}
  
  		nr_options(){
@@ -394,6 +456,7 @@ Upstream status: local to CleanWRT.
 +		// the tab opens with a scan, so the table is never empty for no reason
 +		update(){
 +			if (!this.scanned) this.scan();
++			this.start_timer();
 +		}
  
 -			var submit_btn = this.createBTN("<%:Submit%>",() => {
@@ -403,6 +466,19 @@ Upstream status: local to CleanWRT.
 -					"arfcn": this.arfcn_input.value,
 -					"band": this.band_input.value,
 -					"scs": this.scs_input.selectedIndex
++		pause(){
++			if (this.timer) clearInterval(this.timer);
++			this.timer = null;
++		}
++
++		start_timer(){
++			this.pause();
++			const sec = Number(this.refresh_input.value);
++			if (sec > 0 && this.fieldset.style.display != 'none') {
++				this.timer = setInterval(() => { if (!document.hidden) this.scan(); }, sec * 1000);
++			}
++		}
++
 +		notify(text, kind){
 +			this.msg.textContent = text;
 +			this.msg.className = 'qm-nc-msg' + (kind ? ' is-' + kind : '');
@@ -433,6 +509,12 @@ Upstream status: local to CleanWRT.
 +				this.time_node.textContent = "<%_Updated%> " + new Date().toLocaleTimeString();
 +				const hook = this.config.lockcell_boot_hook;
 +				this.boot_input.checked = !!(hook && (hook.enabled === true || hook.enabled == 1));
++				const guard = this.config.lockcell_guard;
++				if (guard) {
++					this.guard_input.checked = guard.enabled === true || guard.enabled == 1;
++					if (/^\d+$/.test(String(guard.minutes))) this.guard_min.value = guard.minutes;
++				}
++				this.record_history();
 +				this.render_summary();
 +				this.render_cells();
  			});
@@ -470,15 +552,6 @@ Upstream status: local to CleanWRT.
 -			while (this.neighborcell_table.querySelector("tr")) {
 -				let remove = this.neighborcell_table.querySelector("tr")
 -				this.neighborcell_table.removeChild(remove);
--			}
--			var nr,lte,tr_left
--			nr = this.config.NR;
--			lte = this.config.LTE;
--			for (let cell_info of nr) {
--				this.create_nc_tr(1,cell_info);
--				}
--			for (let cell_info of lte) {
--				this.create_nc_tr(0,cell_info);
 +		unlock(){
 +			if (!window.confirm("<%_Unlock the modem from its locked cell? It will choose a cell on its own again.%>")) return;
 +			this.send_lock({ "rat": 0, "pci": "", "arfcn": "", "band": "", "scs": 0, "en_boot_hook": "0" },
@@ -495,6 +568,19 @@ Upstream status: local to CleanWRT.
 +				this.pci_input.focus();
 +				return;
  			}
+-			var nr,lte,tr_left
+-			nr = this.config.NR;
+-			lte = this.config.LTE;
+-			for (let cell_info of nr) {
+-				this.create_nc_tr(1,cell_info);
+-				}
+-			for (let cell_info of lte) {
+-				this.create_nc_tr(0,cell_info);
++			if (!/^\d+$/.test(arfcn)) {
++				this.notify("<%_Enter the ARFCN as a number.%>", 'err');
++				this.arfcn_input.focus();
++				return;
+ 			}
 -
 -		}
 -
@@ -502,9 +588,9 @@ Upstream status: local to CleanWRT.
 -			//clear status_table
 -			while (this.status_table.querySelector("tr")) {
 -				this.status_table.removeChild(this.status_table.querySelector("tr"));
-+			if (!/^\d+$/.test(arfcn)) {
-+				this.notify("<%_Enter the ARFCN as a number.%>", 'err');
-+				this.arfcn_input.focus();
++			if (rat == 1 && !/^\d+$/.test(band)) {
++				this.notify("<%_Enter the NR band number, for example 78.%>", 'err');
++				this.band_input.focus();
 +				return;
  			}
 -			var status = this.config.lockcell_status;
@@ -512,17 +598,14 @@ Upstream status: local to CleanWRT.
 -				if (status[key] != ""){
 -					this.create_status_tr(key + ":" + status[key].toUpperCase());
 -				}
-+			if (rat == 1 && !/^\d+$/.test(band)) {
-+				this.notify("<%_Enter the NR band number, for example 78.%>", 'err');
-+				this.band_input.focus();
-+				return;
- 			}
 +			const what = (rat ? 'NR' : 'LTE') + ' PCI ' + pci + ', ARFCN ' + arfcn + (rat ? ', n' + band : '');
 +			if (!window.confirm("<%_Lock the modem to this cell?%>\n\n" + what + "\n\n<%_The connection drops for a few seconds while the modem moves to it.%>")) return;
 +			this.send_lock({
 +				"rat": rat, "pci": pci, "arfcn": arfcn, "band": rat ? band : "",
 +				"scs": rat ? Number(this.scs_input.value) : 0,
-+				"en_boot_hook": this.boot_input.checked ? "1" : "0"
++				"en_boot_hook": this.boot_input.checked ? "1" : "0",
++				"guard": this.guard_input.checked ? "1" : "0",
++				"guard_minutes": String(Math.min(120, Math.max(1, parseInt(this.guard_min.value, 10) || 5)))
 +			}, "<%_Locked to%> " + what + ".");
 +		}
 +
@@ -622,7 +705,141 @@ Upstream status: local to CleanWRT.
 +					: rat + ' <%_not locked%>';
 +				this.lock_node.appendChild(chip);
 +			}
++			const guard = c.lockcell_guard;
++			if (any && guard && (guard.enabled === true || guard.enabled == 1)) {
++				this.lock_node.appendChild(this.el('span', 'qm-nc-chip',
++					"<%_Auto-unlock after%> " + (guard.minutes || 5) + " <%_min without the cell%>"));
++			}
 +			this.unlock_btn.style.display = any ? '' : 'none';
++		}
++
++		// ---- signal history, kept for this browser tab (sessionStorage)
++		record_history(){
++			const now = Date.now();
++			for (const cell of this.cells()) {
++				const v = qmNum(cell.rsrp);
++				if (isNaN(v)) continue;
++				const list = this.history[cell.key] || (this.history[cell.key] = []);
++				list.push([ now, v ]);
++				if (list.length > 40) list.splice(0, list.length - 40);
++			}
++			// forget cells not heard for an hour
++			for (const key in this.history) {
++				const list = this.history[key];
++				if (!list.length || now - list[list.length - 1][0] > 3600000) delete this.history[key];
++			}
++			this.save_store(sessionStorage, 'qm-nc-history-' + this.cfg_id, this.history);
++		}
++
++		sparkline(key){
++			const list = this.history[key] || [];
++			if (list.length < 2) return null;
++			const NS = 'http://www.w3.org/2000/svg';
++			const w = 56, h = 16, lo = -125, hi = -60;
++			const svg = document.createElementNS(NS, 'svg');
++			svg.setAttribute('class', 'qm-spark');
++			svg.setAttribute('width', w);
++			svg.setAttribute('height', h);
++			svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
++			svg.setAttribute('aria-hidden', 'true');
++			const pts = list.map((p, i) => {
++				const x = list.length == 1 ? w : (i / (list.length - 1)) * (w - 2) + 1;
++				const y = h - 1 - (Math.min(hi, Math.max(lo, p[1])) - lo) / (hi - lo) * (h - 2);
++				return x.toFixed(1) + ',' + y.toFixed(1);
++			});
++			const line = document.createElementNS(NS, 'polyline');
++			line.setAttribute('points', pts.join(' '));
++			svg.appendChild(line);
++			return svg;
++		}
++
++		history_title(key){
++			const list = this.history[key] || [];
++			if (list.length < 2) return '';
++			const vals = list.map(p => p[1]);
++			return "<%_RSRP over the last%> " + list.length + " <%_scans%>: " + Math.min.apply(null, vals) + " <%_to%> " + Math.max.apply(null, vals) + ' dBm';
++		}
++
++		// ---- saved cells, kept in this browser (localStorage)
++		save_cell(){
++			const rat = this.rat_input.value == '1' ? 'NR' : 'LTE';
++			const pci = this.pci_input.value.trim();
++			const arfcn = this.arfcn_input.value.trim();
++			if (!/^\d+$/.test(pci) || !/^\d+$/.test(arfcn)) {
++				this.notify("<%_Fill in PCI and ARFCN first: click a cell in the table.%>", 'err');
++				return;
++			}
++			const name = window.prompt("<%_A name for this cell, for example Home tower:%>", rat + ' ' + pci);
++			if (name == null || !name.trim()) return;
++			const entry = { name: name.trim().slice(0, 40), rat: rat, pci: pci, arfcn: arfcn,
++				band: rat == 'NR' ? this.band_input.value.trim().replace(/^n/i, '') : '',
++				scs: rat == 'NR' ? Number(this.scs_input.value) : null };
++			this.saved = this.saved.filter(x => !(x.rat == entry.rat && x.pci == entry.pci && x.arfcn == entry.arfcn));
++			this.saved.push(entry);
++			this.save_store(localStorage, 'qm-nc-saved', this.saved);
++			this.render_saved();
++			if (this.config) this.render_cells();
++			this.notify("<%_Saved as%> " + entry.name + ".", 'ok');
++		}
++
++		saved_name(cell){
++			const s = this.saved.find(x => x.rat == cell.rat && x.pci == cell.pci && x.arfcn == cell.arfcn);
++			return s ? s.name : null;
++		}
++
++		render_saved(){
++			this.saved_node.textContent = '';
++			if (!this.saved.length) {
++				this.saved_node.style.display = 'none';
++				return;
++			}
++			this.saved_node.style.display = '';
++			this.saved_node.appendChild(this.el('span', 'qm-nc-label', "<%_Saved cells%>"));
++			for (const entry of this.saved) {
++				const chip = this.el('span', 'qm-nc-chip qm-nc-saved-chip');
++				const pick = this.el('button', 'qm-nc-chip-btn', entry.name);
++				pick.type = 'button';
++				pick.title = entry.rat + ' PCI ' + entry.pci + ', ARFCN ' + entry.arfcn + (entry.band ? ', n' + entry.band : '') + ' - ' + "<%_click to fill in the form%>";
++				pick.addEventListener('click', () => {
++					this.fill_form({ rat: entry.rat, pci: entry.pci, arfcn: entry.arfcn, band: entry.band, scs: entry.scs,
++						key: entry.rat + ':' + entry.arfcn + ':' + entry.pci });
++					this.notify("<%_Filled in%> " + entry.name + ". <%_Press Lock to lock to it.%>");
++				});
++				const del = this.el('button', 'qm-nc-chip-x', '×');
++				del.type = 'button';
++				del.title = "<%_Forget this cell%>";
++				del.setAttribute('aria-label', "<%_Forget%> " + entry.name);
++				del.addEventListener('click', () => {
++					this.saved = this.saved.filter(x => x !== entry);
++					this.save_store(localStorage, 'qm-nc-saved', this.saved);
++					this.render_saved();
++					if (this.config) this.render_cells();
++				});
++				chip.append(pick, del);
++				this.saved_node.appendChild(chip);
+ 			}
+ 		}
+ 
+-		create_status_tr(status){
+-			var tr = this.createTR();
+-			var td = this.createTD(status);
++		// ---- a link from 3gInfo-lite: ?tab=NeighborCell&rat=LTE&pci=..&arfcn=..[&band=..]
++		prefill(params){
++			const rat = (params.get('rat') || '').toUpperCase() == 'NR' ? 'NR' : 'LTE';
++			const pci = params.get('pci') || '';
++			const arfcn = params.get('arfcn') || '';
++			if (!/^\d+$/.test(pci) || !/^\d+$/.test(arfcn)) return;
++			const band = (params.get('band') || '').replace(/^[nNbB]/, '');
++			this.fill_form({ rat: rat, pci: pci, arfcn: arfcn, band: /^\d+$/.test(band) ? band : '', scs: null,
++				key: rat + ':' + arfcn + ':' + pci });
++			if (rat == 'NR' && !this.band_input.value) {
++				const mhz = qmNrMhz(arfcn), g = mhz != null ? qmNrGuess(mhz) : null;
++				if (g) {
++					this.band_input.value = g.band;
++					this.scs_input.value = String(QM_SCS[g.scs]);
++				}
++			}
++			this.notify("<%_Filled in from the link: check the values, then press Lock.%>", 'warn');
 +		}
 +
 +		render_empty(text){
@@ -630,30 +847,58 @@ Upstream status: local to CleanWRT.
 +			const tr = this.el('tr', 'tr placeholder');
 +			const td = this.el('td', 'td', text);
 +			td.colSpan = 10;
-+			tr.appendChild(td);
-+			this.cell_body.appendChild(tr);
- 		}
- 
--		create_status_tr(status){
--			var tr = this.createTR();
--			var td = this.createTD(status);
--			tr.appendChild(td);
+ 			tr.appendChild(td);
 -			this.status_table.appendChild(tr);
-+		fmt(v, unit){
-+			return isNaN(qmNum(v)) ? '—' : v + ' ' + unit;
++			this.cell_body.appendChild(tr);
  		}
  
 -		create_nc_tr(rat,cell_info){
 -			if (rat == 0) {
 -				var text = "LTE:";
+-			}
+-			else{
+-				var text = "NR:";
+-			}
+-			for (let key in cell_info) {
+-				if (cell_info[key] != ""){
+-					text += key + ":" + cell_info[key] + " ";
+-				}	
+-			}
+-			let tr_left = this.createTD(text);
+-			let tr_right = this.create_copy_btn_td(rat,cell_info);
+-			let tr = this.createTR();
+-			tr.appendChild(tr_left);
+-			tr.appendChild(tr_right);
+-			this.neighborcell_table.appendChild(tr);
+-		}
+-
+-		create_copy_btn_td(rat,cell_info){
+-			var copy_btn = this.createBTN("<%:Copy%>",() => {
+-				this.pci_input.value = cell_info.pci;
+- 				this.arfcn_input.value = cell_info.arfcn;
+- 				this.band_input.value = cell_info.band;
+-				this.rat_input.selectedIndex = rat;
+-				this.nr_options()
+-			});
+-			var td = document.createElement('td');
+-			td.className = "td cbi-section-table-cell left";
+-			td.setAttribute("width","10%");
+-			td.appendChild(copy_btn);
+-			
+-			return td;
++		fmt(v, unit){
++			return isNaN(qmNum(v)) ? '—' : v + ' ' + unit;
+ 		}
+ 
+-		cb_get(){
+-			this.render_neighborcell();
+-			this.render_status();
 +		render_cells(){
 +			const cells = this.cells();
 +			if (!cells.length) {
 +				this.render_empty("<%_The modem reports no cells. Try again in a moment.%>");
 +				return;
- 			}
--			else{
--				var text = "NR:";
++			}
 +			const net = this.network_name();
 +			this.cell_body.textContent = '';
 +			for (const cell of cells) {
@@ -671,6 +916,11 @@ Upstream status: local to CleanWRT.
 +				for (let i = 0; i < 4; i++) bars.appendChild(this.el('i'));
 +				const sig = this.el('td', 'td qm-nc-sig');
 +				sig.append(bars, this.el('span', 'qm-nc-dim', QM_LEVELS[level]));
++				const spark = this.sparkline(cell.key);
++				if (spark) {
++					sig.appendChild(spark);
++					sig.title = this.history_title(cell.key);
++				}
 +
 +				// cell: serving / neighbour, RAT, ID
 +				const cellTd = this.el('td', 'td');
@@ -679,6 +929,8 @@ Upstream status: local to CleanWRT.
 +				if (cell.serving) tags.appendChild(this.el('span', 'qm-tag is-accent', "<%_Connected%>"));
 +				else tags.appendChild(this.el('span', 'qm-tag is-plain', cell.kind == 'inter' ? "<%_Neighbour, other frequency%>" : "<%_Neighbour, same frequency%>"));
 +				if (cell.locked) tags.appendChild(this.el('span', 'qm-tag is-warn', "<%_Locked%>"));
++				const savedName = this.saved_name(cell);
++				if (savedName) tags.appendChild(this.el('span', 'qm-tag', '★ ' + savedName));
 +				cellTd.appendChild(tags);
 +				if (cell.cellid) {
 +					cellTd.appendChild(this.el('div', 'qm-nc-dim', "<%_Cell ID%> " + cell.cellid + (cell.tac ? ' · TAC ' + cell.tac : '')));
@@ -733,46 +985,14 @@ Upstream status: local to CleanWRT.
 +					}
 +				});
 +				this.cell_body.appendChild(tr);
- 			}
--			for (let key in cell_info) {
--				if (cell_info[key] != ""){
--					text += key + ":" + cell_info[key] + " ";
--				}	
--			}
--			let tr_left = this.createTD(text);
--			let tr_right = this.create_copy_btn_td(rat,cell_info);
--			let tr = this.createTR();
--			tr.appendChild(tr_left);
--			tr.appendChild(tr_right);
--			this.neighborcell_table.appendChild(tr);
--		}
--
--		create_copy_btn_td(rat,cell_info){
--			var copy_btn = this.createBTN("<%:Copy%>",() => {
--				this.pci_input.value = cell_info.pci;
-- 				this.arfcn_input.value = cell_info.arfcn;
-- 				this.band_input.value = cell_info.band;
--				this.rat_input.selectedIndex = rat;
--				this.nr_options()
--			});
--			var td = document.createElement('td');
--			td.className = "td cbi-section-table-cell left";
--			td.setAttribute("width","10%");
--			td.appendChild(copy_btn);
--			
--			return td;
++			}
  		}
--
--		cb_get(){
--			this.render_neighborcell();
--			this.render_status();
--		}
 -
 -		
  	}
  
  	class IMEI extends ModemConfig {
-@@ -990,12 +1271,25 @@
+@@ -990,12 +1481,25 @@
  		}
  
  		render(){
@@ -801,7 +1021,7 @@ Upstream status: local to CleanWRT.
  		}
  
  		cb_get(){
-@@ -1034,9 +1328,9 @@
+@@ -1034,9 +1538,9 @@
  			this.hard_reboot_btn = this.createBTN("<%:Hard Reboot%>",() => {
  				this.set_config('{"method":"hard"}');
  			});
@@ -814,7 +1034,7 @@ Upstream status: local to CleanWRT.
  			}
  		update(){
  			this.get_config();
-@@ -1134,7 +1428,7 @@
+@@ -1134,7 +1638,7 @@
  			table.appendChild(tr);
  			this.fieldset.appendChild(table);
  			this.fieldset.appendChild(this.textarea);
@@ -823,7 +1043,32 @@ Upstream status: local to CleanWRT.
  		}
  
  		cb_get(){
-@@ -1438,6 +1732,160 @@
+@@ -1299,6 +1803,8 @@
+ 			this.datatabs = [];
+ 			this.disabled_features = [];
+ 			this.hotplug_elements = [];
++			// CleanWRT: ?tab=<name> opens that tab once (3gInfo-lite links to NeighborCell)
++			this.deep_tab = new URLSearchParams(window.location.search).get('tab');
+ 			//this.create_tabmenu();
+ 			
+ 		}
+@@ -1321,6 +1827,15 @@
+ 					this.class_map[key].cfg_id = cfg_id;
+ 					this.class_map[key].get_config();
+ 				}
++				const want = this.deep_tab;
++				this.deep_tab = null;
++				const wanted = want ? this.datatabs.find(t => t.getAttribute("data-tab") == want) : null;
++				if (wanted) {
++					this.switch_tab(wanted);
++					const view = this.class_map[want];
++					if (view && view.prefill) view.prefill(new URLSearchParams(window.location.search));
++					return;
++				}
+ 				//check if all datatab not selected
+ 				for (let tab of this.datatabs) {
+ 					if (tab.className == "cbi-tab") {
+@@ -1438,6 +1953,183 @@
  	.band-container > input[type="checkbox"] + span {
  		margin-right: 0;
  	}
@@ -980,6 +1225,29 @@ Upstream status: local to CleanWRT.
 +	.qm-nc-h { font-weight: 600; margin-bottom: 4px; }
 +
 +	.qm-nc-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
++
++	.qm-nc-refresh { width: auto; min-width: 0; }
++
++	.qm-spark { margin-left: 8px; vertical-align: middle; }
++	.qm-spark polyline { fill: none; stroke: var(--qm-accent); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
++
++	.qm-nc-saved { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 0; }
++	.qm-nc-saved-chip { padding: 0 4px 0 10px; gap: 2px; }
++	.qm-nc-chip-btn, .qm-nc-chip-x {
++		border: 0;
++		background: none;
++		color: inherit;
++		font: inherit;
++		cursor: pointer;
++		padding: 0 4px;
++		height: 22px;
++	}
++	.qm-nc-chip-btn:hover { color: var(--qm-accent); }
++	.qm-nc-chip-x { color: var(--qm-text-3); font-size: 14px; line-height: 1; }
++	.qm-nc-chip-x:hover { color: var(--qm-err-text); }
++
++	.qm-nc-guard { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
++	.qm-nc-guard > .qm-nc-minutes { width: 5em; min-width: 0; }
 +	.qm-nc-check > input[type="checkbox"] + span { margin: 0; }
  </style>
  <div class="cbi-map">
@@ -1037,7 +1305,7 @@ Upstream status: local to CleanWRT.
              esac
              json_select $type
              json_add_object ""
-@@ -1059,12 +1073,72 @@
+@@ -1059,12 +1073,88 @@
              json_add_string "ecno" "$ecno"
              json_add_string "rsrp" "$rsrp"
              json_add_string "rsrq" "$rsrq"
@@ -1058,8 +1326,24 @@ Upstream status: local to CleanWRT.
 +get_neighborcell_serving_qualcomm(){
 +    local response line operator
 +    operator=$(cmd_cops_query "$at_port" | grep "+COPS:" | awk -F'"' '{print $2}')
++    # AT+COPS? answers with digits (41302) when the numeric format is set; then
++    # take the name from AT+QSPN: "<full name>","<short name>","<SPN>",<alphabet>,"<RPLMN>"
++    case "$operator" in
++        ""|*[!0-9]*) ;;
++        *)
++            local qspn name n
++            qspn=$(at "$at_port" 'AT+QSPN' | grep "+QSPN:")
++            for n in 2 4 6; do
++                name=$(echo "$qspn" | awk -F'"' -v n="$n" '{print $n}')
++                [ -n "$name" ] && break
++            done
++            [ -n "$name" ] && operator="$name"
++            ;;
++    esac
 +    json_add_string "operator" "$operator"
 +    response=$(cmd_qeng_servingcell "$at_port" | grep "+QENG:" | tr -d '\r')
++    # the modem's state: NOCONN / CONNECT (camped), SEARCH, LIMSRV (no usable cell)
++    json_add_string "state" "$(echo "$response" | sed -n 's/^+QENG: "servingcell","\([A-Z]*\)".*/\1/p' | head -1)"
 +    json_add_array "serving"
 +    # read from a here-document, not a pipe: a piped loop runs in a subshell
 +    # and the rows it adds would never reach the reply
@@ -1110,3 +1394,42 @@ Upstream status: local to CleanWRT.
  get_neighborcell_lte(){
      lte_status=$(cmd_qnwlock_query "$at_port" "common/lte" | grep "+QNWLOCK:")
      lte_lock_status=$(echo $lte_status | awk -F',' '{print $2}')
+@@ -1252,6 +1342,15 @@
+         ;;
+     esac
+     qmodem_lockcell_boot_hook_add_json "$config_section"
++    # CleanWRT: the auto-unlock guard (/usr/sbin/cw-cell-lock-guard)
++    json_add_object "lockcell_guard"
++    if qmodem_bool_enabled "$(uci -q get "qmodem.${config_section}.lockcell_guard_enabled")"; then
++        json_add_boolean "enabled" 1
++    else
++        json_add_boolean "enabled" 0
++    fi
++    json_add_string "minutes" "$(uci -q get "qmodem.${config_section}.lockcell_guard_minutes" || echo 5)"
++    json_close_object
+     json_close_object
+ }
+ 
+@@ -1271,6 +1370,22 @@
+     band=$(echo $json_param | jq -r '.band')
+     scs=$(echo $json_param | jq -r '.scs')
+     en_boot_hook=$(echo $json_param | jq -r '.en_boot_hook // empty')
++    # CleanWRT: the auto-unlock guard, saved when the page sends it
++    guard=$(echo "$json_param" | jq -r '.guard // empty')
++    guard_minutes=$(echo "$json_param" | jq -r '.guard_minutes // empty')
++    if [ -n "$guard" ] && [ -n "$config_section" ]; then
++        if qmodem_bool_enabled "$guard"; then
++            uci -q set "qmodem.${config_section}.lockcell_guard_enabled=1"
++        else
++            uci -q set "qmodem.${config_section}.lockcell_guard_enabled=0"
++        fi
++        case "$guard_minutes" in
++            ''|*[!0-9]*) ;;
++            *) [ "$guard_minutes" -ge 1 ] && [ "$guard_minutes" -le 120 ] &&
++                uci -q set "qmodem.${config_section}.lockcell_guard_minutes=$guard_minutes" ;;
++        esac
++        uci -q commit qmodem
++    fi
+     case $platform in
+         "lte12"|\
+         "qualcomm")

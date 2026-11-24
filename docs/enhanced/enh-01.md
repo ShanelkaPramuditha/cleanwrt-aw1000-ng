@@ -11,10 +11,12 @@ updated: 2026-11-24
 User requests of 2026-11-24, worked in one session: redesign every Nikki page for usability; fix
 uneven spacing between row buttons; offer a way to lock the modem to a cell, from a list of the
 cells around the router with operator and signal data and a click to lock; tidy the padding on
-*Advance Modem Settings*; set up this work log.
+*Advance Modem Settings*; set up this work log. Then "complete enh-01": the user chose to do the
+batch's own suggestions S1 to S12 inside this batch (T7 to T17). S5 needs the router and stays
+open.
 
 All code is written and checked off-device. **Nothing has been tested on a router yet, and
-nothing is committed.**
+nothing is committed.** The batch stays in `review` until the router checks in each task are done.
 
 ## Summary
 
@@ -26,6 +28,17 @@ nothing is committed.**
 | ENH-01-T4 | Padding and button rows on every Advance Modem Settings tab | review | same patch as T3 |
 | ENH-01-T5 | Check all patch sets apply together | done | none (check only) |
 | ENH-01-T6 | Agent-friendly docs and this work log | done | `AGENTS.md`, `CLAUDE.md`, `docs/enhanced/` |
+| ENH-01-T7 | Rebuild only packages a patch touches (S1) | review | `tools/cw-release-build.sh` |
+| ENH-01-T8 | Translations for the new strings (S2) | review | `patches/feeds/nikki/0003-...`, `patches/feeds/qmodem/0014-...`, strings in `patches/feeds/3ginfo/0007-...` |
+| ENH-01-T9 | Quote QModem request values for the shell (S3, S4) | review | `patches/feeds/qmodem/0013-shell-quoting-for-page-requests.patch` |
+| ENH-01-T10 | Operator name when `AT+COPS?` is numeric (S6) | review | in `patches/feeds/qmodem/0012-...` |
+| ENH-01-T11 | Auto-unlock when the locked cell is lost (S7) | review | `files/usr/sbin/cw-cell-lock-guard` + service, uci-default, test; in `qmodem/0012` |
+| ENH-01-T12 | Signal history per cell (S8) | review | in `patches/feeds/qmodem/0012-...` |
+| ENH-01-T13 | Saved cells (S9) | review | in `patches/feeds/qmodem/0012-...` |
+| ENH-01-T14 | Auto-refresh on the Neighbor Cell tab (S10) | review | in `patches/feeds/qmodem/0012-...` |
+| ENH-01-T15 | Scheduled Nikki subscription updates (S11) | review | `patches/feeds/nikki/0002-subscription-auto-update.patch` |
+| ENH-01-T16 | Lock link from 3gInfo-lite (S12) | review | `patches/feeds/3ginfo/0007-neighbour-cell-lock-link.patch`; deep link in `qmodem/0012` |
+| ENH-01-T17 | Final check: all patches, tests, docs | done | none (check only) |
 
 ## Tasks
 
@@ -180,6 +193,201 @@ nothing is committed.**
         the `docs` workflow runs it). `exclude_docs` needs MkDocs 1.5 or later;
         `requirements-docs.txt` pins `>=1.6`
 
+### ENH-01-T7: Rebuild only packages a patch touches (S1)
+
+- **Status:** review
+- **From:** ENH-01-S1
+- **Goal:** a build on a kept tree does not recompile mihomo (Go) because luci-app-nikki is patched.
+- **Files:** `tools/cw-release-build.sh` (step 2a-bis); `docs/building.md` (*What the build script
+  guarantees*).
+- **Changes:**
+  - The loop that cleaned every top-level package of a patched feed is gone. Packages are found by
+    walking up from each patched path to its package Makefile, now also from `diff --git` lines,
+    so a mode-only diff names its package.
+  - The set cleaned is written to `<tree>/.cw-patched-packages`; the next build cleans the union of
+    that set and its own, so removing a patch still rebuilds the package it touched.
+- **Verification:**
+  - [x] `sh -n`, `bash -n` (off-device)
+  - [x] the block run on a scratch tree with `make` stubbed: 15 packages, mihomo-meta not among
+        them; a mihomo-meta entry in an old state file is cleaned once and dropped (off-device)
+  - [ ] an incremental build with the real tree confirms mihomo is not rebuilt (build machine)
+- **Remaining:** the build-machine check.
+
+### ENH-01-T8: Translations for the new strings (S2)
+
+- **Status:** review
+- **From:** ENH-01-S2
+- **Files:**
+  - `patches/feeds/nikki/0003-translations-for-the-new-pages.patch`: 254 strings in zh_Hans,
+    zh_Hant, ru
+  - `patches/feeds/qmodem/0014-translations-for-advance-modem-settings.patch`: 77 strings (75
+    from 0012, 2 never translated upstream) in zh_Hans, zh-cn, ru
+  - `patches/feeds/3ginfo/0007-neighbour-cell-lock-link.patch`: its 3 strings in de, it, pl, ru,
+    zh_Hans
+  - working files: the numbered translation lists and the merge script live in the session
+    scratchpad only (`tr/merge.py` checks one line per msgid and identical placeholders)
+- **Verification:**
+  - [x] every translation keeps its msgid's placeholders (script) (off-device)
+  - [x] every catalog compiles with LuCI's `po2lmo`; Nikki's with `msgfmt --check-format`. The
+        QModem and 3ginfo catalogs already had duplicate entries upstream (26 / 26 / 8 / 2 each);
+        none added (off-device)
+  - [ ] pages viewed in Chinese and Russian (on the router)
+- **Remaining:** the router check; a native speaker's review would help (the translations were
+  written for CleanWRT, and Russian has no plural forms through LuCI's `_()`).
+
+### ENH-01-T9: Quote QModem request values for the shell (S3, S4)
+
+- **Status:** review
+- **From:** ENH-01-S3, ENH-01-S4
+- **Files:** `patches/feeds/qmodem/0013-shell-quoting-for-page-requests.patch`
+  (`luci/luci-app-qmodem/luasrc/controller/qmodem.lua`,
+  `application/qmodem/files/usr/share/qmodem/modem_ctrl.sh`)
+- **Changes:**
+  - `shq()` single-quotes every request value; `action` and `cfg` must match `^[%w_%-]+$` or the
+    request gets a 400; `sendATCommand`'s `at()` quotes port and command.
+  - The pages send `params` JSON-encoded twice; the old double quotes stripped one level by
+    accident. The controller now unwraps it: a `params` that parses as a JSON string becomes that
+    string. Every caller (Lock Band, Rat Prefer, Dial Mode, Set IMEI, Neighbor Cell, Reboot,
+    AT Debug) sends the script exactly what it did before.
+  - `modem_ctrl.sh`: `"$3"` quoted for the seven `set_*` calls and the reboot, send_at
+    (`at "$port" "$cmd"`) and send_sms branches.
+- **Verification:**
+  - [x] `shq` and the unwrap ported to Python and run through `sh -c` for each request shape: the
+        lock JSON, IMEI, reboot, Rat Prefer array, an AT command with spaces and `;`, and an
+        injection attempt (`$(touch /tmp/pwned)`, backticks, quotes): all arrive intact, nothing
+        runs (off-device; no Lua interpreter in the workspace)
+  - [ ] every Advance Modem Settings tab used once, and an AT command with a space sent (on the
+        router)
+- **Remaining:** the router check. `luci.jsonc.parse` of a bare JSON string is assumed to return
+  the string (json-c accepts scalars); confirm on the router.
+
+### ENH-01-T10: Operator name when `AT+COPS?` is numeric (S6)
+
+- **Status:** review
+- **From:** ENH-01-S6
+- **Files:** `vendor/quectel.sh` `get_neighborcell_serving_qualcomm`, in `qmodem/0012`
+- **Changes:** when the COPS operator is all digits, take the first non-empty of the full name,
+  short name and SPN from `AT+QSPN`.
+- **Verification:**
+  - [x] under dash with stubs: `41302` + QSPN full name gives "Dialog Axiata"; an empty full name
+        falls back to the short name (off-device)
+  - [ ] on the router with `AT+COPS=3,2` set (on the router)
+
+### ENH-01-T11: Auto-unlock when the locked cell is lost (S7)
+
+- **Status:** review
+- **From:** ENH-01-S7
+- **Goal:** a modem locked to a cell that goes away is unlocked after N minutes, so the router
+  comes back online by itself.
+- **Files:**
+  - new `files/usr/sbin/cw-cell-lock-guard`, `files/etc/init.d/cw-cell-lock-guard` (procd,
+    START=99), `files/etc/uci-defaults/57-cw-cell-lock-guard` (enables it)
+  - new `tools/tests/cw-cell-lock-guard-test.sh`
+  - `qmodem/0012`: the lock request saves `lockcell_guard_enabled` / `lockcell_guard_minutes`;
+    the reply reports them and the registration `state`; the form has *Unlock automatically* with
+    minutes; the summary shows a chip while it is on
+  - docs: `docs/modem.md#unlock-automatically`, `docs/reference/options.md`,
+    `docs/reference/uci-defaults.md`, `docs/reference/files-and-ports.md`
+- **Changes:** once a minute, per modem with the guard on: read `modem_ctrl.sh get_neighborcell`;
+  when locked and (no serving cell, or state `SEARCH` / `LIMSRV`) for N checks in a row, send the
+  page's own unlock request (which also clears the boot hook) and log it. No answer from the
+  modem is not counted.
+- **Verification:**
+  - [x] `tools/tests/cw-cell-lock-guard-test.sh`: 15 cases pass under sh and dash (off-device)
+  - [x] the build script's init-script checks pass for the new service (off-device)
+  - [ ] lock to a cell, then make it unusable (or lock to a PCI that is not there) and watch the
+        guard unlock after N minutes in `logread` (on the router)
+- **Remaining:** the router check. The guard runs `get_neighborcell` once a minute while enabled,
+  which also queries neighbours; see ENH-01-S15.
+
+### ENH-01-T12: Signal history per cell (S8)
+
+- **Status:** review
+- **From:** ENH-01-S8
+- **Files:** `modem_debug.htm`, in `qmodem/0012`
+- **Changes:** each successful scan appends the RSRP of every listed cell (40 points at most,
+  cells unheard for an hour dropped) to `sessionStorage`; rows with two or more points draw a
+  56x16 SVG sparkline (-125 to -60 dBm) with min / max in its tooltip.
+- **Scope cut:** the history lives in the browser tab, not on the router; a router-side history is
+  ENH-01-S16.
+- **Verification:**
+  - [x] jsdom: after two scans every row has a sparkline and the tooltip reads "RSRP over the last
+        2 scans: -88 to -86 dBm" (off-device)
+  - [ ] on the router
+
+### ENH-01-T13: Saved cells (S9)
+
+- **Status:** review
+- **From:** ENH-01-S9
+- **Files:** `modem_debug.htm`, in `qmodem/0012`
+- **Changes:** *Save cell* asks for a name and stores the form's cell in `localStorage`
+  (`qm-nc-saved`); saved cells show as chips above the form (click fills the form, × forgets) and
+  as a ★ tag on their row.
+- **Scope cut:** kept per browser, not on the router (ENH-01-S17).
+- **Verification:**
+  - [x] jsdom: saved as "Home tower", chip shown, the row tagged (off-device)
+  - [ ] on the router
+
+### ENH-01-T14: Auto-refresh on the Neighbor Cell tab (S10)
+
+- **Status:** review
+- **From:** ENH-01-S10
+- **Files:** `modem_debug.htm`, in `qmodem/0012`
+- **Changes:** a select next to Scan (off, 15, 30, 60 s, remembered in `localStorage`); the timer
+  runs only while the tab is shown and the page is visible, and stops when another tab opens.
+- **Verification:**
+  - [x] jsdom: timer set and stored; cleared after switching to Lock Band (off-device)
+  - [ ] on the router
+
+### ENH-01-T15: Scheduled Nikki subscription updates (S11)
+
+- **Status:** review
+- **From:** ENH-01-S11
+- **Files:** `patches/feeds/nikki/0002-subscription-auto-update.patch` (`nikki/files/nikki.init`,
+  `view/nikki/profile.js`); docs `docs/features/vpn-proxy.md`, `docs/reference/options.md`
+- **Changes:**
+  - per subscription `auto_update` and `auto_update_interval` (1, 3, 6, 12, 24 h) in its dialog;
+    the Last update column shows "Auto: every N h" / "Auto: daily"
+  - `nikki.init` writes one `#nikki` cron line per such subscription at start (stop removes them,
+    as for the scheduled restart) running the new `auto_update_subscription`: not in use →
+    download only; in use → download, restart only on success; in use with Prefer Remote →
+    restart only (it downloads on start)
+- **Verification:**
+  - [x] the two functions run with stubs: cron lines for 6 h and daily; the four in-use / prefer /
+        success cases behave as above (off-device)
+  - [x] `profile.js` parses; the patch applies after 0001 (off-device)
+  - [ ] a real scheduled update, in use and not in use (on the router)
+
+### ENH-01-T16: Lock link from 3gInfo-lite (S12)
+
+- **Status:** review
+- **From:** ENH-01-S12
+- **Files:** `patches/feeds/3ginfo/0007-neighbour-cell-lock-link.patch` (`3gdetail.js`,
+  `radio.css`, five catalogs); `qmodem/0012` (`TabMenu` reads `?tab=`, `NeighborCell.prefill`)
+- **Changes:** every neighbour (table and card layout) has *Lock…* linking to
+  `admin/modem/qmodem/modem_debug?tab=NeighborCell&rat=&pci=&arfcn=`; that tab opens with the
+  form filled and a note to check and press Lock. A cell without PCI or channel gets a dash.
+- **Verification:**
+  - [x] `lockLink` URLs for LTE and NR, and the dash case (off-device)
+  - [x] jsdom: the real `TabMenu` opens Neighbor Cell from the URL, the form holds PCI 197 / ARFCN
+        1725 and that row is selected after the scan (off-device)
+  - [ ] on the router
+
+### ENH-01-T17: Final check: all patches, tests, docs
+
+- **Status:** done
+- **Verification:**
+  - [x] `tools/cw-apply-feed-patches.sh` on a scratch tree of the pinned feeds: every tree and
+        feed patch applies (3ginfo 0002 to 0007, diskman, luci 0001 to 0011, nikki 0001 to 0003,
+        qmodem 0002 to 0014), exit 0; every patched file is identical to the working copy
+        (off-device)
+  - [x] the JS and JSON files the Nikki and 3ginfo patches touch parse as CI parses them
+        (off-device)
+  - [x] all 12 `tools/tests/*-test.sh` pass (off-device)
+  - [ ] `mkdocs build --strict` (not installed here; the `docs` workflow runs it)
+- **Note:** `patches/feeds/luci/0010-tailscale-service-switch.patch` appeared during the session
+  (not part of this batch); it applies cleanly with the rest.
+
 ## Notes
 
 - **Theme tokens for page styles:** Vantage's `--v-*` tier first, then the Bootstrap export
@@ -195,6 +403,13 @@ nothing is committed.**
   foldable buttons; Nikki's tables have Edit and Delete only, so they never fold.
 - The Nikki debug script (`debug.sh`) enables and restarts Nikki when it is disabled; the Logs page
   asks first.
+- **QModem catalogs:** LuCI loads every `*.<lang>.lmo`, so QModem's Russian file being
+  `po/ru/modem.po` (not `qmodem.po`) still works; `po/zh-cn` is a copy of `po/zh_Hans` and gets
+  the same entries.
+- **Fragments:** QModem's page builds sentences from pieces around numbers; their translations are
+  written for that order. Before reusing such a msgid elsewhere, check its translation still fits.
+- **Testing the page in jsdom:** `window.onload` creates a `TabMenu`; a harness that also creates
+  one gets two tab bars. That is a harness artefact, not a page bug.
 
 ## Suggestions
 
@@ -202,20 +417,31 @@ nothing is committed.**
 
 | ID | suggestion | why (evidence) | size | status |
 |---|---|---|---|---|
-| ENH-01-S1 | Rebuild only the packages a feed patch touches, not every package of a patched feed | `tools/cw-release-build.sh` step 2a-bis (line 219) invalidates all top-level packages of a patched feed; with the Nikki patch that includes mihomo-meta and mihomo-alpha (Go), so every build recompiles them | M | open |
-| ENH-01-S2 | Translate the new and reworded strings (zh_Hans, zh_Hant, ru) | the Nikki and QModem pages now show English for these strings in other languages; the feeds carry `po/zh_Hans`, `po/zh_Hant`, `po/ru` | M | open |
-| ENH-01-S3 | Pass QModem `params` to the shell safely | `qmodem.lua` line 76 builds `modem_ctrl.sh <action> <cfg> "<params>"` from a form value; a value with spaces breaks it, and shell metacharacters are interpreted. Admin-only, but still an injection path. Quote with single quotes and escape, or pass through stdin | S | open |
-| ENH-01-S4 | Quote `$3` in `modem_ctrl.sh` | `set_neighborcell $3` (line 303), and the other `set_*` calls, word-split their JSON argument | S | open |
-| ENH-01-S5 | Verify or fix NR neighbour parsing on the RG500Q-EA | the `*NR*` branch in `get_neighborcell_qualcomm` uses guessed field positions; this firmware may report NR neighbours only through `AT+QNWCFG="nr5g_meas_info"` | M | open |
-| ENH-01-S6 | Show the operator name when `AT+COPS?` answers in numeric format | if another tool sets `AT+COPS=3,2`, `operator` is `41302`; the page then falls back to MCC-MNC. A small MCC-MNC to name table, or `AT+QSPN`, would fix it | S | open |
+| ENH-01-S1 | Rebuild only the packages a feed patch touches, not every package of a patched feed | `tools/cw-release-build.sh` step 2a-bis (line 219) invalidates all top-level packages of a patched feed; with the Nikki patch that includes mihomo-meta and mihomo-alpha (Go), so every build recompiles them | M | moved → ENH-01-T7 |
+| ENH-01-S2 | Translate the new and reworded strings (zh_Hans, zh_Hant, ru) | the Nikki and QModem pages now show English for these strings in other languages; the feeds carry `po/zh_Hans`, `po/zh_Hant`, `po/ru` | M | moved → ENH-01-T8 |
+| ENH-01-S3 | Pass QModem `params` to the shell safely | `qmodem.lua` line 76 builds `modem_ctrl.sh <action> <cfg> "<params>"` from a form value; a value with spaces breaks it, and shell metacharacters are interpreted. Admin-only, but still an injection path. Quote with single quotes and escape, or pass through stdin | S | moved → ENH-01-T9 |
+| ENH-01-S4 | Quote `$3` in `modem_ctrl.sh` | `set_neighborcell $3` (line 303), and the other `set_*` calls, word-split their JSON argument | S | moved → ENH-01-T9 |
+| ENH-01-S5 | Verify or fix NR neighbour parsing on the RG500Q-EA | the `*NR*` branch in `get_neighborcell_qualcomm` uses guessed field positions; this firmware may report NR neighbours only through `AT+QNWCFG="nr5g_meas_info"` | M | open: needs the AW1000 (capture `AT+QENG="neighbourcell"` and `AT+QNWCFG="nr5g_meas_info"` in SA mode first) |
+| ENH-01-S6 | Show the operator name when `AT+COPS?` answers in numeric format | if another tool sets `AT+COPS=3,2`, `operator` is `41302`; the page then falls back to MCC-MNC. A small MCC-MNC to name table, or `AT+QSPN`, would fix it | S | moved → ENH-01-T10 |
 
 ### New features
 
 | ID | suggestion | why | size | status |
 |---|---|---|---|---|
-| ENH-01-S7 | Auto-unlock safety net: unlock when the locked cell is lost or weak for N minutes | a locked modem never moves, so a cell outage leaves the router offline until someone unlocks by hand | M | open |
-| ENH-01-S8 | Signal history per cell (RSRP / SINR over time) on the Neighbor Cell tab or 3gInfo-lite | picking a cell to lock is easier with a trend than with one reading | L | open |
-| ENH-01-S9 | Saved cells: name a cell, lock to it from a short list | users who switch between two cells re-enter PCI and ARFCN each time | S | open |
-| ENH-01-S10 | Auto-refresh toggle on the Neighbor Cell tab | the tab scans on open and on Scan only | S | open |
-| ENH-01-S11 | Nikki subscription auto-update schedule on the Profiles page | subscriptions update only at start (Prefer: Remote) or by hand | M | open |
-| ENH-01-S12 | A "Lock this cell" link from 3gInfo-lite's cell list to the Neighbor Cell tab | 3gInfo-lite already shows the cells; the lock is two pages away | S | open |
+| ENH-01-S7 | Auto-unlock safety net: unlock when the locked cell is lost or weak for N minutes | a locked modem never moves, so a cell outage leaves the router offline until someone unlocks by hand | M | moved → ENH-01-T11 |
+| ENH-01-S8 | Signal history per cell (RSRP / SINR over time) on the Neighbor Cell tab or 3gInfo-lite | picking a cell to lock is easier with a trend than with one reading | L | moved → ENH-01-T12 |
+| ENH-01-S9 | Saved cells: name a cell, lock to it from a short list | users who switch between two cells re-enter PCI and ARFCN each time | S | moved → ENH-01-T13 |
+| ENH-01-S10 | Auto-refresh toggle on the Neighbor Cell tab | the tab scans on open and on Scan only | S | moved → ENH-01-T14 |
+| ENH-01-S11 | Nikki subscription auto-update schedule on the Profiles page | subscriptions update only at start (Prefer: Remote) or by hand | M | moved → ENH-01-T15 |
+| ENH-01-S12 | A "Lock this cell" link from 3gInfo-lite's cell list to the Neighbor Cell tab | 3gInfo-lite already shows the cells; the lock is two pages away | S | moved → ENH-01-T16 |
+
+### Added while completing the batch
+
+| ID | suggestion | why (evidence) | size | status |
+|---|---|---|---|---|
+| ENH-01-S13 | Translate the 3gInfo-lite radio page | 185 to 189 of its 205 strings have no translation in zh_Hans, ru, pl, de, it (3ginfo patch 0004 added most of them) | M | open |
+| ENH-01-S14 | Remove the duplicate entries in QModem's catalogs | `msgfmt` reports 26 duplicates in `po/zh_Hans/qmodem.po` and `po/zh-cn/qmodem.po`, 8 in `po/ru/modem.po`; `po2lmo` keeps one silently, possibly the wrong one | S | open |
+| ENH-01-S15 | A light "lock status" action for the guard | `cw-cell-lock-guard` calls `get_neighborcell` once a minute, which also runs `AT+QENG="neighbourcell"`, `AT+COPS?` and maybe `AT+QSPN`; a `get_lock_status` action (QNWLOCK queries and servingcell only) would halve the AT traffic shared with the LED daemon and 3gInfo-lite | S | open |
+| ENH-01-S16 | Router-side signal history | the sparkline history (T12) lives in one browser tab; a small collector (or 3gInfo-lite's snapshot) could keep hours of RSRP / SINR per cell | L | open |
+| ENH-01-S17 | Saved cells on the router | saved cells (T13) are per browser; storing them in `/etc/config/qmodem` would share them between devices and survive a browser reset | S | open |
+| ENH-01-S18 | Russian plural forms | LuCI's `_()` has no plural forms, so "%d строк", "Осталось дней: %d" read awkwardly for some numbers; `N_()` could be used where counts are shown | S | open |
