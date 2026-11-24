@@ -84,8 +84,87 @@ With `--key`, every Wi-Fi interface gets WPA2-PSK (WPA3 on a 6 GHz radio, which 
 else), the password, and its radio turned on. The root password is still unset: LuCI asks for
 one on the first login, as on any fresh flash (see [First boot](first-boot.md)).
 
+## Build them into your own image
+
+If you build the image yourself, `tools/cw-build.sh` asks for these values before the build
+starts. Press Enter to keep the value in brackets. If you change nothing, you get the stock
+image.
+
+```
+  The router's defaults (built into the image; a reset brings them back)
+  Enter keeps the value in brackets.
+  Hostname [OpenWrt]: MyRouter
+  LAN address (e.g. 192.168.50.1 or 192.168.50.1/24) [192.168.1.1]: 192.168.50.1
+  Wi-Fi name, 2.4 GHz [OpenWrt]: MyWiFi
+  Wi-Fi name, 5 GHz [OpenWrt]: MyWiFi-5G
+  Wi-Fi password [Enter for none: Wi-Fi stays off]:
+  Again, to confirm:
+```
+
+The password is not shown while you type it. A Wi-Fi name needs a password, for the same
+reason as above. The values are checked by the same rules as `cw-settings-pack.sh`, and a wrong
+one is asked again.
+
+These are not a one-time setting like the archive. They become the **image's own defaults**:
+the router starts with them, and a reset brings them back instead of the stock values.
+
+The next build offers your last answers again (*Use these again? [Y]es, [c]hange, stock
+[d]efaults*). They are kept in `.cw-build-settings` next to the repository, readable only by
+you, because they include the Wi-Fi password.
+
+| to | run |
+|---|---|
+| build the stock image without questions | `tools/cw-build.sh --defaults` |
+| reuse the last answers without questions | `tools/cw-build.sh --same` |
+| give the values without questions, for example in a script | `CW_HOSTNAME=MyRouter CW_LAN_IP=192.168.50.1 CW_SSID=MyWiFi CW_WIFI_KEY='Str0ng-WiFi-pass' tools/cw-build.sh` (also `CW_SSID_2G`, `CW_SSID_5G`) |
+
+Without a terminal, for example when the output goes to a pipe, nothing is asked and the stock
+image is built (or the `CW_*` values, or `--same`).
+
+With Docker, or when you run `tools/cw-release-build.sh` directly, make the script with
+`sh tools/cw-settings-pack.sh ... --script mysettings.sh` and pass it as
+`CW_LOCAL_SETTINGS=/path/to/mysettings.sh` (inside the container, for example
+`-e CW_LOCAL_SETTINGS=/cleanwrt/mysettings.sh`).
+
+!!! warning "An image built with your values holds the Wi-Fi password"
+    Anyone with the image file can read it. Keep the image to yourself, and use the stock image
+    or the settings archive for anything you share. The build's `provenance.txt` notes that own
+    defaults are built in, without the values. Release builds refuse them.
+
+## On GitHub Actions
+
+The `build` workflow takes the same values, if you build on GitHub (see
+[Build from source](building.md#on-github-actions)).
+
+1. Only if you want Wi-Fi on: add the Wi-Fi password as a repository secret named
+   `CW_WIFI_KEY` (*Settings → Secrets and variables → Actions → New repository secret*). It is a
+   secret and not a box in the form, because anyone who can see the repository's Actions runs
+   can read what was typed into the form.
+2. *Actions → build → Run workflow*, then fill in the boxes you want. Leave the others empty for
+   the stock values.
+
+    | box | sets |
+    |---|---|
+    | Own settings - hostname | the router's name |
+    | Own settings - LAN address | the LAN address |
+    | Own settings - Wi-Fi name | the Wi-Fi name on both bands |
+    | Own settings - 5 GHz Wi-Fi name | the 5 GHz name, when it differs |
+    | Own settings - turn Wi-Fi on | Wi-Fi on, with the `CW_WIFI_KEY` password |
+
+3. The values are checked before the build starts, so a mistake costs a minute, not two hours.
+   The run's summary lists what was built in (without the password).
+4. The images go to a private draft release named `own-v<version>`, which only the
+   repository's collaborators can see. Download the `*-squashfs-sysupgrade.bin` from there. A
+   later build with own settings replaces that draft's files.
+
+Such an image is never published: it doesn't go into the release draft, and the `release`
+workflow refuses any draft built with own settings. The hostname, LAN address and Wi-Fi names
+are visible in the run to anyone who can see the repository's Actions; only the password stays
+secret.
+
 ## Back to the defaults
 
-A reset removes your settings with everything else: *System → Backup / Flash Firmware → Perform
+If you flashed with the settings archive, a reset removes your settings with everything else: *System → Backup / Flash Firmware → Perform
 reset*, `firstboot && reboot`, or `sysupgrade -n`. The router comes back with the stock defaults
-at `192.168.1.1`, and Wi-Fi is off. See [Recovery](recovery.md).
+at `192.168.1.1`, and Wi-Fi is off. See [Recovery](recovery.md). An image you built with your
+own values comes back with those values instead; flash the stock image to get the stock ones.

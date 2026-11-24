@@ -1,7 +1,7 @@
 ---
 title: "Build OpenWrt for the AW1000 on GitHub Actions"
 description: "Build CleanWRT for the Arcadyan AW1000 from source on GitHub Actions or locally with Docker: pinned feeds, checks, signing and the repository layout."
-updated: 2026-11-06
+updated: 2026-11-24
 ---
 
 # Build from source
@@ -45,8 +45,18 @@ The inputs of a manual build:
 | Input | Default | Meaning |
 |---|---|---|
 | `draft` | on | put the images in the private draft release `v<CW_VERSION>`. Needs the signing secrets and a live `cw-opt` feed. Untick it for a test build that publishes nothing |
+| `hostname` | empty | own settings: the router's name (empty: `OpenWrt`) |
+| `lan_ip` | empty | own settings: the LAN address, such as `192.168.50.1` or `192.168.50.1/24` (empty: `192.168.1.1`) |
+| `ssid` | empty | own settings: the Wi-Fi name on both bands (empty: `OpenWrt`). Needs `wifi` |
+| `ssid_5g` | empty | own settings: the 5 GHz name, when it differs |
+| `wifi` | off | own settings: turn Wi-Fi on with the password in the `CW_WIFI_KEY` repository secret |
 
-That is the only choice. A clean rebuild is not offered because every run starts from a freshly
+Any own setting makes the build put **your values into the image**, like the questions of a local
+build ([Your own settings](custom-settings.md#on-github-actions)). Such a build never fills the
+release draft: its images go to a separate private draft, `own-v<CW_VERSION>`, whatever `draft`
+says, and the `release` workflow refuses to publish any draft built with own settings.
+
+Apart from the own settings, `draft` is the only choice. A clean rebuild is not offered because every run starts from a freshly
 cloned tree anyway; the feed is compiled by the `feed` workflow; and images are never uploaded as
 a workflow artifact, which anyone signed in to GitHub could download, while a draft stays private.
 
@@ -112,9 +122,11 @@ a root shell; clones the tree at `OPENWRT_TAG` when there is none; starts
 `tools/cw-release-build.sh` as root in its own session with the local defaults
 (`CW_MAX_IMAGE_MB=130`, `CW_BUILD_OPT_ARTIFACTS=0`, `CW_CCACHE=1`); writes the output to
 `build.log` next to the repository; and shows the progress below. It ends with the image's path,
-size and sha256, or the lines around the error. Ctrl+C stops only the display and closing the
+size and sha256, or the lines around the error. Before it starts, it asks for the router's
+defaults (hostname, LAN address, Wi-Fi names and password) and builds your answers into the image;
+Enter keeps the stock values ([details](custom-settings.md#build-them-into-your-own-image)). Ctrl+C stops only the display and closing the
 terminal does not stop the build; run it again and it attaches to the running build. Flags:
-`--clean`, `--dirclean`, `--check`.
+`--clean`, `--dirclean`, `--check`, and `--defaults` / `--same` to skip the questions.
 
 ### A progress bar
 

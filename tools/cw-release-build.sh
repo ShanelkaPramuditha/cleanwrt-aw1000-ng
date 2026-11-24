@@ -24,6 +24,11 @@
 #                              the devices trust for the cw-opt feed
 #                              (tools/cw-check-release-keys.sh). Without it a tree with
 #                              no key gets a fresh one that no device trusts.
+#   CW_LOCAL_SETTINGS=<file>   a first-boot script from tools/cw-settings-pack.sh --script
+#                              (tools/cw-build.sh makes it from its questions), built into
+#                              the image as /etc/uci-defaults/zz-cw-my-settings: your hostname,
+#                              LAN address and Wi-Fi become the image's defaults. Local builds
+#                              only: refused with CW_REQUIRE_RELEASE_KEYS=1.
 #   CW_MAX_IMAGE_MB=<n>        image size gate in MiB (default 80). The image carries
 #                              qBittorrent and needs the expanded
 #                              rootfs layout (the UBI check below enforces CW_UBI_LAYOUT).
@@ -368,6 +373,22 @@ cp -a "$REPO/files" files
 # into the rootfs, and every file on a device belongs to root - the scripts this folder adds
 # are read by the boot process as root and written back as root.
 chown -R --no-dereference 0:0 files
+# 3a. Your own defaults (local builds): the script tools/cw-build.sh wrote from its questions.
+#     It runs after the image's own first-boot scripts (zz- sorts last), on the first boot and
+#     after every reset, so a reset brings back these values rather than the stock ones. A
+#     release must stay the stock image anyone can reset to, and must not carry a password.
+if [ -n "${CW_LOCAL_SETTINGS:-}" ]; then
+    if [ "${CW_REQUIRE_RELEASE_KEYS:-0}" = "1" ]; then
+        echo "ERROR: CW_LOCAL_SETTINGS is for local builds; a release build ships the stock defaults" >&2
+        exit 1
+    fi
+    [ -f "$CW_LOCAL_SETTINGS" ] || { echo "ERROR: CW_LOCAL_SETTINGS: no such file: $CW_LOCAL_SETTINGS" >&2; exit 1; }
+    head -n 2 "$CW_LOCAL_SETTINGS" | grep -q 'tools/cw-settings-pack.sh' ||
+        { echo "ERROR: CW_LOCAL_SETTINGS: $CW_LOCAL_SETTINGS was not made by tools/cw-settings-pack.sh --script" >&2; exit 1; }
+    sh -n "$CW_LOCAL_SETTINGS" || { echo "ERROR: CW_LOCAL_SETTINGS: $CW_LOCAL_SETTINGS is not a valid shell script" >&2; exit 1; }
+    install -m 0755 -o 0 -g 0 "$CW_LOCAL_SETTINGS" files/etc/uci-defaults/zz-cw-my-settings
+    echo "== your own defaults built in: /etc/uci-defaults/zz-cw-my-settings (from CW_LOCAL_SETTINGS) =="
+fi
 # The user-visible version is exactly "<dist> <version>".
 # Stock base-files appends the version code to DISTRIB_DESCRIPTION and
 # OPENWRT_RELEASE; with an empty VERSION_CODE that is the OpenWrt revision, so drop
@@ -827,6 +848,9 @@ if [ "$rc" = 0 ]; then
             echo "built: $(date -u)"
             echo "cw-repo HEAD: $(git -C "$REPO" rev-parse HEAD 2>/dev/null || echo unknown)"
             echo "build mode: ${CLEAN:-incremental}"
+            # the values themselves stay out: one of them is the Wi-Fi password
+            [ ! -f files/etc/uci-defaults/zz-cw-my-settings ] ||
+                echo "own defaults: built in (CW_LOCAL_SETTINGS, /etc/uci-defaults/zz-cw-my-settings) - not the stock image"
             # `describe --dirty` alone said "v25.12.5-dirty" for every build, because this script
             # replaces the tracked feeds.conf.default with the repo's pinned list. State what differs
             # from the tag: the expected files are "clean"; anything else is listed.

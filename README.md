@@ -178,6 +178,10 @@ the background, and shows its progress:
  / compile  ██████████████░░░░░░░░░░░░░░░░░░░░░░░░  35%  142/406  luci-base  0:48:10  left 1:29:30
 ```
 
+Before the build starts it asks for the router's hostname, LAN address, Wi-Fi names and Wi-Fi
+password, and builds them into the image as its defaults. Press Enter to keep the stock values
+([Your own settings](https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/custom-settings/#build-them-into-your-own-image)).
+
 At the end it prints the image's path, size and sha256, or the lines around the error. The whole
 output is in `~/cw/build.log`. Ctrl+C stops only the display, and closing the window does not
 stop the build: run `tools/cw-build.sh` again and it shows the build that is running.
@@ -188,6 +192,8 @@ stop the build: run `tools/cw-build.sh` again and it shows the build that is run
 | `tools/cw-build.sh --clean` | rebuilds every package, keeps the toolchain |
 | `tools/cw-build.sh --dirclean` | rebuilds everything, the toolchain included |
 | `tools/cw-build.sh --check` | the feed, patch, pin and config checks in a few minutes, compiles nothing |
+| `tools/cw-build.sh --defaults` | builds the stock image without asking for your hostname, LAN address and Wi-Fi |
+| `tools/cw-build.sh --same` | builds with the hostname, LAN address and Wi-Fi you gave last time, without asking |
 
 The images are in `~/cw/openwrt/bin/targets/qualcommax/ipq807x/`; copy the one you want
 elsewhere, because the next build clears that folder.

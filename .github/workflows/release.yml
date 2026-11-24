@@ -97,6 +97,12 @@ jobs:
           # the provenance bundle unpacks to the paths sha256sums.cw names
           tar -xzf provenance.tar.gz
           grep 'cw-release-provenance' sha256sums.cw | sha256sum -c --quiet -
+          # an image with own settings (a Wi-Fi password, values a reset brings back) is never
+          # published; the build puts those in own-v<version>, this is the second lock
+          if grep -q '^own defaults:' cw-release-provenance/provenance.txt; then
+            echo "::error::this draft was built with own settings (CW_LOCAL_SETTINGS) - it holds a Wi-Fi password and is never published. Rebuild without them."
+            exit 1
+          fi
           echo "all files present and matching sha256sums.cw"
 
       - name: Publish

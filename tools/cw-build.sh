@@ -1,13 +1,22 @@
 #!/bin/sh
 # cw-build.sh - build the image on your own machine with one command, and watch it.
 #
-#   usage: tools/cw-build.sh [--clean | --dirclean | --check] [--tree <openwrt-tree>]
+#   usage: tools/cw-build.sh [--clean | --dirclean | --check] [--defaults | --same] [--tree <openwrt-tree>]
 #
 #   no flag      incremental build: only what changed is rebuilt
 #   --clean      rebuild every package, keep the toolchain
 #   --dirclean   rebuild everything, the toolchain included
 #   --check      feed, patch, pin and config checks only, nothing is compiled
+#   --defaults   no questions: the stock defaults (OpenWrt, 192.168.1.1, Wi-Fi off)
+#   --same       no questions: the values you gave last time
 #   --tree DIR   the OpenWrt tree (default: openwrt next to this repository)
+#
+# Before a build starts it asks for the router's defaults: hostname, LAN address, Wi-Fi names
+# and Wi-Fi password. Enter keeps the value shown; with nothing changed the image is the stock
+# one. Your values are built into the image (a reset brings them back) and offered again next
+# time from <cw>/.cw-build-settings (mode 600: it holds the Wi-Fi password). Without a terminal,
+# or with CW_HOSTNAME, CW_LAN_IP, CW_SSID, CW_SSID_2G, CW_SSID_5G or CW_WIFI_KEY set, nothing is
+# asked and those variables (or the stock defaults) are used.
 #
 # It works out every path from where the repository is, so it is the same from your own shell
 # or a root shell (where ~ is /root). It clones the OpenWrt tree at the pinned tag when there
@@ -25,12 +34,14 @@ set -eu
 REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TREE=
 MODE=
+ASK=
 while [ $# -gt 0 ]; do
 	case "$1" in
 	--clean | --dirclean) MODE=$1 ;;
 	--check) MODE=check ;;
+	--defaults | --same) ASK=${1#--} ;;
 	--tree) shift; TREE=${1:?--tree needs a directory} ;;
-	-h | --help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+	-h | --help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
 	*) echo "cw-build: unknown option '$1' (see --help)" >&2; exit 2 ;;
 	esac
 	shift
@@ -39,6 +50,8 @@ CW=$(dirname "$REPO")
 [ -n "$TREE" ] || TREE="$CW/openwrt"
 LOG="$CW/build.log"
 PIDF="$CW/.cw-build.pid"
+SETF="$CW/.cw-build-settings"      # your answers, offered again next time
+SCRIPTF="$CW/.cw-build-settings.sh" # the first-boot script made from them, for the build
 
 if [ -t 1 ]; then
 	B=$(printf '\033[1m') D=$(printf '\033[2m') G=$(printf '\033[32m') Y=$(printf '\033[33m')
@@ -145,6 +158,150 @@ free=$(df -Pk "$TREE" | awk 'NR == 2 { print int($4 / 1048576) }')
 [ "${free:-0}" -lt 25 ] &&
 	say "  ${Y}Only ${free} GB free under $TREE.${N} ${D}A first build needs about 50 GB; it may run out.${N}"
 
+# ── The router's defaults: asked here, built into the image ─────────────────────────────────
+# Stock values: what the image ships when nothing is changed (docs/first-boot.md).
+D_HOST=OpenWrt D_LAN=192.168.1.1 D_SSID=OpenWrt
+
+sq() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
+
+save_settings() {
+	( umask 077
+	  { echo "# tools/cw-build.sh: the answers of the last build. Holds the Wi-Fi password."
+	    echo "S_HOST=$(sq "$S_HOST")"; echo "S_LAN=$(sq "$S_LAN")"
+	    echo "S_SSID2=$(sq "$S_SSID2")"; echo "S_SSID5=$(sq "$S_SSID5")"; echo "S_KEY=$(sq "$S_KEY")"
+	  } > "$SETF" )
+}
+
+show_settings() {
+	say "    hostname     $S_HOST"
+	say "    LAN address  $S_LAN"
+	if [ -n "$S_KEY" ]; then
+		say "    Wi-Fi        on   2.4 GHz '$S_SSID2'   5 GHz '$S_SSID5'   password set"
+	else
+		say "    Wi-Fi        off  (stock: no password, so it stays off)"
+	fi
+}
+
+# The first-boot script, through tools/cw-settings-pack.sh (one place for the validation and
+# the uci commands). Nothing changed from stock: no script, the stock image. Fails with the
+# tool's message on a bad value.
+make_script() {
+	set --
+	[ "$S_HOST" = "$D_HOST" ] || set -- "$@" --hostname "$S_HOST"
+	case "$S_LAN" in "$D_LAN" | "$D_LAN/24") ;; *) set -- "$@" --lan-ip "$S_LAN" ;; esac
+	if [ -n "$S_KEY" ]; then
+		if [ "$S_SSID2" = "$S_SSID5" ]; then
+			set -- "$@" --ssid "$S_SSID2"
+		else
+			set -- "$@" --ssid-2g "$S_SSID2" --ssid-5g "$S_SSID5"
+		fi
+		set -- "$@" --key "$S_KEY"
+	elif [ "$S_SSID2" != "$D_SSID" ] || [ "$S_SSID5" != "$D_SSID" ]; then
+		say "  ${R}A Wi-Fi name needs a password:${N} Wi-Fi with no password stays off. Set one, or keep the name '$D_SSID'."
+		return 1
+	fi
+	rm -f "$SCRIPTF"
+	[ $# -gt 0 ] || return 0
+	sh "$REPO/tools/cw-settings-pack.sh" "$@" --script "$SCRIPTF"
+}
+
+ask() { # <prompt> <current>: prints the answer, the current value on Enter
+	printf '  %s [%s]: ' "$1" "$2" >/dev/tty
+	read -r a </dev/tty || a=
+	printf '%s' "${a:-$2}"
+}
+
+ask_key() { # hidden; Enter keeps the current one, '-' clears it
+	while :; do
+		if [ -n "$S_KEY" ]; then
+			printf "  Wi-Fi password [Enter keeps the saved one, '-' for none]: " >/dev/tty
+		else
+			printf '  Wi-Fi password [Enter for none: Wi-Fi stays off]: ' >/dev/tty
+		fi
+		stty -echo </dev/tty 2>/dev/null; read -r k </dev/tty || k=; stty echo </dev/tty 2>/dev/null; echo >/dev/tty
+		case "$k" in
+		'') return 0 ;;
+		-) S_KEY=; return 0 ;;
+		esac
+		printf '  Again, to confirm: ' >/dev/tty
+		stty -echo </dev/tty 2>/dev/null; read -r k2 </dev/tty || k2=; stty echo </dev/tty 2>/dev/null; echo >/dev/tty
+		[ "$k" = "$k2" ] && { S_KEY=$k; return 0; }
+		say "  ${Y}The two did not match.${N}"
+	done
+}
+
+settings() {
+	S_HOST=$D_HOST S_LAN=$D_LAN S_SSID2=$D_SSID S_SSID5=$D_SSID S_KEY=
+	saved=0
+	# shellcheck disable=SC1090
+	[ -f "$SETF" ] && . "$SETF" && saved=1
+
+	# From the environment, without questions (scripts, CI-like use)
+	if [ -n "${CW_HOSTNAME:-}${CW_LAN_IP:-}${CW_SSID:-}${CW_SSID_2G:-}${CW_SSID_5G:-}${CW_WIFI_KEY:-}" ]; then
+		S_HOST=${CW_HOSTNAME:-$D_HOST} S_LAN=${CW_LAN_IP:-$D_LAN}
+		S_SSID2=${CW_SSID_2G:-${CW_SSID:-$D_SSID}} S_SSID5=${CW_SSID_5G:-${CW_SSID:-$D_SSID}} S_KEY=${CW_WIFI_KEY:-}
+		ASK=env
+	fi
+	case "$ASK" in
+	defaults) S_HOST=$D_HOST S_LAN=$D_LAN S_SSID2=$D_SSID S_SSID5=$D_SSID S_KEY= ;;
+	same | env) ;;
+	*)
+		if ! { [ -t 0 ] && [ -r /dev/tty ]; }; then
+			# no terminal to ask on: the stock image, unless --same
+			S_HOST=$D_HOST S_LAN=$D_LAN S_SSID2=$D_SSID S_SSID5=$D_SSID S_KEY=
+		else
+			trap 'stty echo </dev/tty 2>/dev/null; printf "\n\n  Stopped; nothing was started.\n\n"; exit 130' INT
+			say "  ${B}The router's defaults${N} ${D}(built into the image; a reset brings them back)${N}"
+			if [ "$saved" = 1 ]; then
+				say "  ${D}Last time:${N}"
+				show_settings
+				printf '  Use these again? [Y]es, [c]hange, stock [d]efaults: ' >/dev/tty
+				read -r a </dev/tty || a=
+				case "$a" in
+				[cC]*) saved=0 ;;
+				[dD]*) S_HOST=$D_HOST S_LAN=$D_LAN S_SSID2=$D_SSID S_SSID5=$D_SSID S_KEY= ;;
+				esac
+			fi
+			if [ "$saved" = 0 ]; then
+				say "  ${D}Enter keeps the value in brackets.${N}"
+				while :; do
+					S_HOST=$(ask "Hostname" "$S_HOST")
+					S_LAN=$(ask "LAN address (e.g. 192.168.50.1 or 192.168.50.1/24)" "$S_LAN")
+					S_SSID2=$(ask "Wi-Fi name, 2.4 GHz" "$S_SSID2")
+					S_SSID5=$(ask "Wi-Fi name, 5 GHz" "$S_SSID5")
+					ask_key
+					if make_script; then
+						say ""
+						show_settings
+						printf '  Build with these? [Y/n]: ' >/dev/tty
+						read -r a </dev/tty || a=
+						case "$a" in [nN]*) say "" ;; *) break ;; esac
+					else
+						say "  ${D}Again: Enter keeps what you typed.${N}"
+					fi
+				done
+			fi
+			trap - INT
+			say ""
+		fi
+		;;
+	esac
+
+	make_script || exit 2
+	if [ ! -f "$SCRIPTF" ]; then   # nothing differs from stock
+		rm -f "$SETF"
+		say "  Defaults: ${B}stock${N} ${D}(OpenWrt, 192.168.1.1, Wi-Fi off)${N}"
+	else
+		[ "$ASK" = env ] || save_settings
+		say "  Defaults: ${B}your own${N}, built into the image:"
+		show_settings
+		say "  ${D}The image holds the Wi-Fi password: don't share it. A reset brings these values back.${N}"
+	fi
+	say ""
+}
+
+[ "$MODE" = check ] || settings
+
 # Start the build as root, detached: setsid puts it in its own session, so neither Ctrl+C here
 # nor closing the terminal reaches it.
 as_root=
@@ -162,6 +319,7 @@ $as_root env -u TERM \
 	CW_BUILD_OPT_ARTIFACTS="${CW_BUILD_OPT_ARTIFACTS:-0}" \
 	CW_CCACHE="${CW_CCACHE:-1}" \
 	CW_CHECK_ONLY="$checkonly" \
+	CW_LOCAL_SETTINGS="$( [ "$MODE" != check ] && [ -f "$SCRIPTF" ] && echo "$SCRIPTF" || true)" \
 	CW_PIDFILE="$PIDF" CW_LOG="$LOG" CW_TREE="$TREE" CW_REPO="$REPO" \
 	setsid sh -c 'echo $$ > "$CW_PIDFILE"; exec "$CW_REPO/tools/cw-release-build.sh" "$CW_TREE" "$@" < /dev/null >> "$CW_LOG" 2>&1' sh "$@" &
 n=0

@@ -35,6 +35,13 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   *Select All* and *Scan* buttons no longer lie on top of the band list, and radio and checkbox
   labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
   status card no longer touches the Save bar.
+- **Your own defaults in a local build.** `tools/cw-build.sh` asks for the hostname, LAN address,
+  Wi-Fi names and Wi-Fi password before it builds, and builds your answers into the image, so
+  the router starts with them and a reset brings them back. Press Enter to keep the stock
+  values. The next build offers the same answers again. See
+  [Your own settings](custom-settings.md#build-them-into-your-own-image). The `build` workflow on
+  GitHub takes the same values (the Wi-Fi password from a repository secret) and puts those
+  images in a private draft of their own, which is never published.
 - **Traffic Monitor graphs follow the theme.** *Status → Traffic Monitor → Graphs* now draws its
   charts in the page instead of showing white pictures: tiles for today, yesterday, this month
   (with an estimate for the whole month), last month and all time, and bar charts for every

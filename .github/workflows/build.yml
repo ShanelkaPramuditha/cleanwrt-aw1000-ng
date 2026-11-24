@@ -11,6 +11,31 @@ on:
         description: "Put the images in the private draft release v<CW_VERSION> (needs the signing secrets and a live cw-opt feed); untick for a test build"
         type: boolean
         default: true
+      # Your own defaults, built into the image (tools/cw-settings-pack.sh, as tools/cw-build.sh
+      # asks for locally). Empty: the stock value. Any of them set makes an "own settings" build:
+      # its images go to the separate private draft own-v<CW_VERSION>, never to the release
+      # draft, and the release workflow refuses to publish them. These four are visible to anyone
+      # who can see this repository's Actions runs; the Wi-Fi password is a secret, CW_WIFI_KEY.
+      hostname:
+        description: "Own settings - hostname (empty: OpenWrt)"
+        type: string
+        default: ""
+      lan_ip:
+        description: "Own settings - LAN address, e.g. 192.168.50.1 or 192.168.50.1/24 (empty: 192.168.1.1)"
+        type: string
+        default: ""
+      ssid:
+        description: "Own settings - Wi-Fi name, both bands (empty: OpenWrt; needs the Wi-Fi box below)"
+        type: string
+        default: ""
+      ssid_5g:
+        description: "Own settings - 5 GHz Wi-Fi name, if it differs (empty: the name above)"
+        type: string
+        default: ""
+      wifi:
+        description: "Own settings - turn Wi-Fi on with the password in the CW_WIFI_KEY repository secret"
+        type: boolean
+        default: false
   # The feed workflow runs this same build with opt_artifacts on and publishes the feed it makes.
   workflow_call:
     inputs:
@@ -51,10 +76,19 @@ jobs:
         run: |
           ver=$(sed -n 's/^CW_VERSION="\(.*\)"$/\1/p' tools/cw-release-build.sh)
           tag=$(sed -n 's/^OPENWRT_TAG="\(.*\)"$/\1/p' tools/cw-release-build.sh)
+          # An own-settings build never fills the release draft: it holds a Wi-Fi password and
+          # is not the stock image anyone can reset to. Its images go to own-v<version>.
+          own=${{ (inputs.hostname != '' || inputs.lan_ip != '' || inputs.ssid != '' || inputs.ssid_5g != '' || inputs.wifi) && 'true' || 'false' }}
+          draft=${{ inputs.draft && 'true' || 'false' }}
+          if [ "$own" = true ] && [ "$draft" = true ]; then
+            echo "::notice::own settings given: the images go to the private draft own-v$ver, not to the release draft v$ver"
+            draft=false
+          fi
           {
             echo "version=$ver"
             echo "tag=$tag"
-            echo "draft=${{ inputs.draft && 'true' || 'false' }}"
+            echo "draft=$draft"
+            echo "own=$own"
           } >> "$GITHUB_OUTPUT"
 
       # A draft is checked before the two-hour build, not after it: it needs the signing keys
@@ -100,6 +134,52 @@ jobs:
               { echo "::error::the cw-opt feed ($url) does not answer: run the feed workflow first"; bad=1; }
           fi
           exit "$bad"
+
+      # The first-boot script with your values, checked by the same tool and rules as a local build
+      # (a bad value or a Wi-Fi name without the password stops here, before two hours of build).
+      # It lands in the workspace, which the build container sees as /cleanwrt, readable by this
+      # job only, and is deleted when the job ends. The password never appears in the log.
+      - name: Own settings
+        if: steps.ver.outputs.own == 'true'
+        env:
+          CW_HOSTNAME: ${{ inputs.hostname }}
+          CW_LAN_IP: ${{ inputs.lan_ip }}
+          CW_SSID: ${{ inputs.ssid }}
+          CW_SSID_5G: ${{ inputs.ssid_5g }}
+          CW_WIFI: ${{ inputs.wifi }}
+          CW_WIFI_KEY: ${{ secrets.CW_WIFI_KEY }}
+        run: |
+          set -eu
+          set --
+          [ -z "$CW_HOSTNAME" ] || set -- "$@" --hostname "$CW_HOSTNAME"
+          [ -z "$CW_LAN_IP" ] || set -- "$@" --lan-ip "$CW_LAN_IP"
+          if [ "$CW_WIFI" = true ]; then
+            [ -n "$CW_WIFI_KEY" ] || { echo "::error::the Wi-Fi box is ticked but there is no CW_WIFI_KEY repository secret (Settings -> Secrets and variables -> Actions)"; exit 1; }
+            ssid=${CW_SSID:-OpenWrt}
+            if [ -n "$CW_SSID_5G" ] && [ "$CW_SSID_5G" != "$ssid" ]; then
+              set -- "$@" --ssid-2g "$ssid" --ssid-5g "$CW_SSID_5G"
+            else
+              set -- "$@" --ssid "$ssid"
+            fi
+            set -- "$@" --key "$CW_WIFI_KEY"
+          elif [ -n "$CW_SSID$CW_SSID_5G" ]; then
+            echo "::error::a Wi-Fi name needs the Wi-Fi box ticked (and the CW_WIFI_KEY secret): Wi-Fi with no password stays off"; exit 1
+          fi
+          sh tools/cw-settings-pack.sh "$@" --script .cw-own-settings.sh
+          {
+            echo "### Own settings built into this image"
+            echo "| | |"
+            echo "|---|---|"
+            echo "| hostname | ${CW_HOSTNAME:-OpenWrt (stock)} |"
+            echo "| LAN | ${CW_LAN_IP:-192.168.1.1 (stock)} |"
+            if [ "$CW_WIFI" = true ]; then
+              echo "| Wi-Fi | on: 2.4 GHz \`${CW_SSID:-OpenWrt}\`, 5 GHz \`${CW_SSID_5G:-${CW_SSID:-OpenWrt}}\`, password from CW_WIFI_KEY |"
+            else
+              echo "| Wi-Fi | off (stock) |"
+            fi
+            echo
+            echo "The images go to the private draft **own-v${{ steps.ver.outputs.version }}**. They hold the Wi-Fi password: never publish them."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # The build, its caches and its log all live on /mnt; the root disk only holds the builder
       # image. So the root-disk cleanup (about 2 minutes of rm) runs in the background, beside the
@@ -204,6 +284,7 @@ jobs:
           CW_CCACHE: "1"
           CW_BUILD_OPT_ARTIFACTS: ${{ inputs.opt_artifacts && '1' || '0' }}
           CW_REQUIRE_RELEASE_KEYS: ${{ ((inputs.opt_artifacts && secrets.APK_PRIVATE_KEY != '') || steps.ver.outputs.draft == 'true') && '1' || '0' }}
+          CW_LOCAL_SETTINGS: ${{ steps.ver.outputs.own == 'true' && '/cleanwrt/.cw-own-settings.sh' || '' }}
         run: |
           set -o pipefail
           # Progress lines in this log (">> progress: compile [####....] 40% ..."), read from the
@@ -217,7 +298,7 @@ jobs:
           progress=$!
           rc=0
           docker run --rm \
-            -e CW_CCACHE -e CW_BUILD_OPT_ARTIFACTS -e CW_REQUIRE_RELEASE_KEYS -e CW_MAX_IMAGE_MB \
+            -e CW_CCACHE -e CW_BUILD_OPT_ARTIFACTS -e CW_REQUIRE_RELEASE_KEYS -e CW_MAX_IMAGE_MB -e CW_LOCAL_SETTINGS \
             -v /mnt/cw/openwrt:/build -v "$PWD":/cleanwrt \
             cleanwrt-builder /cleanwrt/tools/cw-release-build.sh /build 2>&1 | tee -a /mnt/cw/build.log || rc=$?
           # one last pass so the final line is printed, then stop the watcher
@@ -407,6 +488,43 @@ jobs:
             echo "**Actions → release → Run workflow**."
           } >> "$GITHUB_STEP_SUMMARY"
           echo "draft $tag: $(gh release view "$tag" --json url -q .url)"
+
+      # Own settings: a private draft of its own, refreshed by each such build of this version.
+      # Never the release draft, and the release workflow refuses any draft whose provenance says
+      # own defaults are built in.
+      - name: Own-settings draft
+        if: success() && steps.ver.outputs.own == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -eu
+          tag="own-v$VERSION"
+          {
+            echo "CleanWRT $VERSION with **your own settings** built in (hostname, LAN, Wi-Fi), from commit $GITHUB_SHA,"
+            echo "run [${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) (its summary lists the values, without the password)."
+            echo
+            echo "**Keep this draft private and never publish it:** the images hold your Wi-Fi password, and a reset"
+            echo "brings your values back instead of the stock ones. Download the \`*-squashfs-sysupgrade.bin\` and flash it"
+            echo "as usual. The release workflow refuses to publish an own-settings build."
+          } > notes.md
+          if gh release view "$tag" >/dev/null 2>&1; then
+            [ "$(gh release view "$tag" --json isDraft -q .isDraft)" = "true" ] ||
+              { echo "ERROR: $tag is published - it must stay a draft; delete that release" >&2; exit 1; }
+            gh release view "$tag" --json assets -q '.assets[].name' | while read -r a; do
+              [ -e "dist/$a" ] || { echo "removing stale asset $a"; gh release delete-asset "$tag" "$a" --yes; }
+            done
+            gh release upload "$tag" dist/* --clobber
+            gh release edit "$tag" --target "$GITHUB_SHA" --notes-file notes.md
+          else
+            gh release create "$tag" dist/* --draft --target "$GITHUB_SHA" --title "CleanWRT $VERSION - own settings (private)" --notes-file notes.md
+          fi
+          echo "draft $tag: $(gh release view "$tag" --json url -q .url)"
+          echo "### Draft $tag refreshed (private; never publish it)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the own-settings script
+        if: always()
+        run: rm -f .cw-own-settings.sh
 
       - name: Upload build log
         if: always()

@@ -1,7 +1,7 @@
 #!/bin/sh
 # cw-settings-pack.sh - make a settings archive to flash together with a CleanWRT image.
 #
-#   usage: tools/cw-settings-pack.sh [--hostname NAME] [--lan-ip ADDR[/PREFIX]] [--ssid NAME] [--ssid-2g NAME] [--ssid-5g NAME] [--ssid-6g NAME] [--key PASSWORD] [-o FILE]
+#   usage: tools/cw-settings-pack.sh [--hostname NAME] [--lan-ip ADDR[/PREFIX]] [--ssid NAME] [--ssid-2g NAME] [--ssid-5g NAME] [--ssid-6g NAME] [--key PASSWORD] [-o FILE | --script FILE]
 #
 # The image itself ships the stock OpenWrt defaults (hostname OpenWrt, LAN 192.168.1.1, Wi-Fi
 # 'OpenWrt' with no key and the radios off), so a reset always brings a router back to values
@@ -23,6 +23,8 @@
 #   --ssid-2g/-5g/-6g NAME Wi-Fi name on one band (overrides --ssid there)
 #   --key PASSWORD         WPA2 password (8-63 characters, or 64 hex digits); turns Wi-Fi ON
 #   -o FILE                output archive (default: mysettings.tar.gz)
+#   --script FILE          write only the first-boot script, no archive. tools/cw-build.sh uses
+#                          it to build these values into a local image (see docs/custom-settings.md)
 #
 # A Wi-Fi name without --key is refused: it would only name a network that stays off, and
 # enabling it open would give anyone in range the LAN of a router with no root password yet.
@@ -32,7 +34,7 @@ set -eu
 usage() { sed -n '4p' "$0" | sed 's/^# *//' >&2; exit 2; }
 die() { echo "cw-settings-pack: $*" >&2; exit 1; }
 
-HOSTNAME_V='' LANIP='' SSID='' SSID2='' SSID5='' SSID6='' KEY='' OUT=mysettings.tar.gz
+HOSTNAME_V='' LANIP='' SSID='' SSID2='' SSID5='' SSID6='' KEY='' OUT=mysettings.tar.gz SCRIPT_OUT=''
 [ $# -gt 0 ] || usage
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -44,7 +46,8 @@ while [ $# -gt 0 ]; do
 		--ssid-6g)  [ $# -ge 2 ] || usage; SSID6=$2; shift 2 ;;
 		--key)      [ $# -ge 2 ] || usage; KEY=$2; shift 2 ;;
 		-o)         [ $# -ge 2 ] || usage; OUT=$2; shift 2 ;;
-		-h|--help)  sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+		--script)   [ $# -ge 2 ] || usage; SCRIPT_OUT=$2; shift 2 ;;
+		-h|--help)  sed -n '2,33p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
 		*) echo "cw-settings-pack: unknown option '$1'" >&2; usage ;;
 	esac
 done
@@ -100,8 +103,13 @@ mkdir -p "$WORK/etc/uci-defaults"
 S="$WORK/etc/uci-defaults/zz-cw-my-settings"
 {
 	echo '#!/bin/sh'
-	echo '# Made by tools/cw-settings-pack.sh. Runs once on the first boot after it was restored,'
-	echo '# then the system deletes it. A reset brings back the stock defaults.'
+	if [ -n "$SCRIPT_OUT" ]; then
+		echo '# Made by tools/cw-settings-pack.sh and built into this image by tools/cw-build.sh.'
+		echo '# Runs on the first boot, and again after every reset: these are the image defaults.'
+	else
+		echo '# Made by tools/cw-settings-pack.sh. Runs once on the first boot after it was restored,'
+		echo '# then the system deletes it. A reset brings back the stock defaults.'
+	fi
 	if [ -n "$HOSTNAME_V" ]; then
 		echo "uci set system.@system[0].hostname=$(sq "$HOSTNAME_V")"
 		echo 'uci commit system'
@@ -146,6 +154,13 @@ EOS
 	echo 'exit 0'
 } > "$S"
 chmod 0755 "$S"
+
+# --script: the script alone, for a build to put in the image overlay. Private, because it
+# holds the Wi-Fi password.
+if [ -n "$SCRIPT_OUT" ]; then
+	( umask 077; cat "$S" > "$SCRIPT_OUT" )
+	exit 0
+fi
 
 # root-owned entries, like a real backup; GNU tar and bsdtar (macOS) spell it differently
 case "$OUT" in /*) ;; *) OUT="$PWD/$OUT" ;; esac
