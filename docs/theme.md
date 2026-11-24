@@ -1,7 +1,7 @@
 ---
 title: "Theme: Vantage"
 description: "The web interface of CleanWRT: Vantage, its theme with the Dashboard, light and dark modes, and LuCI's own Bootstrap as the fallback."
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 
 # Theme
@@ -43,6 +43,8 @@ CleanWRT changes three things in it:
   from behind grouped buttons: the *Reset* / *Save* / *Save & Apply* buttons at the bottom of a
   page (still docked at the bottom right while you scroll, each with a soft shadow of its own),
   and the buttons at the foot of every dialog, which no longer sit on a shaded strip.
+- `patches/packages/luci-theme-vantage/0004-row-actions-gap.patch` spaces a table row's buttons
+  (*Edit* and ⋯ on *Network → Interfaces*) as far apart as the theme's other buttons.
 
 `patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch` makes the lamps on
 the LED page follow Vantage's light/dark switch rather than the browser's preference.

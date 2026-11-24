@@ -1,0 +1,28 @@
+Row action buttons: the same gap as every other row of buttons
+
+Table rows put their actions side by side 4px apart, half the 8px (--sp-2) that the
+theme uses between buttons everywhere else: the Save bar, dialog footers, page and
+section headers. Beside the ⋯ menu that a row with three or more actions folds into
+(Network > Interfaces: Edit and ⋯), the narrow gap made Edit and ⋯ read as one
+split button, and looked out of step with the buttons around them.
+Row actions now use --sp-2 too. Nothing else changes: the columns stay right-aligned,
+and the phone layout, where a row's buttons wrap, inherits the same gap.
+
+Applies to: https://github.com/anothaDev/luci-theme-vantage.git @ v1.2.0 (a7ff63b7), after 0001, 0002 and 0003.
+Upstream status: local to CleanWRT.
+
+diff --git a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
+index 6755a8e..d310da4 100644
+--- a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
++++ b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
+@@ -1861,7 +1861,9 @@ table { border-collapse: separate; border-spacing: 0; width: 100%; }
+    over them (Static Lease) starts where they start, as every other
+    column's title does */
+ .td.cbi-section-actions, .cbi-section-table-filter > .th.cbi-section-actions { text-align: right; }
+-.td.cbi-section-actions > div:not(.btn, .cbi-button) { display: inline-flex; gap: 4px; flex-wrap: nowrap; align-items: center; }
++/* the same 8px as every other row of buttons (Save bar, dialogs, page
++   headers); 4px read as one split button beside the ⋯ menu */
++.td.cbi-section-actions > div:not(.btn, .cbi-button) { display: inline-flex; gap: var(--sp-2); flex-wrap: nowrap; align-items: center; }
+ .td.cbi-section-actions .btn, .td.cbi-section-actions .cbi-button { padding: 0 10px; }
+ /* three or more row actions: the main one plus ⋯ (menu-vantage.js
+    decorateRowActions); LuCI's other buttons stay in place, hidden, and

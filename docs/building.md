@@ -232,6 +232,7 @@ than shipping a half-applied change.
 | `0009-sip-voip-default-migration` | a first-boot script that migrates a configuration that still pointed at the vendor engine — and only when the media socket is the phone daemon's, so a hand-configured router is left alone |
 | `0010-qmi-wwan-nss-path-behind-its-own-guard` | restores the vendor-deleted `CONFIG_RMNET_DATA` guard. Without it `modpost` fails on a symbol this tree does not carry and the driver cannot be packaged at all |
 | `0011-luci-button-spacing` | QModem's hand-built pages get their spacing: buttons side by side and under the log boxes no longer touch, Dial Overview's status card keeps clear of the Save bar, and Advance Modem Settings puts its Submit / Select All / Scan buttons in real table rows (they were appended straight into the table and lay over the band rows) and spaces its radio and checkbox labels |
+| `0012-neighbor-cell-list-and-lock` | Advance Modem Settings → Neighbor Cell lists every cell the modem hears (the serving cell first) with network name, band, frequency, PCI, RSRP, RSRQ and SINR; a row click fills in the lock form, Lock on a row locks to it, and Unlock and a "Keep after reboot" switch (QModem's boot hook) are added. The Qualcomm parser reads RSRQ and RSRP from the right fields (they were swapped) and returns the serving cells and the operator. The other tabs' button rows no longer sit on the card edge, and no box shows "undefined" |
 
 ### The LuCI feed
 
@@ -263,6 +264,7 @@ than shipping a half-applied change.
 | `packages/luci-theme-vantage/0001-export-tier-for-stock-theme-pages` | Vantage publishes LuCI Bootstrap's colour tokens (`--background-color-high`, `--text-color-highest`, ...) mapped onto its own palette, so pages written for the stock themes (3gInfo-lite, QModem, AWvoice) follow its dark mode instead of falling back to white tiles and dark text |
 | `packages/luci-theme-vantage/0002-legacy-tabs-and-legend-cards` | pages that build their own markup: tabs made of bare list items (no link) get the tab look and the selected state, and a card headed by a `<legend>` gets the header bar inside the card instead of on its border. QModem's Advance Modem Settings, Information and SMS pages use both |
 | `packages/luci-theme-vantage/0003-page-actions-without-card` | the Reset / Save / Save & Apply bar at the bottom of a page loses the frosted card drawn around it (background, border, blur, shadow); the buttons stay docked at the bottom right, each with a soft shadow of its own so they read over the page scrolling under them. A dialog's buttons lose the shaded footer strip and sit on the dialog itself |
+| `packages/luci-theme-vantage/0004-row-actions-gap` | a table row's action buttons (*Edit* and the ⋯ menu on *Network → Interfaces*, *Edit* and *Delete* elsewhere) sit 8px apart, the gap every other group of buttons in the theme uses, instead of 4px |
 
 ### Out-of-feed packages
 

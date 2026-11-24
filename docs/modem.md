@@ -1,7 +1,7 @@
 ---
 title: "AW1000 5G modem: QModem, SMS, TTL, SIP"
 description: "The Quectel RG500Q-EA modem on the Arcadyan AW1000: QModem, 3gInfo, SMS, TTL, which process uses which AT port, the LAN SIP service, and modem firmware."
-updated: 2026-11-06
+updated: 2026-11-24
 ---
 
 # The 5G modem
@@ -15,6 +15,7 @@ vendor QMI dialer, so it dials and recovers on its own.
 |---|---|---|
 | modem control and status | *Modem → QModem* | auto-dial, auto-recovery, dual-stack IPv4/IPv6 when your carrier offers IPv6 |
 | signal and network details | *Modem → 3gInfo-lite* | registration shows correctly on data-only SIMs, from a CEREG-based fix in this build |
+| cell and band locking | *Modem → QModem → Advance Modem Settings* | lock to one cell from a list of the cells around you, or to chosen bands. See below |
 | SMS | *Modem → SMS* | read and send. Received messages can be forwarded |
 | tethering-detection bypass (TTL) | *Modem → TTL* | **on by default**: forwarded packets get a fixed TTL of 64 |
 | data usage | *Statistics → vnStat* | daily and monthly totals on the modem interface |
@@ -149,6 +150,32 @@ version you receive, because the flags differ between versions.
   plan as if the upgrade is one-way.
 - The router itself is unaffected, so SSH and LuCI stay reachable over LAN and Wi-Fi.
 - If the modem does not come back, the vendor's tool and package are the recovery path.
+
+## Locking to a cell
+
+*Modem → QModem → Advance Modem Settings → Neighbor Cell* lists every cell (tower sector) the modem
+can hear. The cell it is connected to comes first, then the others by signal strength. Each row
+shows the signal, 4G or 5G, your network's name, the band and frequency, and the ARFCN, PCI,
+RSRP, RSRQ and SINR values. The tab scans when you open it; **Scan** looks again.
+
+1. Pick a cell with a strong signal (RSRP closer to 0, SINR higher).
+2. Press **Lock** on its row and confirm. The connection drops for a few seconds while the modem
+   moves to that cell. Clicking a row instead only fills in the form below the table, where you
+   can check the values before pressing **Lock**.
+3. Tick **Keep after reboot** before locking if the lock should come back after the modem or
+   the router restarts.
+4. **Unlock**, above the table, lets the modem choose its cell again.
+
+!!! warning "A locked modem does not move"
+    It stays on that cell even when the cell is congested, its signal drops or it goes off the
+    air, so you can lose the connection until you unlock. For everyday use, the **Lock Band** tab
+    is the gentler choice: it keeps the modem on bands you choose but lets it change cells.
+
+Neighbour cells do not report which network they belong to. The modem measures them on the
+frequencies your operator lists, so they are almost always your own network, and the page shows
+your operator's name for them. For a 5G neighbour the band and subcarrier spacing are worked out
+from the ARFCN; when the page is not sure, **Lock** fills in the form and asks you to check the
+band first.
 
 ## What the image fixes around the modem
 

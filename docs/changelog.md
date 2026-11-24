@@ -38,6 +38,16 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   *Select All* and *Scan* buttons no longer lie on top of the band list, and radio and checkbox
   labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
   status card no longer touches the Save bar.
+- **Lock the modem to a cell from a list.** *Advance Modem Settings → Neighbor Cell* now shows
+  every cell the modem hears, the connected one first, with your network's name, the band and
+  frequency, and the signal. Press **Lock** on a row, or click it to fill in the form. **Unlock**
+  and **Keep after reboot** are new. Neighbour signal values were swapped before (RSRP showed as
+  RSRQ); they are now correct.
+- **Tidier Advance Modem Settings.** Buttons no longer sit on the edge of their card, and no field
+  shows "undefined".
+- **Table row buttons are spaced like the rest.** On *Network → Interfaces* and other tables,
+  *Edit* and the ⋯ menu beside it are 8px apart instead of 4px, so they no longer read as one
+  button.
 - **Nikki's pages are redesigned.** *Services → Nikki* now opens on an *Overview* with a
   **Get started** checklist, the profile in use, how traffic is captured and the versions. Every
   page shows whether Nikki is running and has **Restart** and **Open Dashboard**. *Profiles* lists

@@ -64,6 +64,8 @@ upstream's, unchanged.
 | 2026-11-24 | `.github/workflows/build.yml`, `.github/workflows/release.yml`, `docs/building.md`, `docs/custom-settings.md` | added: own settings in the `build` workflow (inputs, Wi-Fi password from the `CW_WIFI_KEY` secret), built into a private `own-v<version>` draft; `release` refuses a draft built with own settings |
 | 2026-11-24 | `tools/cw-build.sh`, `tools/cw-settings-pack.sh`, `tools/cw-release-build.sh`, `docs/custom-settings.md`, `docs/building.md`, `README.md` | added: `cw-build.sh` asks for the hostname, LAN address and Wi-Fi before a local build and builds them in (`CW_LOCAL_SETTINGS`, refused in release builds); `cw-settings-pack.sh --script` |
 | 2026-11-24 | `patches/feeds/luci/0011-vnstat2-graphs-drawn-in-the-page.patch`, `configs/arcadyan_aw1000.seed`, `docs/building.md` | added: the vnStat graphs drawn in the page from `vnstat --json`; `vnstati2` (and libgd, libpng, libwebp) out of the image |
+| 2026-11-24 | `patches/feeds/qmodem/0012-neighbor-cell-list-and-lock.patch`, `docs/modem.md`, `docs/building.md`, `docs/changelog.md` | added: QModem's Neighbor Cell tab rebuilt as a cell list to lock from (network, band, signal, Unlock, keep after reboot), swapped neighbour RSRP/RSRQ fixed, serving cells and operator in the reply; button rows and empty fields tidied on the other tabs |
+| 2026-11-24 | `patches/packages/luci-theme-vantage/0004-row-actions-gap.patch`, `docs/building.md`, `docs/theme.md`, `docs/changelog.md` | added: table row buttons in Vantage spaced 8px apart, like its other button groups |
 | 2026-11-24 | `patches/packages/luci-theme-vantage/0003-page-actions-without-card.patch`, `docs/building.md`, `docs/theme.md` | added: grouped buttons without a card behind them in Vantage (the page's Reset / Save / Save & Apply bar, and dialog footers) |
 | 2026-11-24 | `patches/feeds/nikki/0001-luci-pages-redesign.patch`, `docs/features/vpn-proxy.md`, `docs/modem.md`, `docs/included.md`, `docs/changelog.md` | added: Nikki's LuCI pages redesigned (status header, setup checklist, profile list, log viewer, editor, help text; modifies luci-app-nikki, GPL-3.0) |
 | 2026-11-23 | `configs/arcadyan_aw1000.seed`, `tools/cw-release-build.sh`, `files/etc/uci-defaults/54-cw-tailscale-off`, `tools/tests/cw-tailscale-off-test.sh`, `docs/` | added: Tailscale in the image, off until enabled |
@@ -145,6 +147,13 @@ taken only where the kernel configures `CONFIG_RMNET_DATA`. The branch reads a s
 exports, so without the guard the driver cannot be linked and the package cannot be built. It is the guard the
 driver version this pin replaces carried, and a QSDK kernel that does set the symbol still gets the accelerated
 path. Same terms as above: a modification of QModem's code, published here.
+
+**Advance Modem Settings patch.** `patches/feeds/qmodem/0012-neighbor-cell-list-and-lock.patch`
+modifies `luci-app-qmodem`'s `luasrc/view/qmodem/modem_debug.htm` and `qmodem`'s
+`files/usr/share/qmodem/vendor/quectel.sh` at the pinned commit: the Neighbor Cell tab becomes a list
+of cells to lock from, the neighbour parser reads RSRQ and RSRP from the right fields and also reports
+the serving cells and the operator, and the page's button rows and empty fields are tidied. Same terms
+as above: a modification of QModem's code, published here.
 
 ### Theme patches
 

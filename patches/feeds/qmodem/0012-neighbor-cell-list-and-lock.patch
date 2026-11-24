@@ -1,0 +1,1112 @@
+QModem Advance Modem Settings: a cell list to lock from, and tidy button rows on every tab
+
+Neighbor Cell listed each neighbour as one run-on line ("LTE:neighbourcell:neighbourcell
+intra arfcn:1725 pci:195 rsrp:-9 rsrq:-88") with a Copy button, left out the cell the modem
+is actually using, and showed RSRQ as RSRP and RSRP as RSRQ: Quectel's
+AT+QENG="neighbourcell" puts RSRQ in the fifth field and RSRP in the sixth, and the parser
+read them the other way round. Its Lock Cell Setting and Status headers ran half the card's
+width, its PCI, ARFCN and Band boxes said "undefined", there was no way to unlock, and every
+lock also deleted QModem's saved re-lock-at-boot command, because the page never sent the
+switch for it.
+
+The tab is rebuilt:
+
+- One table lists every cell the modem hears: the serving cell (and the 5G leg of an EN-DC
+  link) first, marked Connected, then the neighbours by signal strength. Each row shows a
+  signal meter, 4G LTE or 5G NR, the network (operator name and MCC-MNC), the band and
+  frequency worked out from the ARFCN, ARFCN, PCI, RSRP, RSRQ and SINR, and the cell ID and
+  TAC for the serving cell. Neighbour cells do not report their network; the row says so.
+- A click on a row (or Enter) fills in the lock form; Lock on a row asks once and locks to
+  that cell. For a 5G neighbour whose band could only be worked out from its ARFCN, Lock fills
+  in the form and asks the user to check the band and SCS first.
+- Above the table: the network, whether LTE and NR are locked and to what, Scan, and Unlock
+  (shown while a lock is on). The tab scans when it opens.
+- The form has real labels and help text, checks PCI (0-1007), ARFCN and band before sending,
+  and has a "Keep after reboot" switch for QModem's existing boot hook
+  (lockcell_boot_hook_*), reflecting its saved state.
+
+Backend (vendor/quectel.sh, Qualcomm platform): RSRQ and RSRP are read from the right fields,
+RSSI and SINR are added, each line starts with empty values so one cell's numbers never carry
+over to the next, and get_neighborcell also returns "operator" (AT+COPS?) and a "serving"
+array parsed from AT+QENG="servingcell" (LTE, NR5G-SA, and EN-DC's LTE + NR5G-NSA). Existing
+keys keep their names and meaning, so other readers of this reply are unaffected.
+
+The other tabs: a row of buttons at the foot of a card no longer sits on the card's edge
+(Vantage pulls a card's last table into its bottom padding; createBtnRow rows get it back,
+and new createActions rows sit outside the table). Rat Prefer's Submit, Reboot Modem's two
+buttons and AT Debug's Clear sit in such a row; Set IMEI gets a labelled field instead of a
+bare box that could read "undefined"; Reboot Modem says what soft and hard reboot do; the AT
+console's buttons start at the left, 8px apart, instead of being spread across the row. No
+input showed "undefined" as its placeholder or value any more.
+
+Applies to: https://github.com/FUjr/QModem.git @ 0988085b, after 0011.
+Upstream status: local to CleanWRT.
+
+--- a/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
++++ b/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
+@@ -74,8 +74,9 @@
+ 			var input = document.createElement('input');
+ 			input.type = "text";
+ 			input.name = name;
+-			input.value = value;
+-			input.placeholder = hint;
++			// CleanWRT: a missing value or hint stays empty; it showed "undefined"
++			input.value = value == null ? "" : value;
++			if (hint) input.placeholder = hint;
+ 			return input;
+ 		}
+ 
+@@ -104,6 +105,16 @@
+ 			return tr;
+ 		}
+ 
++		// CleanWRT: a row of buttons at the foot of a card, outside any table
++		createActions(){
++			var div = document.createElement('div');
++			div.className = "qm-actions";
++			for (var btn of arguments) {
++				div.appendChild(btn);
++			}
++			return div;
++		}
++
+ 		createRadio(name,value){
+ 			var radio = document.createElement('input');
+ 			radio.type = "radio";
+@@ -585,7 +596,8 @@
+ 			var submit_btn = this.createBTN("<%:Submit%>",() => {
+ 				this.submit();
+ 			});
+-			this.fieldset.appendChild(submit_btn);
++			submit_btn.classList.add("cbi-button-apply");
++			this.fieldset.appendChild(this.createActions(submit_btn));
+ 		}
+ 
+ 		createCheckbox(rat){
+@@ -756,228 +768,497 @@
+ 		}
+ 	}
+ 
++	// CleanWRT: the Neighbor Cell tab, rebuilt. One table lists every cell the
++	// modem hears, the serving cell first, with the operator, band, frequency
++	// and signal. A click on a row fills in the lock form; Lock on a row locks
++	// to that cell. The lock status and Unlock sit above the table.
++
++	// LTE: band, first and last downlink EARFCN, downlink MHz at the first one
++	const QM_LTE_BANDS = [
++		[1,0,599,2110],[2,600,1199,1930],[3,1200,1949,1805],[4,1950,2399,2110],[5,2400,2649,869],
++		[7,2750,3449,2620],[8,3450,3799,925],[12,5010,5179,729],[13,5180,5279,746],[14,5280,5379,758],
++		[17,5730,5849,734],[18,5850,5999,860],[19,6000,6149,875],[20,6150,6449,791],[21,6450,6599,1495.9],
++		[25,8040,8689,1930],[26,8690,9039,859],[28,9210,9659,758],[29,9660,9769,717],[30,9770,9869,2350],
++		[32,9920,10359,1452],[34,36200,36349,2010],[38,37750,38249,2570],[39,38250,38649,1880],
++		[40,38650,39649,2300],[41,39650,41589,2496],[42,41590,43589,3400],[43,43590,45589,3600],
++		[46,46790,54539,5150],[48,55240,56739,3550],[66,66436,67335,2110],[71,68586,68935,617]
++	];
++
++	// NR: band, downlink MHz range, usual subcarrier spacing. The most widely used band
++	// comes first, so an ARFCN that two bands share (n41 and n7, n78 and n77) names it.
++	const QM_NR_BANDS = [
++		[78,3300,3800,30],[41,2496,2690,30],[77,3300,4200,30],[79,4400,5000,30],[28,758,803,15],
++		[1,2110,2170,15],[3,1805,1880,15],[7,2620,2690,15],[5,869,894,15],[8,925,960,15],
++		[20,791,821,15],[40,2300,2400,30],[38,2570,2620,30],[66,2110,2200,15],[71,617,652,15],
++		[2,1930,1990,15],[25,1930,1995,15],[257,26500,29500,120],[258,24250,27500,120]
++	];
++
++	function qmNum(v) {
++		if (v == null || v === '' || v === '-') return NaN;
++		return Number(v);
++	}
++
++	function qmLteInfo(earfcn) {
++		const n = qmNum(earfcn);
++		for (const b of QM_LTE_BANDS) {
++			if (n >= b[1] && n <= b[2]) {
++				return { band: b[0], mhz: Math.round((b[3] + 0.1 * (n - b[1])) * 10) / 10 };
++			}
++		}
++		return { band: null, mhz: null };
++	}
++
++	function qmNrMhz(arfcn) {
++		const n = qmNum(arfcn);
++		if (isNaN(n)) return null;
++		let mhz;
++		if (n < 600000) mhz = n * 0.005;
++		else if (n < 2016667) mhz = 3000 + 0.015 * (n - 600000);
++		else mhz = 24250.08 + 0.06 * (n - 2016667);
++		return Math.round(mhz * 100) / 100;
++	}
++
++	function qmNrGuess(mhz) {
++		for (const b of QM_NR_BANDS) {
++			if (mhz >= b[1] && mhz <= b[2]) return { band: b[0], scs: b[3] };
++		}
++		return null;
++	}
++
++	// SCS as the lock command numbers it: 0 = 15 kHz, 1 = 30, 2 = 60, 3 = 120
++	const QM_SCS = { 15: 0, 30: 1, 60: 2, 120: 3 };
++
++	function qmLevel(rsrp) {
++		const v = qmNum(rsrp);
++		if (isNaN(v)) return 0;
++		if (v >= -80) return 4;
++		if (v >= -90) return 3;
++		if (v >= -100) return 2;
++		if (v >= -110) return 1;
++		return 0;
++	}
++
++	const QM_LEVELS = [ "<%_No signal%>", "<%_Poor%>", "<%_Fair%>", "<%_Good%>", "<%_Excellent%>" ];
++
+ 	class NeighborCell extends ModemConfig {
+ 		constructor(cfg_id){
+-			super(cfg_id,"<%:Neighbor Cell%>");
++			super(cfg_id,"<%_Neighbor Cell%>");
+ 			this.config_name = "neighborcell";
+ 			this.get_action = "get_neighborcell";
+ 			this.set_action = "set_neighborcell";
+-			this.task = null;
+-			this.init_nc_table();
++			this.config = null;
++			this.scanned = false;
++			this.busy = false;
++			this.selected = null;
++			this.render();
+ 		}
+ 
+-		scan_neighborcell(){
+-			this.get_config();
++		el(tag, cls, text){
++			const e = document.createElement(tag);
++			if (cls) e.className = cls;
++			if (text != null) e.textContent = text;
++			return e;
++		}
++
++		request(action, params, cb){
++			const args = { "cfg": this.cfg_id, "action": action };
++			if (params != null) args.params = params;
++			XHR.get('<%=luci.dispatcher.build_url("admin", "modem", "qmodem", "modem_ctrl")%>', args,
++				(x, data) => cb(data && typeof data == 'object' ? data : null));
++		}
++
++		field(label, input, help){
++			const row = this.el('div', 'cbi-value');
++			const title = this.el('label', 'cbi-value-title', label);
++			const field = this.el('div', 'cbi-value-field');
++			field.appendChild(input);
++			if (help) field.appendChild(this.el('div', 'cbi-value-description', help));
++			row.append(title, field);
++			return row;
+ 		}
+ 
+-		// pause(){
+-		// 	if (this.task != null) {
+-		// 		clearInterval(this.task);
+-		// 	}
+-		// }
++		render(){
++			const fs = this.fieldset;
++			fs.classList.add('qm-nc');
++
++			fs.appendChild(this.createDescription("<%_The cells (towers) the modem can hear right now, the one it is using first. Click a cell to fill in the lock form, or press Lock on its row. A locked modem stays on that cell even when its signal gets worse, so unlock it if the connection drops.%>"));
+ 
+-		// update(){
+-			
+-		// 	this.task = setInterval(() => {
+-		// 		this.get_config();
+-		// 	},10000);
+-		// }
++			// the network, the lock status, and Scan / Unlock
++			const summary = this.el('div', 'qm-nc-summary');
++			this.net_node = this.el('div', 'qm-nc-net');
++			this.lock_node = this.el('div', 'qm-nc-locks');
++			const tools = this.el('div', 'qm-nc-tools');
++			this.time_node = this.el('span', 'qm-nc-dim');
++			this.unlock_btn = this.createBTN("<%_Unlock%>", () => this.unlock());
++			this.unlock_btn.classList.add('cbi-button-negative');
++			this.unlock_btn.style.display = 'none';
++			this.scan_btn = this.createBTN("<%_Scan%>", () => this.scan());
++			this.scan_btn.classList.add('cbi-button-action');
++			tools.append(this.time_node, this.unlock_btn, this.scan_btn);
++			summary.append(this.net_node, this.lock_node, tools);
++			fs.appendChild(summary);
++
++			this.msg = this.el('div', 'qm-nc-msg');
++			this.msg.style.display = 'none';
++			fs.appendChild(this.msg);
++
++			// the cells
++			const wrap = this.el('div', 'qm-nc-scroll');
++			const table = this.el('table', 'table qm-nc-table');
++			const thead = document.createElement('thead');
++			const htr = this.el('tr', 'tr cbi-section-table-titles');
++			for (const [label, cls] of [
++				[ "<%_Signal%>", '' ], [ "<%_Cell%>", '' ], [ "<%_Network%>", '' ], [ "<%_Band%>", '' ],
++				[ "ARFCN", 'qm-num' ], [ "PCI", 'qm-num' ], [ "RSRP", 'qm-num' ], [ "RSRQ", 'qm-num' ],
++				[ "SINR", 'qm-num' ], [ '', 'qm-act' ]
++			]) {
++				htr.appendChild(this.el('th', 'th ' + cls, label));
++			}
++			thead.appendChild(htr);
++			table.appendChild(thead);
++			this.cell_body = document.createElement('tbody');
++			table.appendChild(this.cell_body);
++			wrap.appendChild(table);
++			fs.appendChild(wrap);
++			this.render_empty("<%_Press Scan to list the cells.%>");
++
++			// the lock form
++			const form = this.el('div', 'qm-nc-form');
++			form.appendChild(this.el('div', 'qm-nc-h', "<%_Lock manually%>"));
++			form.appendChild(this.createDescription("<%_Filled in when you click a cell. For 5G, check the band and SCS: the modem does not report them for neighbour cells, so they are worked out from the ARFCN.%>"));
++
++			this.rat_input = this.createDroplist({ 0: "LTE (4G)", 1: "NR (5G)" });
++			this.rat_input.addEventListener('change', () => this.nr_options());
++			this.pci_input = this.createInput("pci", "", "0 - 1007");
++			this.arfcn_input = this.createInput("arfcn", "", "<%_e.g.%> 1725");
++			this.band_input = this.createInput("band", "", "<%_e.g.%> 78");
++			for (const i of [ this.pci_input, this.arfcn_input, this.band_input ]) {
++				i.inputMode = 'numeric';
++				i.autocomplete = 'off';
++			}
++			this.scs_input = this.createDroplist({ 0: "15 kHz", 1: "30 kHz", 2: "60 kHz", 3: "120 kHz" });
++
++			this.boot_input = this.createCheckbox("1");
++			this.boot_input.id = 'qm-nc-boot-' + this.cfg_id;
++			const boot = this.el('label', 'qm-nc-check');
++			boot.append(this.boot_input, this.el('span', null, "<%_Lock again after the modem or router restarts%>"));
++			boot.htmlFor = this.boot_input.id;
++
++			form.appendChild(this.field("<%_Network type%>", this.rat_input));
++			form.appendChild(this.field("PCI", this.pci_input, "<%_Physical cell ID, the number that tells cells on one frequency apart.%>"));
++			form.appendChild(this.field("ARFCN", this.arfcn_input, "<%_The channel number of the cell's frequency (EARFCN for LTE).%>"));
++			this.band_row = this.field("<%_Band%>", this.band_input, "<%_The NR band number, without the n.%>");
++			this.scs_row = this.field("SCS", this.scs_input, "<%_Subcarrier spacing: usually 30 kHz on n41, n77, n78 and n79, 15 kHz on lower bands.%>");
++			form.appendChild(this.band_row);
++			form.appendChild(this.scs_row);
++			form.appendChild(this.field("<%_Keep after reboot%>", boot));
++
++			this.lock_btn = this.createBTN("<%_Lock%>", () => this.lock_from_form());
++			this.lock_btn.classList.add('cbi-button-apply');
++			const actions = this.el('div', 'qm-actions');
++			actions.append(this.lock_btn);
++			form.appendChild(actions);
++			fs.appendChild(form);
++
++			this.nr_options();
++			this.render_summary();
++		}
+ 
+ 		nr_options(){
+-			if (this.rat_input.selectedIndex == 0) {
+-				this.band_tr.style.display = "none";
+-				this.scs_tr.style.display = "none";
+-			}
+-			else{
+-				this.band_tr.style.display = "";
+-				this.scs_tr.style.display = "";
+-			}
++			const nr = this.rat_input.value == '1';
++			this.band_row.style.display = nr ? '' : 'none';
++			this.scs_row.style.display = nr ? '' : 'none';
+ 		}
+ 
+-		init_nc_table(){
+-			var neighborcell_table,setting_table,status_table ;
+-			neighborcell_table = this.createTable();
+-			status_table = this.createTable();
+-			setting_table = this.createTable();
+-			
+-			this.fieldset.appendChild(neighborcell_table);
+-			this.fieldset.appendChild(status_table);
+-			this.fieldset.appendChild(setting_table);
+-
+-			this.neighborcell_table = neighborcell_table.querySelector('tbody');
+-			this.status_table = status_table.querySelector('tbody');
+-			this.setting_table = setting_table.querySelector('tbody');
+-
+-			var pci_tr,arfcn_tr,band_tr,scs_tr,header,td,td1,th,pci_input,arfcn_input,band_input,scs_input,rat_input,rat_tr;
+-			var status_th,status_trh;
+-			header = this.createTRHeader();
+-			th = this.createTH("<%:Lock Cell Setting%>");
+-			header.appendChild(th);
+-
+-			rat_input = this.createDroplist({0:"LTE",1:"NR"});
+-			rat_tr = this.createTR();
+-			td = this.createTD("<%:RAT%>");
+-			td1 = this.createTD();
+-			td1.appendChild(rat_input);
+-			rat_tr.appendChild(td);
+-			rat_tr.appendChild(td1);
+-
+-
+-			pci_tr = this.createTR();
+-			td = this.createTD("<%:PCI%>");
+-			pci_input = this.createInput("pci","");
+-			td1 = this.createTD();
+-			td1.appendChild(pci_input);
+-			pci_tr.appendChild(td);
+-			pci_tr.appendChild(td1);
+-
+-			arfcn_tr = this.createTR();
+-			td = this.createTD("<%:ARFCN%>");
+-			arfcn_input = this.createInput("arfcn","");
+-			td1 = this.createTD();
+-			td1.appendChild(arfcn_input);
+-			arfcn_tr.appendChild(td);
+-			arfcn_tr.appendChild(td1);
+-			
+-			band_tr = this.createTR();
+-			td = this.createTD("<%:Band%>");
+-			band_input = this.createInput("band","");
+-			td1 = this.createTD();
+-			td1.appendChild(band_input);
+-			band_tr.appendChild(td);
+-			band_tr.appendChild(td1);
+-
+-			scs_tr = this.createTR();
+-			td = this.createTD("<%:SCS%>");
+-			scs_input = this.createDroplist({0:"15KHZ",1:"30KHZ"});
+-			td1 = this.createTD();
+-			td1.appendChild(scs_input);
+-			scs_tr.appendChild(td);
+-			scs_tr.appendChild(td1);
+-
+-			status_th = this.createTH("<%:Status%>");
+-			status_trh = this.createTRHeader();
+-			status_trh.appendChild(status_th);
+-			this.status_table.appendChild(status_trh);
+-
+-			this.pci_input = pci_input;
+-			this.arfcn_input = arfcn_input;
+-			this.band_input = band_input;
+-			this.scs_input = scs_input;
+-			this.rat_input = rat_input;
+-			this.band_tr = band_tr;
+-			this.scs_tr = scs_tr;
+-			this.band_tr.style.display = "none";
+-			this.scs_tr.style.display = "none";
+-			this.rat_input.addEventListener('change',()=>{
+-				this.nr_options();
+-			});
++		// the tab opens with a scan, so the table is never empty for no reason
++		update(){
++			if (!this.scanned) this.scan();
++		}
+ 
+-			var submit_btn = this.createBTN("<%:Submit%>",() => {
+-				var config = {
+-					"rat": this.rat_input.selectedIndex,
+-					"pci": this.pci_input.value,
+-					"arfcn": this.arfcn_input.value,
+-					"band": this.band_input.value,
+-					"scs": this.scs_input.selectedIndex
++		notify(text, kind){
++			this.msg.textContent = text;
++			this.msg.className = 'qm-nc-msg' + (kind ? ' is-' + kind : '');
++			this.msg.style.display = text ? '' : 'none';
++		}
++
++		set_busy(busy, label){
++			this.busy = busy;
++			for (const b of [ this.scan_btn, this.unlock_btn, this.lock_btn ]) b.disabled = busy;
++			for (const b of this.cell_body.querySelectorAll('.cbi-button')) b.disabled = busy || b.dataset.locked == '1';
++			this.scan_btn.value = busy && label ? label : "<%_Scan%>";
++		}
++
++		scan(){
++			if (this.busy) return;
++			this.scanned = true;
++			this.set_busy(true, "<%_Scanning...%>");
++			if (!this.config) this.render_empty("<%_Scanning...%>");
++			this.request(this.get_action, null, (data) => {
++				this.set_busy(false);
++				if (!data || !data.neighborcell) {
++					this.notify("<%_The modem did not answer. Check that it is connected, then scan again.%>", 'err');
++					if (!this.config) this.render_empty("<%_No cells to show.%>");
++					return;
+ 				}
+-				this.set_config(JSON.stringify(config));
++				this.config = data.neighborcell;
++				this.time_node.textContent = "<%_Updated%> " + new Date().toLocaleTimeString();
++				const hook = this.config.lockcell_boot_hook;
++				this.boot_input.checked = !!(hook && (hook.enabled === true || hook.enabled == 1));
++				this.render_summary();
++				this.render_cells();
+ 			});
++		}
+ 
+-			//add scan button
+-			var scan_btn = this.createBTN("<%:Scan%>",() => {
+-				this.scan_neighborcell();
++		send_lock(cfg, done_text){
++			this.set_busy(true, "<%_Working...%>");
++			this.notify("<%_Sending to the modem...%>");
++			this.request(this.set_action, JSON.stringify(JSON.stringify(cfg)), (data) => {
++				this.set_busy(false);
++				const res = data && data.result ? String(data.result.setlockcell || '') : '';
++				if (!data || /ERROR/i.test(res)) {
++					this.notify("<%_The modem refused the request. Check the values and try again.%>" + (res ? ' (' + res.replace(/\s+/g, ' ').trim() + ')' : ''), 'err');
++				} else {
++					this.notify(done_text, 'ok');
++				}
++				// the modem re-registers after a lock change: look again once it has
++				setTimeout(() => { this.scanned = false; this.scan(); }, 3000);
+ 			});
+-
+-			this.setting_table.appendChild(header);
+-			this.setting_table.appendChild(rat_tr);
+-			this.setting_table.appendChild(pci_tr);
+-			this.setting_table.appendChild(arfcn_tr);
+-			this.setting_table.appendChild(band_tr);
+-			this.setting_table.appendChild(scs_tr);
+-			this.setting_table.appendChild(this.createBtnRow(scan_btn, submit_btn));
+ 		}
+ 
+-		render_neighborcell(){
+-			//clear neighborcell_table
+-			while (this.neighborcell_table.querySelector("tr")) {
+-				let remove = this.neighborcell_table.querySelector("tr")
+-				this.neighborcell_table.removeChild(remove);
+-			}
+-			var nr,lte,tr_left
+-			nr = this.config.NR;
+-			lte = this.config.LTE;
+-			for (let cell_info of nr) {
+-				this.create_nc_tr(1,cell_info);
+-				}
+-			for (let cell_info of lte) {
+-				this.create_nc_tr(0,cell_info);
++		unlock(){
++			if (!window.confirm("<%_Unlock the modem from its locked cell? It will choose a cell on its own again.%>")) return;
++			this.send_lock({ "rat": 0, "pci": "", "arfcn": "", "band": "", "scs": 0, "en_boot_hook": "0" },
++				"<%_Unlocked. The modem chooses its cell on its own again.%>");
++		}
++
++		lock_from_form(){
++			const rat = this.rat_input.value == '1' ? 1 : 0;
++			const pci = this.pci_input.value.trim();
++			const arfcn = this.arfcn_input.value.trim();
++			const band = this.band_input.value.trim().replace(/^n/i, '');
++			if (!/^\d+$/.test(pci) || Number(pci) > 1007) {
++				this.notify("<%_Enter a PCI from 0 to 1007.%>", 'err');
++				this.pci_input.focus();
++				return;
+ 			}
+-
+-		}
+-
+-		render_status(){
+-			//clear status_table
+-			while (this.status_table.querySelector("tr")) {
+-				this.status_table.removeChild(this.status_table.querySelector("tr"));
++			if (!/^\d+$/.test(arfcn)) {
++				this.notify("<%_Enter the ARFCN as a number.%>", 'err');
++				this.arfcn_input.focus();
++				return;
+ 			}
+-			var status = this.config.lockcell_status;
+-			for (let key in status) {
+-				if (status[key] != ""){
+-					this.create_status_tr(key + ":" + status[key].toUpperCase());
+-				}
++			if (rat == 1 && !/^\d+$/.test(band)) {
++				this.notify("<%_Enter the NR band number, for example 78.%>", 'err');
++				this.band_input.focus();
++				return;
+ 			}
++			const what = (rat ? 'NR' : 'LTE') + ' PCI ' + pci + ', ARFCN ' + arfcn + (rat ? ', n' + band : '');
++			if (!window.confirm("<%_Lock the modem to this cell?%>\n\n" + what + "\n\n<%_The connection drops for a few seconds while the modem moves to it.%>")) return;
++			this.send_lock({
++				"rat": rat, "pci": pci, "arfcn": arfcn, "band": rat ? band : "",
++				"scs": rat ? Number(this.scs_input.value) : 0,
++				"en_boot_hook": this.boot_input.checked ? "1" : "0"
++			}, "<%_Locked to%> " + what + ".");
++		}
++
++		fill_form(cell){
++			this.rat_input.value = cell.rat == 'NR' ? '1' : '0';
++			this.pci_input.value = cell.pci;
++			this.arfcn_input.value = cell.arfcn;
++			this.band_input.value = cell.rat == 'NR' && cell.band ? cell.band : '';
++			if (cell.rat == 'NR' && cell.scs != null) this.scs_input.value = String(cell.scs);
++			this.nr_options();
++			this.selected = cell.key;
++			for (const tr of this.cell_body.querySelectorAll('tr[data-key]')) {
++				tr.classList.toggle('is-selected', tr.dataset.key == cell.key);
++				tr.setAttribute('aria-selected', tr.dataset.key == cell.key ? 'true' : 'false');
++			}
++		}
++
++		// serving cells, then neighbours by signal, each with band, MHz and
++		// whether it is the locked one
++		cells(){
++			const c = this.config || {};
++			const st = c.lockcell_status || {};
++			const out = [];
++			const seen = {};
++			const add = (cell) => {
++				cell.key = cell.rat + ':' + cell.arfcn + ':' + cell.pci;
++				if (seen[cell.key]) return;
++				seen[cell.key] = true;
++				if (cell.rat == 'LTE') {
++					const info = qmLteInfo(cell.arfcn);
++					cell.mhz = info.mhz;
++					if (!cell.band) cell.band = info.band;
++				} else {
++					cell.mhz = qmNrMhz(cell.arfcn);
++					const servingNr = (c.serving || []).find(s => s.rat == 'NR' && s.arfcn == cell.arfcn);
++					const guess = cell.mhz != null ? qmNrGuess(cell.mhz) : null;
++					if (!cell.band && servingNr) cell.band = servingNr.band;
++					if (cell.scs === '' || cell.scs == null) {
++						cell.scs = servingNr && servingNr.scs !== '' ? Number(servingNr.scs) : (guess ? QM_SCS[guess.scs] : null);
++					} else {
++						cell.scs = Number(cell.scs);
++					}
++					if (!cell.band && guess) {
++						cell.band = guess.band;
++						cell.guessed = true;
++					}
++				}
++				cell.locked = cell.rat == 'LTE'
++					? (st.LTE == 'locked' && st.LTE_PCI == cell.pci && st.LTE_Freq == cell.arfcn)
++					: (st.NR == 'locked' && st.NR_PCI == cell.pci && st.NR_Freq == cell.arfcn);
++				out.push(cell);
++			};
++			for (const s of (c.serving || [])) {
++				add({ serving: true, rat: s.rat, pci: s.pci, arfcn: s.arfcn, band: s.band, rsrp: s.rsrp, rsrq: s.rsrq,
++				      sinr: s.sinr, scs: s.scs, mcc: s.mcc, mnc: s.mnc, cellid: s.cellid, tac: s.tac });
++			}
++			const neigh = [];
++			for (const n of (c.LTE || [])) {
++				neigh.push({ rat: 'LTE', kind: /inter/.test(n.neighbourcell) ? 'inter' : 'intra', pci: n.pci, arfcn: n.arfcn,
++				             rsrp: n.rsrp, rsrq: n.rsrq, sinr: n.sinr });
++			}
++			for (const n of (c.NR || [])) {
++				neigh.push({ rat: 'NR', kind: /inter/.test(n.neighbourcell || '') ? 'inter' : 'intra', pci: n.pci, arfcn: n.arfcn,
++				             rsrp: n.rsrp, rsrq: n.rsrq, sinr: n.sinr });
++			}
++			neigh.sort((a, b) => (isNaN(qmNum(b.rsrp)) ? -999 : qmNum(b.rsrp)) - (isNaN(qmNum(a.rsrp)) ? -999 : qmNum(a.rsrp)));
++			neigh.forEach(add);
++			return out;
++		}
++
++		network_name(){
++			const c = this.config || {};
++			const s = (c.serving || [])[0];
++			const plmn = s && s.mcc ? s.mcc + '-' + s.mnc : '';
++			const op = (c.operator || '').trim();
++			return { name: op && !/^\d+$/.test(op) ? op : (plmn || op || "<%_Unknown%>"), plmn: plmn };
++		}
++
++		render_summary(){
++			const c = this.config;
++			this.net_node.textContent = '';
++			this.lock_node.textContent = '';
++			if (!c) return;
++
++			const net = this.network_name();
++			this.net_node.append(this.el('span', 'qm-nc-label', "<%_Network%>"), this.el('strong', null, net.name));
++			if (net.plmn && net.plmn != net.name) this.net_node.appendChild(this.el('span', 'qm-nc-dim', net.plmn));
++
++			const st = c.lockcell_status || {};
++			let any = false;
++			for (const rat of [ 'LTE', 'NR' ]) {
++				const locked = st[rat] == 'locked';
++				any = any || locked;
++				const chip = this.el('span', 'qm-nc-chip' + (locked ? ' is-locked' : ''));
++				chip.textContent = locked
++					? rat + ' <%_locked to%> PCI ' + (st[rat + '_PCI'] || '?') + ' · ARFCN ' + (st[rat + '_Freq'] || '?')
++					: rat + ' <%_not locked%>';
++				this.lock_node.appendChild(chip);
++			}
++			this.unlock_btn.style.display = any ? '' : 'none';
++		}
++
++		render_empty(text){
++			this.cell_body.textContent = '';
++			const tr = this.el('tr', 'tr placeholder');
++			const td = this.el('td', 'td', text);
++			td.colSpan = 10;
++			tr.appendChild(td);
++			this.cell_body.appendChild(tr);
+ 		}
+ 
+-		create_status_tr(status){
+-			var tr = this.createTR();
+-			var td = this.createTD(status);
+-			tr.appendChild(td);
+-			this.status_table.appendChild(tr);
++		fmt(v, unit){
++			return isNaN(qmNum(v)) ? '—' : v + ' ' + unit;
+ 		}
+ 
+-		create_nc_tr(rat,cell_info){
+-			if (rat == 0) {
+-				var text = "LTE:";
++		render_cells(){
++			const cells = this.cells();
++			if (!cells.length) {
++				this.render_empty("<%_The modem reports no cells. Try again in a moment.%>");
++				return;
+ 			}
+-			else{
+-				var text = "NR:";
++			const net = this.network_name();
++			this.cell_body.textContent = '';
++			for (const cell of cells) {
++				const tr = this.el('tr', 'tr qm-nc-row' + (cell.serving ? ' is-serving' : ''));
++				tr.dataset.key = cell.key;
++				tr.tabIndex = 0;
++				tr.setAttribute('aria-selected', cell.key == this.selected ? 'true' : 'false');
++				if (cell.key == this.selected) tr.classList.add('is-selected');
++				tr.title = "<%_Click to fill in the lock form%>";
++
++				// signal
++				const level = qmLevel(cell.rsrp);
++				const bars = this.el('span', 'qm-bars');
++				bars.dataset.level = level;
++				for (let i = 0; i < 4; i++) bars.appendChild(this.el('i'));
++				const sig = this.el('td', 'td qm-nc-sig');
++				sig.append(bars, this.el('span', 'qm-nc-dim', QM_LEVELS[level]));
++
++				// cell: serving / neighbour, RAT, ID
++				const cellTd = this.el('td', 'td');
++				const tags = this.el('div', 'qm-nc-tags');
++				tags.appendChild(this.el('span', 'qm-tag', cell.rat == 'NR' ? '5G NR' : '4G LTE'));
++				if (cell.serving) tags.appendChild(this.el('span', 'qm-tag is-accent', "<%_Connected%>"));
++				else tags.appendChild(this.el('span', 'qm-tag is-plain', cell.kind == 'inter' ? "<%_Neighbour, other frequency%>" : "<%_Neighbour, same frequency%>"));
++				if (cell.locked) tags.appendChild(this.el('span', 'qm-tag is-warn', "<%_Locked%>"));
++				cellTd.appendChild(tags);
++				if (cell.cellid) {
++					cellTd.appendChild(this.el('div', 'qm-nc-dim', "<%_Cell ID%> " + cell.cellid + (cell.tac ? ' · TAC ' + cell.tac : '')));
++				}
++
++				// network
++				const netTd = this.el('td', 'td');
++				if (cell.serving) {
++					netTd.appendChild(this.el('div', null, net.name));
++					if (net.plmn && net.plmn != net.name) netTd.appendChild(this.el('div', 'qm-nc-dim', net.plmn));
++				} else {
++					const n = this.el('div', 'qm-nc-dim', net.name);
++					netTd.title = "<%_Neighbour cells do not report their network. The modem measures them on the frequencies your operator lists, so they are almost always the same network.%>";
++					netTd.appendChild(n);
++				}
++
++				// band and frequency
++				const bandTd = this.el('td', 'td');
++				const bandText = cell.band ? (cell.rat == 'NR' ? 'n' : 'B') + cell.band + (cell.guessed ? '?' : '') : '—';
++				bandTd.appendChild(this.el('div', null, bandText));
++				if (cell.guessed) bandTd.title = "<%_Worked out from the ARFCN: check it before locking.%>";
++				if (cell.mhz != null) bandTd.appendChild(this.el('div', 'qm-nc-dim', cell.mhz + ' MHz'));
++
++				const num = (v) => this.el('td', 'td qm-num', v);
++
++				// action
++				const act = this.el('td', 'td qm-act');
++				const btn = this.createBTN(cell.locked ? "<%_Locked%>" : "<%_Lock%>", (ev) => {
++					ev.stopPropagation();
++					this.fill_form(cell);
++					if (cell.rat == 'NR' && cell.guessed) {
++						this.notify("<%_Check the band and SCS in the form below, then press Lock.%>", 'warn');
++						this.band_input.focus();
++						return;
++					}
++					this.lock_from_form();
++				});
++				if (cell.locked) {
++					btn.disabled = true;
++					btn.dataset.locked = '1';
++				}
++				act.appendChild(btn);
++
++				tr.append(sig, cellTd, netTd, bandTd, num(cell.arfcn || '—'), num(cell.pci || '—'),
++					num(this.fmt(cell.rsrp, 'dBm')), num(this.fmt(cell.rsrq, 'dB')), num(this.fmt(cell.sinr, 'dB')), act);
++
++				tr.addEventListener('click', () => this.fill_form(cell));
++				tr.addEventListener('keydown', (ev) => {
++					if (ev.key == 'Enter' || ev.key == ' ') {
++						ev.preventDefault();
++						this.fill_form(cell);
++					}
++				});
++				this.cell_body.appendChild(tr);
+ 			}
+-			for (let key in cell_info) {
+-				if (cell_info[key] != ""){
+-					text += key + ":" + cell_info[key] + " ";
+-				}	
+-			}
+-			let tr_left = this.createTD(text);
+-			let tr_right = this.create_copy_btn_td(rat,cell_info);
+-			let tr = this.createTR();
+-			tr.appendChild(tr_left);
+-			tr.appendChild(tr_right);
+-			this.neighborcell_table.appendChild(tr);
+-		}
+-
+-		create_copy_btn_td(rat,cell_info){
+-			var copy_btn = this.createBTN("<%:Copy%>",() => {
+-				this.pci_input.value = cell_info.pci;
+- 				this.arfcn_input.value = cell_info.arfcn;
+- 				this.band_input.value = cell_info.band;
+-				this.rat_input.selectedIndex = rat;
+-				this.nr_options()
+-			});
+-			var td = document.createElement('td');
+-			td.className = "td cbi-section-table-cell left";
+-			td.setAttribute("width","10%");
+-			td.appendChild(copy_btn);
+-			
+-			return td;
+ 		}
+-
+-		cb_get(){
+-			this.render_neighborcell();
+-			this.render_status();
+-		}
+-
+-		
+ 	}
+ 
+ 	class IMEI extends ModemConfig {
+@@ -990,12 +1271,25 @@
+ 		}
+ 
+ 		render(){
+-			this.imei_input = this.createInput("imei",this.config);
++			this.imei_input = this.createInput("imei","","<%_15 digits%>");
++			this.imei_input.inputMode = "numeric";
+ 			this.imei_btn = this.createBTN("<%:Submit%>",() => {
+ 				this.set_config(this.imei_input.value);
+ 			});
+-			this.fieldset.appendChild(this.imei_input);
+-			this.fieldset.appendChild(this.imei_btn);
++			this.imei_btn.classList.add("cbi-button-apply");
++			// CleanWRT: a labelled field and a button row, not a bare input and button
++			var row = document.createElement('div');
++			row.className = "cbi-value";
++			var title = document.createElement('label');
++			title.className = "cbi-value-title";
++			title.textContent = "IMEI";
++			var field = document.createElement('div');
++			field.className = "cbi-value-field";
++			field.appendChild(this.imei_input);
++			row.appendChild(title);
++			row.appendChild(field);
++			this.fieldset.appendChild(row);
++			this.fieldset.appendChild(this.createActions(this.imei_btn));
+ 		}
+ 
+ 		cb_get(){
+@@ -1034,9 +1328,9 @@
+ 			this.hard_reboot_btn = this.createBTN("<%:Hard Reboot%>",() => {
+ 				this.set_config('{"method":"hard"}');
+ 			});
+-			this.fieldset.appendChild(this.soft_reboot_btn);
+-			this.fieldset.appendChild(document.createElement("br"));
+-			this.fieldset.appendChild(this.hard_reboot_btn);
++			// CleanWRT: one row of buttons, with what each one does
++			this.fieldset.appendChild(this.createDescription("<%_Soft reboot restarts the modem with an AT command. Hard reboot cuts its power, for when it no longer answers.%>"));
++			this.fieldset.appendChild(this.createActions(this.soft_reboot_btn, this.hard_reboot_btn));
+ 			}
+ 		update(){
+ 			this.get_config();
+@@ -1134,7 +1428,7 @@
+ 			table.appendChild(tr);
+ 			this.fieldset.appendChild(table);
+ 			this.fieldset.appendChild(this.textarea);
+-			this.fieldset.appendChild(this.clear_btn);
++			this.fieldset.appendChild(this.createActions(this.clear_btn));
+ 		}
+ 
+ 		cb_get(){
+@@ -1438,6 +1732,160 @@
+ 	.band-container > input[type="checkbox"] + span {
+ 		margin-right: 0;
+ 	}
++
++	/* CleanWRT: a row of buttons is the last thing in its card. Vantage pulls a card's
++	   last table into the card's bottom padding, so a button row inside it sat on the
++	   card edge; it gets that space back. createActions rows sit outside the table. */
++	td.qm-btn-row {
++		padding-bottom: var(--v-card-py, 16px);
++	}
++
++	.qm-actions {
++		display: flex;
++		flex-wrap: wrap;
++		align-items: center;
++		gap: 8px;
++		margin-top: 16px;
++	}
++
++	.qm-actions > .cbi-button + .cbi-button {
++		margin-left: 0;
++	}
++
++	/* the AT console's buttons start at the left, 8px apart, not spread over the row */
++	.flex_container {
++		justify-content: flex-start;
++		gap: 8px;
++	}
++
++	.flex_container > .cbi-button + .cbi-button {
++		margin-left: 0;
++	}
++
++	/* ---- Neighbor Cell (CleanWRT) ---- */
++	.qm-nc {
++		--qm-text-2: var(--v-text-2, var(--text-color-medium, #57606a));
++		--qm-text-3: var(--v-text-3, var(--text-color-low, #8c959f));
++		--qm-line: var(--v-line, var(--border-color-medium, #d0d7de));
++		--qm-soft: var(--v-surface-2, var(--background-color-low, #f6f8fa));
++		--qm-sunk: var(--v-surface-3, var(--background-color-medium, #eef1f4));
++		--qm-accent: var(--v-accent-text, var(--primary-color-high, #0969da));
++		--qm-accent-soft: var(--v-accent-soft, var(--primary-color-low, #ddf4ff));
++		--qm-ok: var(--v-ok, var(--success-color-medium, #2da44e));
++		--qm-ok-text: var(--v-ok-text, var(--success-color-high, #197c36));
++		--qm-ok-soft: var(--v-ok-soft, var(--success-color-low, #dafbe1));
++		--qm-warn: var(--v-warn, var(--warn-color-medium, #d4a72c));
++		--qm-warn-text: var(--v-warn-text, var(--warn-color-high, #946300));
++		--qm-warn-soft: var(--v-warn-soft, var(--warn-color-low, #fff8c5));
++		--qm-err: var(--v-err, var(--error-color-medium, #e5534b));
++		--qm-err-text: var(--v-err-text, var(--error-color-high, #cf222e));
++		--qm-err-soft: var(--v-err-soft, var(--error-color-low, #ffebe9));
++		--qm-r: var(--v-r, 6px);
++		--qm-fs-sm: var(--v-fs-sm, 12px);
++	}
++
++	.qm-nc .qm-nc-dim { color: var(--qm-text-3); font-size: var(--qm-fs-sm); }
++
++	.qm-nc-summary {
++		display: flex;
++		flex-wrap: wrap;
++		align-items: center;
++		gap: 12px 24px;
++		margin: 4px 0 16px;
++	}
++
++	.qm-nc-net { display: flex; align-items: baseline; gap: 8px; }
++	.qm-nc-label { color: var(--qm-text-2); font-size: var(--qm-fs-sm); }
++	.qm-nc-locks { display: flex; flex-wrap: wrap; gap: 8px; }
++
++	.qm-nc-chip {
++		display: inline-flex;
++		align-items: center;
++		height: 24px;
++		padding: 0 10px;
++		border-radius: 12px;
++		background: var(--qm-sunk);
++		color: var(--qm-text-2);
++		font-size: var(--qm-fs-sm);
++		white-space: nowrap;
++	}
++
++	.qm-nc-chip.is-locked { background: var(--qm-warn-soft); color: var(--qm-warn-text); }
++
++	.qm-nc-tools {
++		display: flex;
++		flex-wrap: wrap;
++		align-items: center;
++		gap: 8px;
++		margin-left: auto;
++	}
++
++	.qm-nc-tools > .cbi-button + .cbi-button { margin-left: 0; }
++
++	.qm-nc-msg {
++		margin: 0 0 16px;
++		padding: 8px 12px;
++		border-radius: var(--qm-r);
++		background: var(--qm-sunk);
++	}
++
++	.qm-nc-msg.is-ok { background: var(--qm-ok-soft); color: var(--qm-ok-text); }
++	.qm-nc-msg.is-warn { background: var(--qm-warn-soft); color: var(--qm-warn-text); }
++	.qm-nc-msg.is-err { background: var(--qm-err-soft); color: var(--qm-err-text); }
++
++	/* the table scrolls sideways on a narrow screen instead of squeezing its columns */
++	.qm-nc-scroll { overflow-x: auto; }
++	.qm-nc-table { min-width: 760px; }
++	.qm-nc-table .qm-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
++	.qm-nc-table .qm-act { width: 1%; text-align: right; white-space: nowrap; }
++	.qm-nc-row { cursor: pointer; }
++	.qm-nc-row:focus-visible { outline: 2px solid var(--qm-accent); outline-offset: -2px; }
++	.qm-nc-row.is-selected > .td { background: var(--qm-accent-soft) !important; }
++	.qm-nc-row.is-selected > .td:first-child { box-shadow: inset 3px 0 0 var(--qm-accent); }
++
++	.qm-nc-sig { white-space: nowrap; }
++	.qm-nc-sig > .qm-nc-dim { margin-left: 8px; }
++
++	.qm-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; vertical-align: -2px; }
++	.qm-bars > i { display: block; width: 4px; border-radius: 1px; background: var(--qm-line); }
++	.qm-bars > i:nth-child(1) { height: 4px; }
++	.qm-bars > i:nth-child(2) { height: 7px; }
++	.qm-bars > i:nth-child(3) { height: 10px; }
++	.qm-bars > i:nth-child(4) { height: 14px; }
++	.qm-bars[data-level="1"] > i:nth-child(-n+1) { background: var(--qm-err); }
++	.qm-bars[data-level="2"] > i:nth-child(-n+2) { background: var(--qm-warn); }
++	.qm-bars[data-level="3"] > i:nth-child(-n+3),
++	.qm-bars[data-level="4"] > i:nth-child(-n+4) { background: var(--qm-ok); }
++
++	.qm-nc-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 2px; }
++
++	.qm-tag {
++		display: inline-flex;
++		align-items: center;
++		height: 20px;
++		padding: 0 7px;
++		border-radius: var(--qm-r);
++		background: var(--qm-sunk);
++		color: var(--qm-text-2);
++		font-size: var(--qm-fs-sm);
++		font-weight: 600;
++		white-space: nowrap;
++	}
++
++	.qm-tag.is-accent { background: var(--qm-accent-soft); color: var(--qm-accent); }
++	.qm-tag.is-warn { background: var(--qm-warn-soft); color: var(--qm-warn-text); }
++	.qm-tag.is-plain { background: none; padding: 0 2px; font-weight: 400; color: var(--qm-text-3); }
++
++	.qm-nc-form {
++		margin-top: 24px;
++		padding-top: 16px;
++		border-top: 1px solid var(--qm-line);
++	}
++
++	.qm-nc-h { font-weight: 600; margin-bottom: 4px; }
++
++	.qm-nc-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
++	.qm-nc-check > input[type="checkbox"] + span { margin: 0; }
+ </style>
+ <div class="cbi-map">
+ 	<fieldset class="cbi-section">
+--- a/application/qmodem/files/usr/share/qmodem/vendor/quectel.sh
++++ b/application/qmodem/files/usr/share/qmodem/vendor/quectel.sh
+@@ -1008,6 +1008,10 @@
+         json_add_string "NR" "unlock"
+     fi
+     json_close_object
++    # CleanWRT: the cell the modem is camped on (and the 5G leg of an EN-DC
++    # link), with the operator's name, so the page can list every cell the
++    # modem hears in one table and lock to any of them.
++    get_neighborcell_serving_qualcomm
+     while read line; do
+         if [ -n "$(echo $line | grep "+QENG:")" ]; then
+             # +QENG: "neighbourcell intra","LTE",<earfcn>,<PCID>,<
+@@ -1023,7 +1027,10 @@
+             # _priority>,<thresh_Xhigh>,<thresh_Xlow>,<PSC>,<RSC
+             # P><eccno>,<srxlev>
+             # …]
+-            line=$(echo $line | sed 's/+QENG: //g')
++            line=$(echo $line | sed 's/+QENG: //g' | tr -d '\r')
++            # CleanWRT: start every line empty, so one cell's values never
++            # carry over into the next
++            neighbourcell="" arfcn="" pci="" rscp="" ecno="" rsrp="" rsrq="" rssi="" sinr=""
+             case $line in
+                 *WCDMA*)
+                     type="WCDMA"
+@@ -1038,17 +1045,24 @@
+                     neighbourcell=$(echo $line | awk -F',' '{print $1}' | tr -d '"')
+                     arfcn=$(echo $line | awk -F',' '{print $3}')
+                     pci=$(echo $line | awk -F',' '{print $4}')
+-                    rsrp=$(echo $line | awk -F',' '{print $5}')
+-                    rsrq=$(echo $line | awk -F',' '{print $6}')
+-
++                    # CleanWRT: RSRQ comes before RSRP (see the format above);
++                    # they were read the other way round
++                    rsrq=$(echo $line | awk -F',' '{print $5}')
++                    rsrp=$(echo $line | awk -F',' '{print $6}')
++                    rssi=$(echo $line | awk -F',' '{print $7}')
++                    sinr=$(echo $line | awk -F',' '{print $8}')
+                     ;;
+                 *NR*)
+                     type="NR"
++                    neighbourcell=$(echo $line | awk -F',' '{print $1}' | tr -d '"')
+                     arfcn=$(echo $line | awk -F',' '{print $3}')
+                     pci=$(echo $line | awk -F',' '{print $4}')
+                     rsrp=$(echo $line | awk -F',' '{print $5}')
+                     rsrq=$(echo $line | awk -F',' '{print $6}')
+                     ;;
++                *)
++                    continue
++                    ;;
+             esac
+             json_select $type
+             json_add_object ""
+@@ -1059,12 +1073,72 @@
+             json_add_string "ecno" "$ecno"
+             json_add_string "rsrp" "$rsrp"
+             json_add_string "rsrq" "$rsrq"
++            json_add_string "rssi" "$rssi"
++            json_add_string "sinr" "$sinr"
+             json_close_object
+             json_select ".."
+         fi
+     done < /tmp/neighborcell
+ }
+ 
++# CleanWRT: the serving cell(s) and the operator, for the Neighbor Cell tab.
++# Adds "operator" and a "serving" array to the open neighborcell object.
++#   +QENG: "servingcell",<state>,"LTE",<is_tdd>,<MCC>,<MNC>,<cellID>,<PCID>,<earfcn>,<band>,<ul_bw>,<dl_bw>,<TAC>,<RSRP>,<RSRQ>,<RSSI>,<SINR>,...
++#   +QENG: "servingcell",<state>,"NR5G-SA",<duplex>,<MCC>,<MNC>,<cellID>,<PCID>,<TAC>,<ARFCN>,<band>,<NR_DL_bw>,<RSRP>,<RSRQ>,<SINR>,<scs>,...
++#   EN-DC: +QENG: "LTE",<is_tdd>,<MCC>,<MNC>,<cellID>,<PCID>,<earfcn>,<band>,<ul_bw>,<dl_bw>,<TAC>,<RSRP>,<RSRQ>,<RSSI>,<SINR>,...
++#          +QENG: "NR5G-NSA",<MCC>,<MNC>,<PCID>,<RSRP>,<SINR>,<RSRQ>,<ARFCN>,<band>,<NR_DL_bw>,...,<scs>(16)
++get_neighborcell_serving_qualcomm(){
++    local response line operator
++    operator=$(cmd_cops_query "$at_port" | grep "+COPS:" | awk -F'"' '{print $2}')
++    json_add_string "operator" "$operator"
++    response=$(cmd_qeng_servingcell "$at_port" | grep "+QENG:" | tr -d '\r')
++    json_add_array "serving"
++    # read from a here-document, not a pipe: a piped loop runs in a subshell
++    # and the rows it adds would never reach the reply
++    while read line; do
++        [ -z "$line" ] && continue
++        line=$(echo "$line" | sed 's/+QENG: //' | tr -d '"')
++        f() { echo "$line" | awk -F',' -v n="$1" '{print $n}'; }
++        case "$line" in
++            servingcell,*,LTE,*)
++                _nc_serving "LTE" "$(f 5)" "$(f 6)" "$(f 7)" "$(f 13)" "$(f 8)" "$(f 9)" "$(f 10)" "$(f 14)" "$(f 15)" "$(f 17)" ""
++                ;;
++            servingcell,*,NR5G-SA,*)
++                _nc_serving "NR" "$(f 5)" "$(f 6)" "$(f 7)" "$(f 9)" "$(f 8)" "$(f 10)" "$(f 11)" "$(f 13)" "$(f 14)" "$(f 15)" "$(f 16)"
++                ;;
++            LTE,*)
++                _nc_serving "LTE" "$(f 3)" "$(f 4)" "$(f 5)" "$(f 11)" "$(f 6)" "$(f 7)" "$(f 8)" "$(f 12)" "$(f 13)" "$(f 15)" ""
++                ;;
++            NR5G-NSA,*)
++                _nc_serving "NR" "$(f 2)" "$(f 3)" "" "" "$(f 4)" "$(f 8)" "$(f 9)" "$(f 5)" "$(f 7)" "$(f 6)" "$(f 16)"
++                ;;
++        esac
++    done <<EOF
++$response
++EOF
++    json_close_array
++}
++
++# rat mcc mnc cellid tac pci arfcn band rsrp rsrq sinr scs
++_nc_serving(){
++    # a cell that is not reported (PCI "-" or empty) is left out
++    case "$6" in ""|"-") return ;; esac
++    json_add_object ""
++    json_add_string "rat" "$1"
++    json_add_string "mcc" "$2"
++    json_add_string "mnc" "$3"
++    json_add_string "cellid" "$4"
++    json_add_string "tac" "$5"
++    json_add_string "pci" "$6"
++    json_add_string "arfcn" "$7"
++    json_add_string "band" "$8"
++    json_add_string "rsrp" "$9"
++    json_add_string "rsrq" "${10}"
++    json_add_string "sinr" "${11}"
++    json_add_string "scs" "${12}"
++    json_close_object
++}
++
+ get_neighborcell_lte(){
+     lte_status=$(cmd_qnwlock_query "$at_port" "common/lte" | grep "+QNWLOCK:")
+     lte_lock_status=$(echo $lte_status | awk -F',' '{print $2}')
