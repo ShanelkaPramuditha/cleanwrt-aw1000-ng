@@ -101,11 +101,15 @@ jobs:
           fi
           exit "$bad"
 
+      # The build, its caches and its log all live on /mnt; the root disk only holds the builder
+      # image. So the root-disk cleanup (about 2 minutes of rm) runs in the background, beside the
+      # next steps and the build, instead of holding the job up. The runner keeps a background
+      # process of a step alive until the job ends.
       - name: Free disk space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
-          sudo apt-get clean
           sudo mkdir -p /mnt/cw && sudo chown "$USER" /mnt/cw
+          nohup sudo sh -c 'rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost; apt-get clean' \
+            > /mnt/cw/free-disk.log 2>&1 &
           df -h / /mnt
 
       - name: Builder image
@@ -229,7 +233,7 @@ jobs:
             CCACHE_DIR=/mnt/cw/openwrt/.ccache /mnt/cw/openwrt/staging_dir/host/bin/ccache -s
           fi
           du -sh /mnt/cw/openwrt/dl /mnt/cw/openwrt/.ccache /mnt/cw/openwrt/tmp/go-build 2>/dev/null || true
-          df -h /mnt
+          df -h / /mnt
 
       - name: Save caches
         if: always()
