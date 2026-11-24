@@ -642,6 +642,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#build-them-into-your-own-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build them into your own image
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On GitHub Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#back-to-the-defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2363,6 +2385,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#build-them-into-your-own-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build them into your own image
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#on-github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On GitHub Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#back-to-the-defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2494,10 +2538,120 @@ as it does every first-boot script. To see what it will do, list or print it bef
 <p>With <code>--key</code>, every Wi-Fi interface gets WPA2-PSK (WPA3 on a 6 GHz radio, which allows nothing
 else), the password, and its radio turned on. The root password is still unset: LuCI asks for
 one on the first login, as on any fresh flash (see <a href="../first-boot/">First boot</a>).</p>
+<h2 id="build-them-into-your-own-image">Build them into your own image<a class="headerlink" href="#build-them-into-your-own-image" title="Permanent link">&para;</a></h2>
+<p>If you build the image yourself, <code>tools/cw-build.sh</code> asks for these values before the build
+starts. Press Enter to keep the value in brackets. If you change nothing, you get the stock
+image.</p>
+<div class="highlight"><pre><span></span><code>  The router's defaults (built into the image; a reset brings them back)
+  Enter keeps the value in brackets.
+  Hostname [OpenWrt]: MyRouter
+  LAN address (e.g. 192.168.50.1 or 192.168.50.1/24) [192.168.1.1]: 192.168.50.1
+  Wi-Fi name, 2.4 GHz [OpenWrt]: MyWiFi
+  Wi-Fi name, 5 GHz [OpenWrt]: MyWiFi-5G
+  Wi-Fi password [Enter for none: Wi-Fi stays off]:
+  Again, to confirm:
+</code></pre></div>
+<p>The password is not shown while you type it. A Wi-Fi name needs a password, for the same
+reason as above. The values are checked by the same rules as <code>cw-settings-pack.sh</code>, and a wrong
+one is asked again.</p>
+<p>These are not a one-time setting like the archive. They become the <strong>image's own defaults</strong>:
+the router starts with them, and a reset brings them back instead of the stock values.</p>
+<p>The next build offers your last answers again (<em>Use these again? [Y]es, [c]hange, stock
+[d]efaults</em>). They are kept in <code>.cw-build-settings</code> next to the repository, readable only by
+you, because they include the Wi-Fi password.</p>
+<table>
+<thead>
+<tr>
+<th>to</th>
+<th>run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>build the stock image without questions</td>
+<td><code>tools/cw-build.sh --defaults</code></td>
+</tr>
+<tr>
+<td>reuse the last answers without questions</td>
+<td><code>tools/cw-build.sh --same</code></td>
+</tr>
+<tr>
+<td>give the values without questions, for example in a script</td>
+<td><code>CW_HOSTNAME=MyRouter CW_LAN_IP=192.168.50.1 CW_SSID=MyWiFi CW_WIFI_KEY='Str0ng-WiFi-pass' tools/cw-build.sh</code> (also <code>CW_SSID_2G</code>, <code>CW_SSID_5G</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Without a terminal, for example when the output goes to a pipe, nothing is asked and the stock
+image is built (or the <code>CW_*</code> values, or <code>--same</code>).</p>
+<p>With Docker, or when you run <code>tools/cw-release-build.sh</code> directly, make the script with
+<code>sh tools/cw-settings-pack.sh ... --script mysettings.sh</code> and pass it as
+<code>CW_LOCAL_SETTINGS=/path/to/mysettings.sh</code> (inside the container, for example
+<code>-e CW_LOCAL_SETTINGS=/cleanwrt/mysettings.sh</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">An image built with your values holds the Wi-Fi password</p>
+<p>Anyone with the image file can read it. Keep the image to yourself, and use the stock image
+or the settings archive for anything you share. The build's <code>provenance.txt</code> notes that own
+defaults are built in, without the values. Release builds refuse them.</p>
+</div>
+<h2 id="on-github-actions">On GitHub Actions<a class="headerlink" href="#on-github-actions" title="Permanent link">&para;</a></h2>
+<p>The <code>build</code> workflow takes the same values, if you build on GitHub (see
+<a href="../building/#on-github-actions">Build from source</a>).</p>
+<ol>
+<li>Only if you want Wi-Fi on: add the Wi-Fi password as a repository secret named
+   <code>CW_WIFI_KEY</code> (<em>Settings → Secrets and variables → Actions → New repository secret</em>). It is a
+   secret and not a box in the form, because anyone who can see the repository's Actions runs
+   can read what was typed into the form.</li>
+<li>
+<p><em>Actions → build → Run workflow</em>, then fill in the boxes you want. Leave the others empty for
+   the stock values.</p>
+<table>
+<thead>
+<tr>
+<th>box</th>
+<th>sets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Own settings - hostname</td>
+<td>the router's name</td>
+</tr>
+<tr>
+<td>Own settings - LAN address</td>
+<td>the LAN address</td>
+</tr>
+<tr>
+<td>Own settings - Wi-Fi name</td>
+<td>the Wi-Fi name on both bands</td>
+</tr>
+<tr>
+<td>Own settings - 5 GHz Wi-Fi name</td>
+<td>the 5 GHz name, when it differs</td>
+</tr>
+<tr>
+<td>Own settings - turn Wi-Fi on</td>
+<td>Wi-Fi on, with the <code>CW_WIFI_KEY</code> password</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>The values are checked before the build starts, so a mistake costs a minute, not two hours.
+   The run's summary lists what was built in (without the password).</p>
+</li>
+<li>The images go to a private draft release named <code>own-v&lt;version&gt;</code>, which only the
+   repository's collaborators can see. Download the <code>*-squashfs-sysupgrade.bin</code> from there. A
+   later build with own settings replaces that draft's files.</li>
+</ol>
+<p>Such an image is never published: it doesn't go into the release draft, and the <code>release</code>
+workflow refuses any draft built with own settings. The hostname, LAN address and Wi-Fi names
+are visible in the run to anyone who can see the repository's Actions; only the password stays
+secret.</p>
 <h2 id="back-to-the-defaults">Back to the defaults<a class="headerlink" href="#back-to-the-defaults" title="Permanent link">&para;</a></h2>
-<p>A reset removes your settings with everything else: <em>System → Backup / Flash Firmware → Perform
+<p>If you flashed with the settings archive, a reset removes your settings with everything else: <em>System → Backup / Flash Firmware → Perform
 reset</em>, <code>firstboot &amp;&amp; reboot</code>, or <code>sysupgrade -n</code>. The router comes back with the stock defaults
-at <code>192.168.1.1</code>, and Wi-Fi is off. See <a href="../recovery/">Recovery</a>.</p>
+at <code>192.168.1.1</code>, and Wi-Fi is off. See <a href="../recovery/">Recovery</a>. An image you built with your
+own values comes back with those values instead; flash the stock image to get the stock ones.</p>
 
 
 
