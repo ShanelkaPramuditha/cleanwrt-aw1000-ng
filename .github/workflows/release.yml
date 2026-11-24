@@ -102,7 +102,10 @@ jobs:
       - name: Publish
         id: pub
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Publishing creates the tag. When the draft's commit changes a file under
+          # .github/workflows/, GitHub refuses the workflow token (it can never hold the Workflows
+          # permission): the RELEASE_TOKEN secret is used when it exists. docs/fork-maintenance.md.
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
           TAG: ${{ steps.draft.outputs.tag }}
           SHA: ${{ steps.draft.outputs.sha }}
           VERSION: ${{ steps.draft.outputs.version }}

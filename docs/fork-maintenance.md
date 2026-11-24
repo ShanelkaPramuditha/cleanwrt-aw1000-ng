@@ -96,19 +96,25 @@ one means rotating it and shipping a new public key in an image.
 
 ## When the draft release is refused
 
-`HTTP 403: Resource not accessible by integration` in the build's *Draft release* step means
-GitHub refused the workflow's own token permission to create the release. The workflow asks for
-`contents: write`, so the refusal comes from the repository:
+`HTTP 403: Resource not accessible by integration` in the build's *Draft release* step, or in
+the release workflow's *Publish* step, means GitHub refused the workflow's own token. The
+workflows ask for `contents: write`, so the refusal has one of these causes:
 
-1. *Settings → Actions → General → Workflow permissions*: **Read and write permissions**. A
+1. **The commit changes a workflow file.** A release aimed at a commit that changes anything
+   under `.github/workflows/` (and, once published, the tag on it) needs the **Workflows**
+   permission, which the workflow token can never hold. The asset uploads still succeed, and
+   then `gh release edit --target` fails. This is the usual cause after a workflow change.
+2. *Settings → Actions → General → Workflow permissions*: **Read and write permissions**. A
    repository created new (rather than renamed) starts read-only. Every workflow here declares its
    own narrower permissions, so this widens nothing else.
-2. *Settings → Rules → Rulesets*: a rule on `v*` tags or on releases blocks the workflow token too.
-3. If neither applies, give the step a token of its own: create a fine-grained personal access
-   token (*GitHub → Settings → Developer settings → Fine-grained tokens*) for **this repository
-   only**, with **Contents: Read and write**, and save it as the repository secret
-   `RELEASE_TOKEN`. The *Draft release* step uses it when it exists and the workflow token
-   otherwise.
+3. *Settings → Rules → Rulesets*: a rule on `v*` tags or on releases blocks the workflow token too.
+
+The fix for all three is a token of the step's own: create a fine-grained personal access token
+(*GitHub → Settings → Developer settings → Fine-grained tokens*) for **this repository only**,
+with **Contents: Read and write** and **Workflows: Read and write**, and save it as the
+repository secret `RELEASE_TOKEN`. The build's *Draft release* step and the release workflow's
+*Publish* step use it when it exists, and the workflow token otherwise. Give it an expiry and
+renew it when GitHub warns you.
 
 ## Pinned packages to bump now and then
 

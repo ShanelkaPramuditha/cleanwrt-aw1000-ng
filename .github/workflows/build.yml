@@ -317,9 +317,11 @@ jobs:
         if: success() && steps.ver.outputs.draft == 'true'
         env:
           # The workflow token, unless the repository has a RELEASE_TOKEN secret: a fine-grained
-          # personal token with "Contents: Read and write" on this repository only. That is the way
-          # round a repository whose settings or rules refuse the workflow token releases
-          # ("HTTP 403: Resource not accessible by integration"). docs/fork-maintenance.md.
+          # personal token on this repository only with "Contents" and "Workflows", both "Read and
+          # write". The workflow token can never hold the Workflows permission, and GitHub refuses
+          # it a release aimed at a commit that changes a file under .github/workflows/ ("HTTP 403:
+          # Resource not accessible by integration" on `gh release edit --target`).
+          # docs/fork-maintenance.md.
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
