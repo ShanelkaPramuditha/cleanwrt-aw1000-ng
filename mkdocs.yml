@@ -43,6 +43,10 @@ theme:
 hooks:
   - tools/docs-hooks.py
 
+# docs/enhanced/ is the work log for agents and maintainers (see AGENTS.md), not a page of the site
+exclude_docs: |
+  enhanced/
+
 markdown_extensions:
   - admonition
   - attr_list
