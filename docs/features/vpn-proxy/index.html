@@ -69,8 +69,8 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Using CleanWRT"}, {"@type": "ListItem", "position": 3, "name": "VPN and proxies", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/vpn-proxy/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "VPN and proxies", "description": "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles).", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/vpn-proxy/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-23"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does CleanWRT include WireGuard and OpenVPN?", "acceptedAnswer": {"@type": "Answer", "text": "Neither is in the image; both are one install away (see WireGuard and OpenVPN). Tailscale is the VPN in the image."}}, {"@type": "Question", "name": "Can I use my Clash config?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, with Nikki. Upload the YAML file or add its subscription URL on Services → Nikki → Profile. mihomo reads Clash and Clash Meta profiles."}}, {"@type": "Question", "name": "Where did Passwall go?", "acceptedAnswer": {"@type": "Answer", "text": "Passwall and Passwall 2 are not in this build. Nikki (mihomo) covers the same use, with Clash profiles."}}, {"@type": "Question", "name": "Why is there no VPN menu?", "acceptedAnswer": {"@type": "Answer", "text": "OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back."}}, {"@type": "Question", "name": "Can I install Passwall myself?", "acceptedAnswer": {"@type": "Answer", "text": "It is not built for this image, and its cores (xray-core and others) are not in the image either. Nikki is the supported proxy app."}}, {"@type": "Question", "name": "Which dashboard is it, and why that one?", "acceptedAnswer": {"@type": "Answer", "text": "Zashboard, the dashboard Nikki itself defaults to. The image carries its build without bundled fonts (it uses the system's), about 1.5 MiB on flash, so it opens without downloading anything."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "VPN and proxies", "description": "The VPN and proxy tools shipped in CleanWRT for the Arcadyan AW1000, what is off by default, and the proxy app in the image: Nikki (mihomo, Clash profiles).", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/features/vpn-proxy/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-24"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does CleanWRT include WireGuard and OpenVPN?", "acceptedAnswer": {"@type": "Answer", "text": "Neither is in the image; both are one install away (see WireGuard and OpenVPN). Tailscale is the VPN in the image."}}, {"@type": "Question", "name": "Can I use my Clash config?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, with Nikki. Upload the YAML file or add its subscription URL on Services → Nikki → Profiles. mihomo reads Clash and Clash Meta profiles."}}, {"@type": "Question", "name": "Where did Passwall go?", "acceptedAnswer": {"@type": "Answer", "text": "Passwall and Passwall 2 are not in this build. Nikki (mihomo) covers the same use, with Clash profiles."}}, {"@type": "Question", "name": "Why is there no VPN menu?", "acceptedAnswer": {"@type": "Answer", "text": "OpenVPN's page was the only one under it, and OpenVPN is no longer in the image. Installing OpenVPN or Cloudflare Tunnel brings the VPN menu back."}}, {"@type": "Question", "name": "Can I install Passwall myself?", "acceptedAnswer": {"@type": "Answer", "text": "It is not built for this image, and its cores (xray-core and others) are not in the image either. Nikki is the supported proxy app."}}, {"@type": "Question", "name": "Which dashboard is it, and why that one?", "acceptedAnswer": {"@type": "Answer", "text": "Zashboard, the dashboard Nikki itself defaults to. The image carries its build without bundled fonts (it uses the system's), about 1.5 MiB on flash, so it opens without downloading anything."}}]}</script>
 </head>
   
   
@@ -2538,21 +2538,58 @@ OpenVPN keeps <code>/etc/config/openvpn</code>, so installing it again brings yo
 <h2 id="nikki">Nikki: Clash profiles and a dashboard<a class="headerlink" href="#nikki" title="Permanent link">&para;</a></h2>
 <p>Nikki runs the mihomo core with an ordinary Clash (Clash Meta) configuration, so a profile from
 your provider or one you wrote yourself works as it is.</p>
+<p>Until Nikki is set up, <em>Services → Nikki → Overview</em> shows a three-step <strong>Get started</strong> checklist
+that links to each step:</p>
 <ol>
-<li><em>Services → Nikki → Profile</em>. Either upload your <code>config.yaml</code> (<strong>Upload Profile</strong>), or add a
-   <strong>subscription</strong> with the URL your provider gave you and press <strong>Update</strong>.</li>
-<li><em>Services → Nikki → App Config</em>: pick that profile, tick <strong>Enable</strong>, <strong>Save &amp; Apply</strong>.</li>
-<li><strong>Open Dashboard</strong> on the same page opens Zashboard, already installed, with the secret filled
-   in. There you switch proxies and groups, run latency tests, and watch connections, rules and
-   logs live.</li>
+<li><em>Services → Nikki → Profiles</em>. Either drop your <code>config.yaml</code> on <strong>Profile files</strong>, or press
+   <strong>Add subscription</strong>, enter the URL your provider gave you, and press <strong>Update</strong>. The package
+   ships a placeholder subscription named <code>default</code>, marked <strong>No URL set</strong>: edit it or add your own.</li>
+<li>Press <strong>Use</strong> next to that profile. It applies at once. You can also pick it under <strong>Profile</strong> on
+   the Overview page.</li>
+<li>On <em>Overview</em>, tick <strong>Enable</strong> and press <strong>Save &amp; Apply</strong>.</li>
 </ol>
-<p><em>Mixin Config</em> overrides parts of the profile without editing it: ports, DNS mode (fake-ip by
-default), TUN or TProxy, and the dashboard address. <em>Proxy Config</em> chooses which LAN devices and
-which traffic go through the proxy.</p>
+<p>Every Nikki page shows whether Nikki is <strong>Running</strong>, <strong>Stopped</strong> (enabled, but the core is not
+running: see <em>Logs</em>) or <strong>Disabled</strong>. Every page also has <strong>Restart</strong> and <strong>Open Dashboard</strong>. The
+dashboard is Zashboard, already installed, and LuCI fills in the secret. There you switch proxies
+and groups, run latency tests, and watch connections, rules and logs live.</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it is for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Overview</em></td>
+<td>on/off, the profile in use, startup and scheduled restart, process limits</td>
+</tr>
+<tr>
+<td><em>Profiles</em></td>
+<td>profile files (upload, use, edit, download, delete) and subscriptions with their data use and expiry</td>
+</tr>
+<tr>
+<td><em>Proxy</em></td>
+<td>which traffic goes through Nikki: LAN devices, the router itself, ports and addresses that bypass it</td>
+</tr>
+<tr>
+<td><em>Mixin</em></td>
+<td>overrides parts of the profile without editing it: ports, DNS mode (fake-ip by default), TUN, the dashboard address. A setting left at <em>Unmodified</em> keeps the profile's value</td>
+</tr>
+<tr>
+<td><em>Editor</em></td>
+<td>the YAML files themselves. It says when a file is regenerated, so edits to it would not last</td>
+</tr>
+<tr>
+<td><em>Logs</em></td>
+<td>the app and core logs with a filter, an errors-only view and a download; the debug report</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Dashboard address:</strong> <code>http://192.168.1.1:9090/ui/</code>. The API on port 9090 needs the secret, which
 the first boot sets to 32 random characters (<code>nikki.mixin.api_secret</code>). LuCI passes it for you.</p>
-<p><strong>Update Dashboard</strong> downloads the newest Zashboard release over the installed one. A clean
-install brings back the version the image ships.</p>
+<p><strong>Update dashboard</strong> (in the Dashboard tile on <em>Overview</em>) downloads the newest Zashboard release
+over the installed one. A clean install brings back the version the image ships.</p>
 <h2 id="common-questions">Common questions<a class="headerlink" href="#common-questions" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>Does CleanWRT include WireGuard and OpenVPN?</summary>
@@ -2560,7 +2597,7 @@ install brings back the version the image ships.</p>
 </details>
 <details class="question">
 <summary>Can I use my Clash config?</summary>
-<p>Yes, with Nikki. Upload the YAML file or add its subscription URL on <em>Services → Nikki → Profile</em>. mihomo reads Clash and Clash Meta profiles.</p>
+<p>Yes, with Nikki. Upload the YAML file or add its subscription URL on <em>Services → Nikki → Profiles</em>. mihomo reads Clash and Clash Meta profiles.</p>
 </details>
 <details class="question">
 <summary>Where did Passwall go?</summary>
@@ -2617,11 +2654,15 @@ the router and the LAN, and none of them is forwarded from the cellular side by 
 <tbody>
 <tr>
 <td>Nikki will not start</td>
-<td>the profile failed its test. <em>Services → Nikki → Log</em> shows mihomo's reason; a common one is a port in the profile that another service already uses</td>
+<td>the status says <strong>Stopped</strong>: the profile failed its test. <em>Services → Nikki → Logs</em> shows mihomo's reason (choose <em>Errors only</em>); a common one is a port in the profile that another service already uses</td>
 </tr>
 <tr>
 <td>The dashboard says it cannot connect</td>
-<td>the API address or secret. Open it from LuCI's <strong>Open Dashboard</strong>, which fills both in</td>
+<td>the API address or secret. Open it from LuCI's <strong>Open Dashboard</strong>, which fills both in. The button is greyed out while Nikki is not running</td>
+</tr>
+<tr>
+<td>A subscription shows <strong>Failed</strong></td>
+<td>its last update did not download a valid profile. Check the URL; <em>Logs → App log</em> has the reason</td>
 </tr>
 <tr>
 <td>Nikki and a VPN fight over the traffic</td>
