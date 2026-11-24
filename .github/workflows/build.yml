@@ -354,7 +354,7 @@ jobs:
           # Size, so creep shows release by release: the sysupgrade image, the change since the
           # newest published release (its asset of the same kind), and the flash blocks the build's
           # UBI check counted. Each part is left out when it cannot be read; none fails the build.
-          img=$(ls dist/*-squashfs-sysupgrade.bin | head -1)
+          img=$(find dist -maxdepth 1 -name '*-squashfs-sysupgrade.bin' | head -1)
           bytes=$(stat -c %s "$img")
           mib() { awk -v b="$1" 'BEGIN { printf "%.1f", b / 1048576 }'; }
           size="**Size:** sysupgrade image $(mib "$bytes") MiB"

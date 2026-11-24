@@ -145,6 +145,8 @@ jobs:
           find files feeds-src -name '*.js' -o -name '*.json' >> "$list"
           sort -u -o "$list" "$list"
           # tests/fixtures are data for the collector's own tests, some deliberately not JSON
+          # The single quotes are deliberate: the JavaScript below is node's, not the shell's.
+          # shellcheck disable=SC2016
           grep -v '/tests/fixtures/' "$list" | xargs node -e '
             const fs = require("fs");
             let bad = 0;
