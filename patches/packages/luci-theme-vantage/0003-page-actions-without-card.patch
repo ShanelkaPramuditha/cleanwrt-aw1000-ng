@@ -1,21 +1,25 @@
-Page actions: the Save bar's buttons without a card behind them
+Button groups without a card behind them: the page's Save bar and the dialogs' footers
 
-Every form page ends in Reset / Save / Save & Apply, which the theme docks to the bottom right
-of the view. It drew them inside a frosted card of their own: a second border, a blurred
-background and a large shadow around a row of buttons that already have their own surfaces.
-On most pages that card is the only thing at the bottom of the view, so it read as a stray
-box rather than as part of the page.
+Two places drew a surface of their own behind a row of buttons that already have their own:
 
-The card is gone: no background, border, blur, padding or shadow on the bar. The bar stays
+- Every form page ends in Reset / Save / Save & Apply, docked to the bottom right of the view
+  inside a frosted card: a second border, a blurred background and a large shadow. On most
+  pages that card is the only thing at the bottom of the view, so it read as a stray box
+  rather than as part of the page.
+- Every dialog (the changes list, the upload dialog, section editors, confirmations) put its
+  buttons on a shaded footer strip with a rule above it, bled out to the dialog's edges.
+
+Both are gone. The Save bar keeps no background, border, blur, padding or shadow; it stays
 sticky, so the buttons still float at the bottom right while the page scrolls, and each button
-carries a soft shadow of its own so it stays legible over the content under it. In a modal the
-bar keeps the footer strip the theme already gives it there, without the button shadows.
+carries a soft shadow of its own so it stays legible over the content under it. A dialog's
+buttons sit on the dialog itself, right-aligned below its content, with no strip and no button
+shadows.
 
 Applies to: https://github.com/anothaDev/luci-theme-vantage.git @ v1.2.0 (a7ff63b7), after 0001 and 0002.
 Upstream status: local to CleanWRT.
 
 diff --git a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
-index 7b35e28..415957a 100644
+index 7b35e28..6755a8e 100644
 --- a/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
 +++ b/luci-theme-vantage/htdocs/luci-static/vantage/vantage.css
 @@ -1128,20 +1128,21 @@ legend { font-size: var(--fs-md); font-weight: 600; padding: 0; margin-bottom: v
@@ -48,3 +52,36 @@ index 7b35e28..415957a 100644
  .cbi-page-actions > * { margin: 0 !important; }
  .cbi-page-actions > form { display: contents; }
  .cbi-page-actions .cbi-button-reset { order: 1; }
+@@ -2360,15 +2361,17 @@ body.modal-overlay-active #modal_overlay { display: block; }
+ #modal_overlay > .modal .cbi-map > h2 { display: none; }
+ #modal_overlay > .modal .cbi-page-actions,
+ #modal_overlay > .modal > .right, #modal_overlay > .modal > .button-row {
++	/* the dialog's buttons sit on the dialog itself, like the page's Save
++	   bar: no shaded footer strip behind them (CleanWRT) */
+ 	position: static;
+-	margin: var(--sp-5) calc(-1 * var(--sp-6)) calc(-1 * var(--sp-5));
+-	padding: var(--sp-3) var(--sp-6);
+-	background: var(--s2);
+-	border-top: 1px solid var(--line);
+-	border-radius: 0 0 var(--r-lg) var(--r-lg);
++	margin: var(--sp-5) 0 0;
++	padding: 0;
++	background: none;
++	border: 0;
++	border-radius: 0;
+ 	backdrop-filter: none;
+ }
+-#modal_overlay > .modal > .right:not(:last-child), #modal_overlay > .modal > .button-row:not(:last-child) { margin-bottom: 0; border-radius: 0; }
++#modal_overlay > .modal > .right:not(:last-child), #modal_overlay > .modal > .button-row:not(:last-child) { margin-bottom: var(--sp-3); }
+ 
+ /* apply / rollback countdown */
+ #modal_overlay > .modal.alert-message {
+@@ -3633,7 +3636,7 @@ body[data-page="admin-system-filemanager"] .sort-button { border-color: var(--li
+ 	#modal_overlay > .modal { padding: var(--sp-4); }
+ 	#modal_overlay > .modal > h4:first-child { margin: calc(-1 * var(--sp-4)) calc(-1 * var(--sp-4)) var(--sp-3); padding: var(--sp-3) var(--sp-4); }
+ 	#modal_overlay > .modal .cbi-page-actions, #modal_overlay > .modal > .right, #modal_overlay > .modal > .button-row {
+-		margin: var(--sp-4) calc(-1 * var(--sp-4)) calc(-1 * var(--sp-4)); padding: var(--sp-3) var(--sp-4);
++		margin: var(--sp-4) 0 0; padding: 0;
+ 	}
+ 	.vt-pal-overlay { padding: var(--sp-3); align-items: flex-start; }
+ 	.vt-pal { max-height: 80vh; }

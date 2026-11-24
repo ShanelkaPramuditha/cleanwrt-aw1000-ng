@@ -35,9 +35,9 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   *Select All* and *Scan* buttons no longer lie on top of the band list, and radio and checkbox
   labels are spaced. On *Dial Overview* the Modem Log's buttons have space between them, and the
   status card no longer touches the Save bar.
-- **The Save buttons stand on their own.** *Reset*, *Save* and *Save & Apply* at the bottom of a
-  page no longer sit inside a card of their own. They still stay at the bottom right while you
-  scroll.
+- **Buttons stand on their own.** *Reset*, *Save* and *Save & Apply* at the bottom of a page no
+  longer sit inside a card of their own, and they still stay at the bottom right while you
+  scroll. The buttons at the foot of a dialog no longer sit on a shaded strip.
 - **OpenVPN is no longer in the image**, and with it the *VPN* menu, where it was the only page.
   OpenVPN is one install away:
   `apk add openvpn-openssl luci-app-openvpn`, and a router upgraded with its settings kept gets its
