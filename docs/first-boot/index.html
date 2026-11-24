@@ -2385,7 +2385,7 @@
 </tr>
 <tr>
 <td>Hostname</td>
-<td><code>CleanWRT</code></td>
+<td><code>OpenWrt</code> (stock, not changed by this image)</td>
 </tr>
 <tr>
 <td>Root password</td>
@@ -2393,11 +2393,11 @@
 </tr>
 <tr>
 <td>Wi-Fi</td>
-<td>on, WPA2-PSK, networks <code>CleanWRT-2.4G</code>, <code>CleanWRT-5G</code> (and <code>CleanWRT-6G</code> on a 6 GHz radio)</td>
+<td>stock OpenWrt default: SSID <code>OpenWrt</code>, no key, <strong>off</strong> until you enable it (set a key first)</td>
 </tr>
 <tr>
-<td>Default Wi-Fi key</td>
-<td><code>CleanWRT#40</code></td>
+<td>Ethernet ports</td>
+<td>stock names: <code>lan1</code>–<code>lan4</code>, <code>wan</code></td>
 </tr>
 <tr>
 <td>Time zone</td>
@@ -2430,9 +2430,9 @@
 </tbody>
 </table>
 <div class="admonition warning">
-<p class="admonition-title">Change both on the first login</p>
-<p>Anyone who knows the default Wi-Fi key can join your network, and with no root password
-anyone on the LAN can log in. Do the steps below before you connect the router to
+<p class="admonition-title">Set a password on the first login</p>
+<p>With no root password anyone on the LAN can log in, and Wi-Fi ships with no key, so set
+one before you enable it. Do the steps below before you connect the router to
 anything you do not trust.</p>
 </div>
 <h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
@@ -2442,9 +2442,13 @@ anything you do not trust.</p>
    That is expected, see <a href="../features/security/#why-the-browser-says-not-secure">Security</a>.</li>
 <li>LuCI asks you to set a root password. Set a strong one. It applies to LuCI and SSH.</li>
 <li>
-<p>Change the Wi-Fi key: <em>Network → Wireless</em>, edit each interface, <em>Wireless Security</em>.</p>
-<div class="highlight"><pre><span></span><code>uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>wireless.default_radio0.key<span class="o">=</span><span class="s1">'your-strong-key'</span>
-uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>wireless.default_radio1.key<span class="o">=</span><span class="s1">'your-strong-key'</span>
+<p>Set a Wi-Fi key, then enable Wi-Fi: <em>Network → Wireless</em>, edit each interface, <em>Wireless Security</em>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>wireless.default_radio<span class="nv">$i</span>.encryption<span class="o">=</span><span class="s1">'psk2'</span>
+<span class="w">  </span>uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>wireless.default_radio<span class="nv">$i</span>.key<span class="o">=</span><span class="s1">'your-strong-key'</span>
+<span class="w">  </span>uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>wireless.default_radio<span class="nv">$i</span>.disabled<span class="o">=</span><span class="s1">'0'</span>
+<span class="w">  </span>uci<span class="w"> </span><span class="nb">set</span><span class="w"> </span>wireless.radio<span class="nv">$i</span>.disabled<span class="o">=</span><span class="s1">'0'</span>
+<span class="k">done</span>
 uci<span class="w"> </span>commit<span class="w"> </span>wireless<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>wifi<span class="w"> </span>reload
 </code></pre></div>
 </li>
@@ -2515,7 +2519,7 @@ uci<span class="w"> </span>commit<span class="w"> </span>wireless<span class="w"
 <strong>Save &amp; Apply</strong>. Set any passwords the app needs <em>before</em> you enable it. See
 <a href="../included/">What is included</a>.</p>
 <h2 id="what-the-image-did-before-you-got-here">What the image did before you got here<a class="headerlink" href="#what-the-image-did-before-you-got-here" title="Permanent link">&para;</a></h2>
-<p>Thirteen first-boot scripts wrote the defaults above — the hostname, the SSIDs and the key, the
+<p>Thirteen first-boot scripts wrote the defaults above — the time zone, the
 HTTPS redirect, the theme's look, the LED ownership, the AT port handed to the phone service, the
 vendor VoIP engine taken off the boot path, and the package pins that keep <code>apk upgrade</code> from
 replacing patched LuCI packages. All of it, script by script and option by option, is in

@@ -2632,7 +2632,7 @@ after its <a href="../../building/#what-this-build-changes-upstream">patch</a>:<
 <tr>
 <td><code>direction.inbound.password</code></td>
 <td><code>CleanWRT#40</code></td>
-<td>the same secret as the default Wi-Fi key, so a router has one pair to remember. Change it on the AWvoice page</td>
+<td>a shipped default; change it on the AWvoice page</td>
 </tr>
 <tr>
 <td><code>direction.inbound.voip_enabled</code></td>
@@ -2701,19 +2701,14 @@ starts it, and no SIP port is open until then.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>wireless.&lt;radio&gt;.ssid</code></td>
-<td><code>CleanWRT-2.4G</code>, <code>CleanWRT-5G</code>, <code>CleanWRT-6G</code></td>
-<td>by band</td>
-</tr>
-<tr>
-<td><code>wireless.&lt;iface&gt;.encryption</code> / <code>key</code></td>
-<td><code>psk2</code> / <code>CleanWRT#40</code></td>
-<td>the key is written only when none is set</td>
+<td><code>wireless.*</code></td>
+<td>stock OpenWrt</td>
+<td>not changed by this image: SSID <code>OpenWrt</code>, no key, radios off</td>
 </tr>
 <tr>
 <td><code>system.@system[0].hostname</code></td>
-<td><code>CleanWRT</code></td>
-<td></td>
+<td><code>OpenWrt</code></td>
+<td>stock, not changed by this image</td>
 </tr>
 <tr>
 <td><code>system.@system[0].timezone</code></td>
