@@ -2926,6 +2926,10 @@ something stale:</p>
 <li>every feed and every local package must match its pinned commit;</li>
 <li>a feed or tree patch that no longer applies cleanly fails the build, because the upstream code
   changed;</li>
+<li>on a tree kept from an earlier build, every package a patch touches is cleaned so it rebuilds
+  with the patch, and so is a package that a removed patch used to touch (the list is kept in
+  <code>.cw-patched-packages</code> in the tree). Packages no patch touches keep their build, so a patch to
+  luci-app-nikki does not recompile mihomo;</li>
 <li>every package the seed selects must survive <code>make defconfig</code>;</li>
 <li>init scripts must be executable and use procd correctly;</li>
 <li>the image must fit the flash layout (<code>UBI_PEBS ...</code> line) and the size gate;</li>
@@ -3035,7 +3039,15 @@ than shipping a half-applied change.</p>
 </tr>
 <tr>
 <td><code>0012-neighbor-cell-list-and-lock</code></td>
-<td>Advance Modem Settings → Neighbor Cell lists every cell the modem hears (the serving cell first) with network name, band, frequency, PCI, RSRP, RSRQ and SINR; a row click fills in the lock form, Lock on a row locks to it, and Unlock and a "Keep after reboot" switch (QModem's boot hook) are added. The Qualcomm parser reads RSRQ and RSRP from the right fields (they were swapped) and returns the serving cells and the operator. The other tabs' button rows no longer sit on the card edge, and no box shows "undefined"</td>
+<td>Advance Modem Settings → Neighbor Cell lists every cell the modem hears (the serving cell first) with network name, band, frequency, PCI, RSRP, RSRQ and SINR; a row click fills in the lock form, Lock on a row locks to it, and Unlock, "Keep after reboot" (QModem's boot hook) and "Unlock automatically" (<code>cw-cell-lock-guard</code>) are added, with auto-refresh, an RSRP sparkline per cell, saved cells and a <code>?tab=NeighborCell</code> link. The Qualcomm parser reads RSRQ and RSRP from the right fields (they were swapped) and returns the serving cells, the state and the operator (from <code>AT+QSPN</code> when <code>AT+COPS?</code> answers with digits). The other tabs' button rows no longer sit on the card edge, and no box shows "undefined"</td>
+</tr>
+<tr>
+<td><code>0013-shell-quoting-for-page-requests</code></td>
+<td>the QModem pages' requests reach the shell single-quoted: the controller pasted the action, the modem name and the parameters into a root shell command (inside double quotes at best, where <code>$(...)</code> still runs), and the AT console's port and command unquoted. Malformed names get a 400; <code>modem_ctrl.sh</code> quotes <code>"$3"</code> where it hands it on, so values keep their spaces</td>
+</tr>
+<tr>
+<td><code>0014-translations-for-advance-modem-settings</code></td>
+<td>zh_Hans, zh-cn and ru for the 77 Advance Modem Settings strings <code>0012</code> added or never had translated</td>
 </tr>
 </tbody>
 </table>
@@ -3100,8 +3112,24 @@ than shipping a half-applied change.</p>
 <td>the radio page takes its card gaps, radii and control height from the theme (Vantage's <code>--v-*</code> tokens), so its cards are evenly spaced and its refresh controls stay on one line</td>
 </tr>
 <tr>
+<td><code>3ginfo/0007-neighbour-cell-lock-link</code></td>
+<td>every neighbour cell on the radio page gets a <em>Lock…</em> link to <em>Advance Modem Settings → Neighbor Cell</em> with the cell filled in (qmodem <code>0012</code>), translated in its five catalogs</td>
+</tr>
+<tr>
 <td><code>diskman/0001-disk-manager-menu-rename-services-move</code></td>
 <td>Disk Manager moves from the System menu to Services, with its title and every internal link</td>
+</tr>
+<tr>
+<td><code>nikki/0001-luci-pages-redesign</code></td>
+<td>every Nikki page redesigned: a status header with Restart and Open Dashboard, a setup checklist, a profile list with Use / Edit / Download / Delete and drag-and-drop upload, subscription usage and expiry, an editor that tracks unsaved changes, a log viewer with filters, help text on every option. Option keys are unchanged</td>
+</tr>
+<tr>
+<td><code>nikki/0002-subscription-auto-update</code></td>
+<td>a subscription can update on a schedule (1 to 12 hours, or daily): a cron line per subscription while Nikki runs, and a restart only when the one in use downloaded successfully</td>
+</tr>
+<tr>
+<td><code>nikki/0003-translations-for-the-new-pages</code></td>
+<td>zh_Hans, zh_Hant and ru for the 254 strings <code>0001</code> and <code>0002</code> added or reworded</td>
 </tr>
 <tr>
 <td><code>tree/0001-apk-package-timestamps-zero</code></td>

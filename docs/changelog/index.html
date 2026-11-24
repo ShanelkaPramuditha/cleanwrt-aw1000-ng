@@ -2501,6 +2501,21 @@
   frequency, and the signal. Press <strong>Lock</strong> on a row, or click it to fill in the form. <strong>Unlock</strong>
   and <strong>Keep after reboot</strong> are new. Neighbour signal values were swapped before (RSRP showed as
   RSRQ); they are now correct.</li>
+<li><strong>The cell lock can undo itself.</strong> Tick <strong>Unlock automatically</strong> when locking, and the router
+  unlocks the modem if the locked cell is lost for the minutes you choose, so a dead tower no
+  longer leaves you offline.</li>
+<li><strong>Watch and save cells.</strong> The Neighbor Cell tab can refresh on its own and draws each cell's
+  signal over the last scans; <strong>Save cell</strong> keeps a named cell to lock to later; every neighbour on
+  <em>Modem → 3gInfo-lite</em> has a <strong>Lock…</strong> link. The operator's name shows even when the modem reports
+  only its number.</li>
+<li><strong>Safer QModem pages.</strong> Values typed on QModem's pages (an AT command, for example) are passed to
+  the router's shell quoted, so input with spaces works and cannot run commands.</li>
+<li><strong>Nikki subscriptions update on their own.</strong> Each subscription can be set to update every 1 to
+  12 hours or once a day; Nikki restarts only when the subscription in use downloaded successfully.</li>
+<li><strong>Nikki and Advance Modem Settings in Chinese and Russian.</strong> The new and reworded text has
+  zh_Hans, zh_Hant (Nikki) and ru translations.</li>
+<li><strong>Faster rebuilds.</strong> A build on a kept tree rebuilds only the packages a patch changes, so the
+  Nikki page patch no longer recompiles mihomo each time.</li>
 <li><strong>Tidier Advance Modem Settings.</strong> Buttons no longer sit on the edge of their card, and no field
   shows "undefined".</li>
 <li><strong>Table row buttons are spaced like the rest.</strong> On <em>Network → Interfaces</em> and other tables,

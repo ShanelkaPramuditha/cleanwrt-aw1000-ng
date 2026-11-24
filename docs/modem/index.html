@@ -1322,6 +1322,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Locking to a cell">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unlock-automatically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unlock automatically
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#watching-and-saving-cells" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Watching and saving cells
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2560,6 +2588,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Locking to a cell">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unlock-automatically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unlock automatically
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#watching-and-saving-cells" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Watching and saving cells
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2847,6 +2903,25 @@ frequencies your operator lists, so they are almost always your own network, and
 your operator's name for them. For a 5G neighbour the band and subcarrier spacing are worked out
 from the ARFCN; when the page is not sure, <strong>Lock</strong> fills in the form and asks you to check the
 band first.</p>
+<h3 id="unlock-automatically">Unlock automatically<a class="headerlink" href="#unlock-automatically" title="Permanent link">&para;</a></h3>
+<p>Tick <strong>Unlock automatically</strong> in the lock form and choose the minutes (5 by default) before
+pressing <strong>Lock</strong>. The router then checks once a minute; when the modem has had no usable cell
+for that long (it reports no serving cell, or is searching, or has only limited service), it is
+unlocked so it can find another cell, and the event goes to the system log (<code>logread -e
+cw-cell-lock-guard</code>). The check is done by the <code>cw-cell-lock-guard</code> service, which does nothing
+for a modem without this switch.</p>
+<h3 id="watching-and-saving-cells">Watching and saving cells<a class="headerlink" href="#watching-and-saving-cells" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Auto-refresh</strong> next to <strong>Scan</strong> scans again every 15, 30 or 60 seconds while the tab is open.
+  Each row's signal column then draws a small line of its RSRP over the last scans, so you can
+  see which cell holds steady before you lock to it. The history lasts while the browser tab is
+  open.</li>
+<li><strong>Save cell</strong>, under the form, stores the cell in the form under a name you choose. Saved cells
+  show above the form (a click fills the form in) and with a star on their row. They are kept in
+  your browser, not on the router.</li>
+<li>On <em>Modem → 3gInfo-lite</em>, every neighbour cell has a <strong>Lock…</strong> link that opens this tab with the
+  cell filled in. Nothing is locked until you press <strong>Lock</strong> there.</li>
+</ul>
 <h2 id="what-the-image-fixes-around-the-modem">What the image fixes around the modem<a class="headerlink" href="#what-the-image-fixes-around-the-modem" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

@@ -69,7 +69,7 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Reference"}, {"@type": "ListItem", "position": 3, "name": "UCI options", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/options/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "UCI options", "description": "The configuration options CleanWRT sets out of the box, package by package: the shipped value, what it changes, and the page that explains the feature.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/options/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-06"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "UCI options", "description": "The configuration options CleanWRT sets out of the box, package by package: the shipped value, what it changes, and the page that explains the feature.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/options/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-24"}</script>
 </head>
   
   
@@ -1598,6 +1598,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#qmodem-cell-lock-options-this-image-adds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qmodem — cell lock options this image adds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nikki-subscription-options-this-image-adds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nikki — subscription options this image adds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uhttpd-the-web-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2374,6 +2396,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#qmodem-cell-lock-options-this-image-adds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qmodem — cell lock options this image adds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nikki-subscription-options-this-image-adds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nikki — subscription options this image adds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uhttpd-the-web-server" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2693,6 +2737,57 @@ after its <a href="../../building/#what-this-build-changes-upstream">patch</a>:<
 </table>
 <p>Nothing in this file is <em>started</em> by the image. The service runs when the AWvoice page's switch
 starts it, and no SIP port is open until then.</p>
+<h2 id="qmodem-cell-lock-options-this-image-adds"><code>qmodem</code> — cell lock options this image adds<a class="headerlink" href="#qmodem-cell-lock-options-this-image-adds" title="Permanent link">&para;</a></h2>
+<p>Set from <em>Modem → QModem → Advance Modem Settings → Neighbor Cell</em>, on the modem's
+<code>modem-device</code> section (for example <code>qmodem.modem1</code>). None is set on a fresh router.</p>
+<table>
+<thead>
+<tr>
+<th>option</th>
+<th>set by</th>
+<th>what it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lockcell_guard_enabled</code></td>
+<td><em>Unlock automatically</em></td>
+<td><code>1</code>: <code>cw-cell-lock-guard</code> unlocks the modem when its locked cell is lost</td>
+</tr>
+<tr>
+<td><code>lockcell_guard_minutes</code></td>
+<td>the minutes next to it</td>
+<td>how long the cell must be lost first, 1 to 120 (default 5)</td>
+</tr>
+<tr>
+<td><code>lockcell_boot_hook_enabled</code>, <code>lockcell_boot_hook_at_cmds</code>, <code>lockcell_boot_hook_delay</code></td>
+<td><em>Keep after reboot</em></td>
+<td>QModem's own: the lock command sent again after the modem starts</td>
+</tr>
+</tbody>
+</table>
+<h2 id="nikki-subscription-options-this-image-adds"><code>nikki</code> — subscription options this image adds<a class="headerlink" href="#nikki-subscription-options-this-image-adds" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>option</th>
+<th>set by</th>
+<th>what it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;subscription&gt;.auto_update</code></td>
+<td><em>Update automatically</em> in a subscription's dialog</td>
+<td><code>1</code>: download it on a schedule while Nikki runs</td>
+</tr>
+<tr>
+<td><code>&lt;subscription&gt;.auto_update_interval</code></td>
+<td><em>Update every</em></td>
+<td>hours between downloads: <code>1</code>, <code>3</code>, <code>6</code>, <code>12</code>, or <code>24</code> (once a day at 04:23)</td>
+</tr>
+</tbody>
+</table>
 <h2 id="uhttpd-the-web-server"><code>uhttpd</code> — the web server<a class="headerlink" href="#uhttpd-the-web-server" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

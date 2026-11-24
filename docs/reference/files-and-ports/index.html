@@ -69,7 +69,7 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Reference"}, {"@type": "ListItem", "position": 3, "name": "Files, ports and paths", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/files-and-ports/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Files, ports and paths", "description": "Where everything lives on the AW1000: config files, recordings and messages, what survives an upgrade, which process owns each port, and every listener.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/files-and-ports/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-06"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Files, ports and paths", "description": "Where everything lives on the AW1000: config files, recordings and messages, what survives an upgrade, which process owns each port, and every listener.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/files-and-ports/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-24"}</script>
 </head>
   
   
@@ -2761,6 +2761,11 @@ audio port appears only while a page is actually using it.</p>
 <td><code>cw-modem-fix</code></td>
 <td>enabled at first boot</td>
 <td>the modem registration fix</td>
+</tr>
+<tr>
+<td><code>cw-cell-lock-guard</code></td>
+<td>starts at 99, enabled at first boot</td>
+<td>checks a cell-locked modem once a minute and unlocks it when its cell is lost (<a href="../../modem/#unlock-automatically">Unlock automatically</a>). Idle unless switched on</td>
 </tr>
 <tr>
 <td><code>qmodem_voip_sipd</code></td>

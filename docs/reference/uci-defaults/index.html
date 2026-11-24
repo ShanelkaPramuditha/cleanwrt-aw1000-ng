@@ -69,7 +69,7 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Reference"}, {"@type": "ListItem", "position": 3, "name": "First-boot defaults", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/uci-defaults/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "First-boot defaults", "description": "Every first-boot script in the CleanWRT image: what it writes, the exact option and value, when it leaves your settings alone, and how to undo each one.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/uci-defaults/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-06"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "First-boot defaults", "description": "Every first-boot script in the CleanWRT image: what it writes, the exact option and value, when it leaves your settings alone, and how to undo each one.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/reference/uci-defaults/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-24"}</script>
 </head>
   
   
@@ -2457,6 +2457,11 @@ rows.</p>
 <td><code>56-cw-wifi-default-key</code></td>
 <td>on each Wi-Fi network still as <code>wifi config</code> generated it (SSID <code>OpenWrt</code>, open, no key): <code>encryption='psk2'</code> (<code>sae</code> on a 6 GHz radio), <code>key='password123'</code>, <code>disabled='0'</code>, and its radio on</td>
 <td>a network with another name, a key or any encryption: nothing</td>
+</tr>
+<tr>
+<td><code>57-cw-cell-lock-guard</code></td>
+<td><code>/etc/init.d/cw-cell-lock-guard enable</code>, which starts the <a href="../../modem/#unlock-automatically">cell-lock guard</a> at boot</td>
+<td>unconditional. The service does nothing until a modem has <em>Unlock automatically</em> switched on</td>
 </tr>
 <tr>
 <td><code>95-cw-drop-removed-apps</code></td>
