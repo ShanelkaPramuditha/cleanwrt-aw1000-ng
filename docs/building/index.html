@@ -3033,6 +3033,10 @@ than shipping a half-applied change.</p>
 <td><code>0011-luci-button-spacing</code></td>
 <td>QModem's hand-built pages get their spacing: buttons side by side and under the log boxes no longer touch, Dial Overview's status card keeps clear of the Save bar, and Advance Modem Settings puts its Submit / Select All / Scan buttons in real table rows (they were appended straight into the table and lay over the band rows) and spaces its radio and checkbox labels</td>
 </tr>
+<tr>
+<td><code>0012-neighbor-cell-list-and-lock</code></td>
+<td>Advance Modem Settings → Neighbor Cell lists every cell the modem hears (the serving cell first) with network name, band, frequency, PCI, RSRP, RSRQ and SINR; a row click fills in the lock form, Lock on a row locks to it, and Unlock and a "Keep after reboot" switch (QModem's boot hook) are added. The Qualcomm parser reads RSRQ and RSRP from the right fields (they were swapped) and returns the serving cells and the operator. The other tabs' button rows no longer sit on the card edge, and no box shows "undefined"</td>
+</tr>
 </tbody>
 </table>
 <h3 id="the-luci-feed">The LuCI feed<a class="headerlink" href="#the-luci-feed" title="Permanent link">&para;</a></h3>
@@ -3129,6 +3133,10 @@ than shipping a half-applied change.</p>
 <tr>
 <td><code>packages/luci-theme-vantage/0003-page-actions-without-card</code></td>
 <td>the Reset / Save / Save &amp; Apply bar at the bottom of a page loses the frosted card drawn around it (background, border, blur, shadow); the buttons stay docked at the bottom right, each with a soft shadow of its own so they read over the page scrolling under them. A dialog's buttons lose the shaded footer strip and sit on the dialog itself</td>
+</tr>
+<tr>
+<td><code>packages/luci-theme-vantage/0004-row-actions-gap</code></td>
+<td>a table row's action buttons (<em>Edit</em> and the ⋯ menu on <em>Network → Interfaces</em>, <em>Edit</em> and <em>Delete</em> elsewhere) sit 8px apart, the gap every other group of buttons in the theme uses, instead of 4px</td>
 </tr>
 </tbody>
 </table>

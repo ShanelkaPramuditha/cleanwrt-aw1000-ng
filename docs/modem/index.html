@@ -69,7 +69,7 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="#14b8a6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CleanWRT", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, {"@type": "ListItem", "position": 2, "name": "Using CleanWRT"}, {"@type": "ListItem", "position": 3, "name": "The 5G modem", "item": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/modem/"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "The 5G modem", "description": "The Quectel RG500Q-EA modem on the Arcadyan AW1000: QModem, 3gInfo, SMS, TTL, which process uses which AT port, the LAN SIP service, and modem firmware.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/modem/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-06"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "The 5G modem", "description": "The Quectel RG500Q-EA modem on the Arcadyan AW1000: QModem, 3gInfo, SMS, TTL, which process uses which AT port, the LAN SIP service, and modem firmware.", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/modem/", "image": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/assets/img/social.png", "inLanguage": "en", "isPartOf": {"@type": "WebSite", "name": "CleanWRT", "url": "https://shanelkapramuditha.github.io/cleanwrt-aw1000-ng/docs/"}, "author": {"@type": "Person", "name": "Pr0Luci", "url": "https://github.com/Pr0Luci"}, "dateModified": "2026-11-24"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why does the 5G modem of my AW1000 not register?", "acceptedAnswer": {"@type": "Answer", "text": "Open Modem → QModem and Modem → 3gInfo-lite and check the SIM, the APN and the signal first. A modem firmware upgrade is a last resort, and only when the carrier or Quectel confirms a newer firmware fixes your case."}}, {"@type": "Question", "name": "How do I read and send SMS on the Arcadyan AW1000?", "acceptedAnswer": {"@type": "Answer", "text": "Modem → SMS in LuCI. Received messages can be forwarded from the same place. Note that this image selects one SMS forwarder deliberately: the two packages that exist install the same init script and the image would refuse to assemble with both."}}, {"@type": "Question", "name": "What does the TTL setting do on the AW1000?", "acceptedAnswer": {"@type": "Answer", "text": "It gives forwarded packets a fixed TTL of 64 so tethered traffic looks like traffic from the router itself. It is on by default. Whether that is allowed depends on your carrier's terms."}}, {"@type": "Question", "name": "Which AT port do I use on the AW1000 modem?", "acceptedAnswer": {"@type": "Answer", "text": "/dev/ttyUSB3 for QModem, and the tty on USB interface 2 for the phone daemon; the LED daemon is configured for /dev/ttyUSB2. Do not leave a terminal open on any of them."}}, {"@type": "Question", "name": "Does CleanWRT include a SIP server?", "acceptedAnswer": {"@type": "Answer", "text": "It includes a LAN SIP service, from the same feed as the modem apps, that a soft phone on your own network registers to. It ships stopped, it listens on nothing until the AWvoice page's switch starts it, and it never reaches outside your network unless you configure the outbound direction yourself."}}]}</script>
 </head>
   
@@ -1314,6 +1314,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#locking-to-a-cell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locking to a cell
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-the-image-fixes-around-the-modem" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2541,6 +2552,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#locking-to-a-cell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locking to a cell
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-the-image-fixes-around-the-modem" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2609,6 +2631,11 @@ vendor QMI dialer, so it dials and recovers on its own.</p>
 <td>signal and network details</td>
 <td><em>Modem → 3gInfo-lite</em></td>
 <td>registration shows correctly on data-only SIMs, from a CEREG-based fix in this build</td>
+</tr>
+<tr>
+<td>cell and band locking</td>
+<td><em>Modem → QModem → Advance Modem Settings</em></td>
+<td>lock to one cell from a list of the cells around you, or to chosen bands. See below</td>
 </tr>
 <tr>
 <td>SMS</td>
@@ -2795,6 +2822,31 @@ version you receive, because the flags differ between versions.</p>
 <li>The router itself is unaffected, so SSH and LuCI stay reachable over LAN and Wi-Fi.</li>
 <li>If the modem does not come back, the vendor's tool and package are the recovery path.</li>
 </ul>
+<h2 id="locking-to-a-cell">Locking to a cell<a class="headerlink" href="#locking-to-a-cell" title="Permanent link">&para;</a></h2>
+<p><em>Modem → QModem → Advance Modem Settings → Neighbor Cell</em> lists every cell (tower sector) the modem
+can hear. The cell it is connected to comes first, then the others by signal strength. Each row
+shows the signal, 4G or 5G, your network's name, the band and frequency, and the ARFCN, PCI,
+RSRP, RSRQ and SINR values. The tab scans when you open it; <strong>Scan</strong> looks again.</p>
+<ol>
+<li>Pick a cell with a strong signal (RSRP closer to 0, SINR higher).</li>
+<li>Press <strong>Lock</strong> on its row and confirm. The connection drops for a few seconds while the modem
+   moves to that cell. Clicking a row instead only fills in the form below the table, where you
+   can check the values before pressing <strong>Lock</strong>.</li>
+<li>Tick <strong>Keep after reboot</strong> before locking if the lock should come back after the modem or
+   the router restarts.</li>
+<li><strong>Unlock</strong>, above the table, lets the modem choose its cell again.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">A locked modem does not move</p>
+<p>It stays on that cell even when the cell is congested, its signal drops or it goes off the
+air, so you can lose the connection until you unlock. For everyday use, the <strong>Lock Band</strong> tab
+is the gentler choice: it keeps the modem on bands you choose but lets it change cells.</p>
+</div>
+<p>Neighbour cells do not report which network they belong to. The modem measures them on the
+frequencies your operator lists, so they are almost always your own network, and the page shows
+your operator's name for them. For a 5G neighbour the band and subcarrier spacing are worked out
+from the ARFCN; when the page is not sure, <strong>Lock</strong> fills in the form and asks you to check the
+band first.</p>
 <h2 id="what-the-image-fixes-around-the-modem">What the image fixes around the modem<a class="headerlink" href="#what-the-image-fixes-around-the-modem" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
