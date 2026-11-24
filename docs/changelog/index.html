@@ -312,6 +312,8 @@
       
         
       
+        
+      
     
     
     
@@ -512,6 +514,34 @@
     
   
     First boot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your own settings at flash time
   
 
     
@@ -2435,6 +2465,16 @@
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <h2 id="25125-r22-sp2-this-fork-not-yet-released">25.12.5-R2.2-SP2 (this fork, not yet released)<a class="headerlink" href="#25125-r22-sp2-this-fork-not-yet-released" title="Permanent link">&para;</a></h2>
 <ul>
+<li><strong>The defaults are stock OpenWrt's again</strong>, so a reset router is reachable with values anyone
+  can look up: hostname <code>OpenWrt</code>, LAN <code>192.168.1.1</code>, Ethernet ports <code>lan1</code>-<code>lan4</code> and <code>wan</code>,
+  and Wi-Fi named <code>OpenWrt</code> with no password and the radios off until you set a password. The
+  image no longer sets the <code>CleanWRT</code> hostname, the <code>CleanWRT-2.4G</code> / <code>CleanWRT-5G</code> names or the
+  <code>CleanWRT#40</code> Wi-Fi password. A router upgraded with its settings kept keeps its own. See
+  <a href="../first-boot/">First boot</a>.</li>
+<li><strong>Flash with your own settings.</strong> <code>tools/cw-settings-pack.sh</code> makes a small settings archive
+  with your hostname, LAN address, Wi-Fi names and password. Pass it to <code>sysupgrade -f</code>, or
+  restore it in LuCI after a first install, and the router comes up with them. A reset still
+  brings back the stock defaults. See <a href="../custom-settings/">Your own settings at flash time</a>.</li>
 <li><strong>Vantage is the new default theme</strong>, with its Dashboard as the first page after login: an
   icon rail, a Ctrl+K command palette, light and dark modes. Footstrap stays in the image under
   <em>System → System → Language and Style</em>, and a router upgraded with its settings kept stays on the
