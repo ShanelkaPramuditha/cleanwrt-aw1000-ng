@@ -2423,8 +2423,9 @@ saved on the router in <code>/etc/config/vantage_theme</code>, so every browser 
   of pages that build their own markup: tabs made of bare list items, and cards headed by a
   <code>&lt;legend&gt;</code>. QModem's pages use both.</li>
 <li><code>patches/packages/luci-theme-vantage/0003-page-actions-without-card.patch</code> takes the card away
-  from behind the <em>Reset</em> / <em>Save</em> / <em>Save &amp; Apply</em> buttons at the bottom of a page. They still
-  stay docked at the bottom right while you scroll, each with a soft shadow of its own.</li>
+  from behind grouped buttons: the <em>Reset</em> / <em>Save</em> / <em>Save &amp; Apply</em> buttons at the bottom of a
+  page (still docked at the bottom right while you scroll, each with a soft shadow of its own),
+  and the buttons at the foot of every dialog, which no longer sit on a shaded strip.</li>
 </ul>
 <p><code>patches/packages/luci-app-cw-led/0002-lamp-colours-follow-the-theme-switch.patch</code> makes the lamps on
 the LED page follow Vantage's light/dark switch rather than the browser's preference.</p>
