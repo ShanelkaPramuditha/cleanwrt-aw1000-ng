@@ -9,9 +9,9 @@ site (`mkdocs.yml` excludes `enhanced/`).
 
 ## Index
 
-| batch | title | status | started | last update |
-|---|---|---|---|---|
-| [enh-01](enh-01.md) | Nikki pages, Vantage row buttons, QModem cell lock | review | 2026-11-24 | 2026-11-24 |
+| batch | title | status | code | off-device | on router | open suggestions | last update |
+|---|---|---|---|---|---|---|---|
+| [enh-01](enh-01.md) | Nikki pages, Vantage row buttons, QModem cell lock | review | 17/17 | 17/17 | 0/14 | 7 | 2026-11-24 19:50 UTC |
 
 ## How a batch works
 
@@ -20,7 +20,13 @@ site (`mkdocs.yml` excludes `enhanced/`).
 2. **Pick tasks.** Take open suggestions from the end of the previous batch, or new requests.
    A task carried over keeps a link to where it came from (`from: ENH-01-S3`), and the old
    suggestion is marked `moved → ENH-02-T1`.
-3. **Work** the tasks. Keep each task's *Status*, *Files* and *Verification* current as you go.
+3. **Work** the tasks, and **update the batch file as you go, not at the end**. After each step
+   that changes a task (started, code written, a check passed or failed, a file added):
+   - set the task's *Status* and tick its *Verification* boxes,
+   - update the *Summary* row, the *Progress* table and the `progress:` counts in the front matter,
+   - add a line to the *Progress log* with the UTC time,
+   - update this index row.
+   A batch file that is behind the work is a bug: the next agent starts from it.
 4. **Close** the batch when no task is `doing`: set the batch status, and write the
    *Suggestions* section with what you noticed but did not do.
 
@@ -54,7 +60,7 @@ batch in `review`).
 - Write what was **verified** and what was **not**. "Tested in a headless DOM with mocked
   replies" and "tested on the router" are different claims; say which.
 - Name files by their repository path (`patches/feeds/qmodem/0012-...patch`).
-- Use absolute dates (`2026-11-24`).
+- Use absolute dates (`2026-11-24`); the *Progress log* and `updated:` also carry the UTC time.
 - Keep the user-facing explanation in the public docs (`docs/modem.md` and so on). A batch file
   links to those pages instead of repeating them.
 - Suggestions say **why** (the evidence: a file and line, a log, a test) and roughly **how big**

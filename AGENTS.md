@@ -33,8 +33,10 @@ All enhancement work is logged in [`docs/enhanced/`](docs/enhanced/README.md):
 - Read `docs/enhanced/README.md` first: the numbering, statuses and rules.
 - The **highest-numbered `enh-NN.md`** is the current batch. Its last section holds the open
   suggestions (bug fixes and features) that a new batch can pick up.
-- When you finish or change a task, update its status and its *Verification* notes in the same
-  change. Do not mark a task `done` that you did not verify; say what was and was not tested.
+- **Update the batch file while you work, not at the end.** After every step that changes a task,
+  update its status, its *Verification* boxes, the *Progress* table, the `progress:` counts, the
+  *Progress log* (with the UTC time) and the index row in `docs/enhanced/README.md`.
+- Do not mark a task `done` that you did not verify; say what was and was not tested.
 
 ## Rules for every change
 

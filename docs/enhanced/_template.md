@@ -3,12 +3,38 @@ batch: ENH-NN
 title: "<short title>"
 status: todo            # todo | doing | review | done | blocked
 started: YYYY-MM-DD
-updated: YYYY-MM-DD
+updated: YYYY-MM-DD HH:MM UTC
+progress:
+  code: 0/N
+  off_device: 0/N
+  on_router: 0/M
+  suggestions_open: 0
 ---
 
 # ENH-NN: <short title>
 
 <One paragraph: what this batch is for and where its tasks came from.>
+
+## Progress
+
+| stage | done | bar |
+|---|---|---|
+| Code and docs written | 0 of N tasks | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| Checked off-device | 0 of N tasks | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| Tested on the router | 0 of M tasks | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| Committed | no | |
+
+**Where it stands (YYYY-MM-DD HH:MM UTC):** <one or two sentences>
+
+## Router test checklist
+
+- [ ] <check> (T1)
+
+## Progress log
+
+| time (UTC) | what happened |
+|---|---|
+| HH:MM | batch opened |
 
 ## Summary
 

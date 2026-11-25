@@ -1,9 +1,14 @@
 ---
 batch: ENH-01
 title: "Nikki pages, Vantage row buttons, QModem cell lock"
-status: review
+status: review          # code complete; waiting for the router tests below
 started: 2026-11-24
-updated: 2026-11-24
+updated: 2026-11-24 19:50 UTC
+progress:
+  code: 17/17           # tasks whose code or docs are written
+  off_device: 17/17     # tasks checked without a router
+  on_router: 0/14       # tasks that also need a test on the AW1000
+  suggestions_open: 7   # S5, S13-S18
 ---
 
 # ENH-01: Nikki pages, Vantage row buttons, QModem cell lock
@@ -17,6 +22,64 @@ open.
 
 All code is written and checked off-device. **Nothing has been tested on a router yet, and
 nothing is committed.** The batch stays in `review` until the router checks in each task are done.
+
+## Progress
+
+| stage | done | bar |
+|---|---|---|
+| Code and docs written | 17 of 17 tasks | `████████████████████` 100% |
+| Checked off-device (patches apply, syntax, tests, headless page runs) | 17 of 17 tasks | `████████████████████` 100% |
+| Tested on the router | 0 of 14 tasks | `░░░░░░░░░░░░░░░░░░░░` 0% |
+| Docs site build (`mkdocs build --strict`) | not run here | waits for the `docs` workflow |
+| Committed | no | the user has not asked for a commit |
+
+**Where it stands (2026-11-24 19:50 UTC):** every task is implemented and checked off-device.
+What is left is testing on the AW1000 (the checklist below), the docs workflow run, and a commit.
+When a router check passes, tick it below and in its task, and move that task to `done`.
+
+## Router test checklist
+
+One list of every check that needs the AW1000, in a sensible order. Each line names its task.
+
+- [ ] Build an image with this batch and flash it (all tasks)
+- [ ] Incremental rebuild on the same tree: the log shows no `mihomo` compile (T7)
+- [ ] *Network → Interfaces*: Edit and ⋯ are 8px apart, desktop and phone width (T2)
+- [ ] Every Nikki page in light and dark mode; upload, Use, Edit, Delete, a real subscription
+      Update (T1)
+- [ ] A subscription with *Update automatically* every 1 hour: it updates, and Nikki restarts only
+      when it is the one in use (T15)
+- [ ] *Advance Modem Settings*: every tab, buttons clear of the card edge, no "undefined" (T4)
+- [ ] Neighbor Cell: the table fills on open, values plausible, operator name shown (T3, T10)
+- [ ] Lock to a neighbour, then Unlock; with *Keep after reboot*, reboot and see the lock return
+      (T3)
+- [ ] *Unlock automatically* at 2 minutes, lock to a cell that cannot serve: `logread -e
+      cw-cell-lock-guard` shows the unlock (T11)
+- [ ] Auto-refresh at 15 s: sparklines appear, the timer stops on another tab (T12, T14)
+- [ ] *Save cell*, reload the page, the chip and the ★ tag are still there (T13)
+- [ ] *Modem → 3gInfo-lite* → *Lock…* opens Neighbor Cell with the cell filled in (T16)
+- [ ] AT Debug: send a command containing a space; Lock Band and Set IMEI still work (T9)
+- [ ] Switch LuCI to 简体中文, 繁體中文 and Русский: Nikki and Advance Modem Settings read in that
+      language (T8)
+- [ ] In SA mode, capture `AT+QENG="neighbourcell"` and `AT+QNWCFG="nr5g_meas_info"` for S5
+
+## Progress log
+
+Times are UTC on 2026-11-24, taken from the files' write times where a file proves them.
+
+| time | what happened |
+|---|---|
+| 11:31 | T1: Nikki redesign patch written (`nikki/0001`), docs updated |
+| 17:38 | T2: Vantage row-button gap patch (`luci-theme-vantage/0004`) |
+| before 18:31 | T3, T4: first version of `qmodem/0012` (cell list, lock, tab tidy); T5: all patch sets checked together, no conflicts |
+| 18:31 | T6: `AGENTS.md`, `CLAUDE.md`, `docs/enhanced/` created; enh-01 opened with suggestions S1 to S12 |
+| 18:39 | T7 (S1): `tools/cw-release-build.sh` cleans only patched packages |
+| 18:42 | T9 (S3, S4): `qmodem/0013` shell quoting |
+| 18:43 to 18:44 | T11 (S7): `cw-cell-lock-guard`, its service, first-boot script and test (15 cases pass) |
+| 19:16 | T15 (S11): `nikki/0002` scheduled subscription updates; T10, T11 page side, T12, T13, T14, T16 page side: `qmodem/0012` regenerated |
+| 19:22 to 19:24 | T8 (S2): `nikki/0003`, `qmodem/0014`; T16: `3ginfo/0007` with its translations |
+| 19:25 to 19:27 | docs: `docs/modem.md`, reference pages, `docs/building.md`, NOTICE, README, changelog |
+| 19:29 | T17: final apply check and tests pass; enh-01 updated with T7 to T17 and S13 to S18 |
+| 19:50 | this progress view, the router checklist and this log added; README and AGENTS rules now require updating the log as work happens |
 
 ## Summary
 
