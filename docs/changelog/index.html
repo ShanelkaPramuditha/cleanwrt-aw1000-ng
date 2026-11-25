@@ -2465,6 +2465,10 @@
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <h2 id="25125-r22-sp2-this-fork-not-yet-released">25.12.5-R2.2-SP2 (this fork, not yet released)<a class="headerlink" href="#25125-r22-sp2-this-fork-not-yet-released" title="Permanent link">&para;</a></h2>
 <ul>
+<li><strong>The Dashboard can name more devices.</strong> Many phones, printers and smart devices send no name
+  when they ask for an address, so they showed as <em>Unknown device</em>. The router now also learns
+  the names devices announce on the LAN (mDNS) and the Dashboard uses those. A device that
+  announces nothing can still be named by hand: click it on the Dashboard. See <a href="../theme/">Themes</a>.</li>
 <li><strong>The defaults are stock OpenWrt's again</strong>, so a reset router is reachable with values anyone
   can look up: hostname <code>OpenWrt</code>, LAN <code>192.168.1.1</code>, Ethernet ports <code>lan1</code>-<code>lan4</code> and <code>wan</code>,
   and Wi-Fi named <code>OpenWrt</code>. The image no longer sets the <code>CleanWRT</code> hostname, the <code>CleanWRT-2.4G</code> / <code>CleanWRT-5G</code> names or the
