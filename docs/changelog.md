@@ -7,6 +7,10 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
 
 ## 25.12.5-R2.2-SP2 (this fork, not yet released)
 
+- **The Dashboard can name more devices.** Many phones, printers and smart devices send no name
+  when they ask for an address, so they showed as *Unknown device*. The router now also learns
+  the names devices announce on the LAN (mDNS) and the Dashboard uses those. A device that
+  announces nothing can still be named by hand: click it on the Dashboard. See [Themes](theme.md).
 - **The defaults are stock OpenWrt's again**, so a reset router is reachable with values anyone
   can look up: hostname `OpenWrt`, LAN `192.168.1.1`, Ethernet ports `lan1`-`lan4` and `wan`,
   and Wi-Fi named `OpenWrt`. The image no longer sets the `CleanWRT` hostname, the `CleanWRT-2.4G` / `CleanWRT-5G` names or the

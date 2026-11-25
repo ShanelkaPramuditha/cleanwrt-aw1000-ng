@@ -172,6 +172,10 @@ CONFIG_PACKAGE_luci-theme-bootstrap=y
 # settings on the theme it had, and 96-cw-default-theme points a fresh one at Vantage.
 CONFIG_PACKAGE_luci-theme-vantage=y
 CONFIG_PACKAGE_luci-app-vantage=y
+# umdns: mDNS host cache on lan (ubus umdns hosts). The Dashboard names a client from it
+# when the client sent no DHCP hostname (phones, printers, Apple and IoT devices); without
+# it Vantage's mDNS name source is off (docs/enhanced/enh-02.md).
+CONFIG_PACKAGE_umdns=y
 # Footstrap, the previous default, is not in the image (configs/local-packages.pin says why).
 # Transitive deps of the luci-mod-* set that a minimal seed must name explicitly,
 # else `make defconfig` drops the whole admin UI (status/network -> admin-full):

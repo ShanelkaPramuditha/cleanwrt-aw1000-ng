@@ -1,7 +1,7 @@
 ---
 title: "What is included in CleanWRT"
 description: "Every app in CleanWRT for the Arcadyan AW1000, where to find it in LuCI, and whether it is on or off out of the box."
-updated: 2026-11-06
+updated: 2026-11-25
 ---
 
 # What is included
@@ -60,6 +60,7 @@ The printer server (`p910nd`) is there too.
 |---|---|
 | `luci` and the `luci-mod-*` set | web admin UI |
 | `dnsmasq-full` | DNS and DHCP server |
+| `umdns` | learns the names devices announce on the LAN (mDNS), so the Dashboard can name a device that sent no DHCP name |
 | `firewall4` / `nftables` | firewall and NAT |
 | `kmod-ath11k` and `wpad` | Wi-Fi |
 | `kmod-qca-nss-dp`, `kmod-qca-ssdk` | Ethernet data plane |
