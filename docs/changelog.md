@@ -11,6 +11,11 @@ description: "What is new in each CleanWRT release for the Arcadyan AW1000."
   when they ask for an address, so they showed as *Unknown device*. The router now also learns
   the names devices announce on the LAN (mDNS) and the Dashboard uses those. A device that
   announces nothing can still be named by hand: click it on the Dashboard. See [Themes](theme.md).
+- **Advance Modem Settings looks right again.** On *Lock Band* a second line of bands no longer
+  slides under the Select All and Submit buttons or out of the card; on *Dial Mode* the current
+  mode and the choices sit under their titles and Submit stays inside the card; on *Neighbor Cell*
+  the cell you are connected to is no longer hidden under the table titles. See
+  [Modem](modem.md).
 - **The defaults are stock OpenWrt's again**, so a reset router is reachable with values anyone
   can look up: hostname `OpenWrt`, LAN `192.168.1.1`, Ethernet ports `lan1`-`lan4` and `wan`,
   and Wi-Fi named `OpenWrt`. The image no longer sets the `CleanWRT` hostname, the `CleanWRT-2.4G` / `CleanWRT-5G` names or the

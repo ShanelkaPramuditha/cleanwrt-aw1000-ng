@@ -12,7 +12,7 @@ site (`mkdocs.yml` excludes `enhanced/`).
 | batch | title | status | code | off-device | on router | open suggestions | last update |
 |---|---|---|---|---|---|---|---|
 | [enh-01](enh-01.md) | Nikki pages, Vantage row buttons, QModem cell lock | review | 17/17 | 17/17 | 0/14 | 7 | 2026-11-24 19:50 UTC |
-| [enh-02](enh-02.md) | Dashboard client names | doing | 1/1 | 1/1 | 0/2 | 0 | 2026-11-25 06:45 UTC |
+| [enh-02](enh-02.md) | Dashboard client names, QModem table layout | doing | 2/2 | 2/2 | 0/3 | 0 | 2026-11-25 08:51 UTC |
 
 ## How a batch works
 

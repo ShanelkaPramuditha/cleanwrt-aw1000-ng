@@ -1,0 +1,62 @@
+QModem Advance Modem Settings: tables laid out right under Vantage
+
+Three tabs of Advance Modem Settings broke under the Vantage theme, each from a theme rule
+written for LuCI's own tables:
+
+- Lock Band: Vantage gives every .td height: 44px. In a table cell that is a minimum, but the
+  band list cell and the button rows (createBtnRow, patch 0011) are display: flex, where it is
+  a fixed height. The second line of bands ran under Select All / Submit, the last band (n79)
+  hung out of the card, and the buttons ran over the card's bottom edge (Dial Mode's Submit
+  too). Both get height: auto; the band cell gets a class (qm-band-cell) to be picked by.
+- Dial Mode: Vantage makes div.left display: block. The Current Mode and Dial Mode cells are
+  div.td.left, so they left the table and stacked, out of line with their titles. Cells of
+  the page's tables stay table cells.
+- Neighbor Cell (patch 0012): Vantage sticks table titles below its top bar. The cell table
+  sits in a horizontal scroller, so the titles stuck to the scroller instead, pushed down by
+  the top bar's height over the first row, and the serving (Connected) cell was hidden. The
+  titles of that table do not stick, as Vantage already does for LuCI's own tables in a
+  scroller.
+
+Applies to: https://github.com/FUjr/QModem.git @ 0988085b, after 0014.
+Upstream status: local to CleanWRT.
+
+--- a/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
++++ b/luci/luci-app-qmodem/luasrc/view/qmodem/modem_debug.htm
+@@ -481,6 +481,7 @@
+ 					td = document.createElement('td');
+ 					td.classList.add("cbi-section-table-cell");
+ 					td.classList.add("td")
++					td.classList.add("qm-band-cell");
+ 					td.style.display = "flex";
+ 					td.style.flexWrap = "wrap";
+ 					//clear tr
+@@ -2130,6 +2131,29 @@
+ 	.qm-nc-guard { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+ 	.qm-nc-guard > .qm-nc-minutes { width: 5em; min-width: 0; }
+ 	.qm-nc-check > input[type="checkbox"] + span { margin: 0; }
++
++	/* CleanWRT: three Vantage rules that break this page's tables.
++	   - Every .td is height: 44px. In a table cell that is a minimum, but the band
++	     list and the button rows are display: flex, where it is a fixed height: the
++	     second line of bands ran over Select All / Submit, the last band out of the
++	     card, and the buttons over the card's bottom edge.
++	   - div.left is display: block, so Dial Mode's div.td.left cells left the table
++	     and stacked under each other, out of line with their titles.
++	   - A table title sticks below the top bar, but inside a horizontal scroller it
++	     sticks to the scroller instead, pushed down over the first row: the Neighbor
++	     Cell table hid the serving (Connected) cell under its titles. */
++	td.qm-btn-row,
++	td.qm-band-cell {
++		height: auto;
++	}
++
++	.cbi-section-table div.td.left {
++		display: table-cell;
++	}
++
++	.qm-nc-table .tr > .th.th {
++		position: static;
++	}
+ </style>
+ <div class="cbi-map">
+ 	<fieldset class="cbi-section">

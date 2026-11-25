@@ -1,7 +1,7 @@
 ---
 title: "AW1000 5G modem: QModem, SMS, TTL, SIP"
 description: "The Quectel RG500Q-EA modem on the Arcadyan AW1000: QModem, 3gInfo, SMS, TTL, which process uses which AT port, the LAN SIP service, and modem firmware."
-updated: 2026-11-24
+updated: 2026-11-25
 ---
 
 # The 5G modem
